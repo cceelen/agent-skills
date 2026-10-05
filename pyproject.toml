@@ -13,6 +13,11 @@ dev = [
     "ruff>=0.6",
 ]
 
+[tool.uv]
+# The programs of a skill run on Python 3.9. The tools for development do not: new versions of
+# them need Python 3.10. One environment keeps one version of each tool in uv.lock.
+environments = ["python_version >= '3.10'"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 

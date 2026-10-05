@@ -47,6 +47,8 @@ Run the two commands before each commit. The two commands must pass.
 ## Rules for the programs
 
 - Use Python 3.9 or later, and only the standard library.
+- The tools for development (`pytest`, `ruff`, `pre-commit`) need Python 3.10 or later. The CI
+  runs the tests of the programs on Python 3.9 also.
 - A program must not stop when the network is not available. It must record the error and
   continue.
 - The same input must give the same output. Sort the output. Do not write the current time into
