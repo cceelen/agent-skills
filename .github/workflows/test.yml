@@ -15,7 +15,11 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-      - run: uv run --python ${{ matrix.python }} pytest -q
+      # uv.lock has the tools for Python 3.10 and later. Python 3.9 gets the last pytest for it.
+      - if: matrix.python == '3.9'
+        run: uv run --python 3.9 --no-project --with pytest==8.4.2 pytest -q
+      - if: matrix.python != '3.9'
+        run: uv run --python ${{ matrix.python }} pytest -q
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
