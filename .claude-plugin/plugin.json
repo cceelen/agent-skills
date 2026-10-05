@@ -1,7 +1,7 @@
 {
   "name": "agent-skills",
   "description": "Agent skills in the open SKILL.md format. First skill: library-vetting.",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "author": { "name": "Christian Ceelen" },
   "license": "MIT",
   "keywords": ["skills", "dependencies", "supply-chain", "security", "vetting"]

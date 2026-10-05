@@ -72,6 +72,15 @@ Write the files for the user in ASD-STE100 Simplified Technical English. These f
 - Use a maximum of 20 words in an instruction and 25 words in other sentences.
 - Put the condition before the instruction.
 
+## Rules for commit messages
+
+- Use the Conventional Commits format: `type(scope): subject`. The scope is optional.
+- Write the subject in ASD-STE100 Simplified Technical English.
+- Give the purpose of the change. Do not tell the sequence of the work.
+- Do not list files or single changes.
+- Do not add a link to an agent session.
+- Do not add a footer line, for example `Co-Authored-By`, unless the owner tells you to add it.
+
 ## Procedure to add a skill
 
 1. Make the folder `skills/<name>/` with a `SKILL.md`.
@@ -86,6 +95,9 @@ Write the files for the user in ASD-STE100 Simplified Technical English. These f
 
 Use a version number of the form `major.minor.patch`. Increase the major number when a change
 makes earlier reports not comparable.
+
+This repository uses trunk-based development. There is no release branch. Each change is a
+short-lived branch and a pull request into `main`. A release is a tag on `main`.
 
 Procedure for a release:
 

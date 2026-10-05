@@ -20,7 +20,12 @@ jobs:
       - name: Make sure that the tag is the version of the project
         env:
           TAG: ${{ github.ref_name }}
-        run: test "$TAG" = "v$(uv version --short)"
+        run: |
+          version="v$(uv version --short)"
+          if [ "$TAG" != "$version" ]; then
+            echo "::error::The tag is $TAG, but the version of the project is $version. Increase the version on main first, then make the tag."
+            exit 1
+          fi
       - run: uv run pytest -q
       - name: Make the archive
         env:
