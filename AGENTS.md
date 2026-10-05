@@ -108,5 +108,7 @@ The owner sets these one time. The files in the repository cannot set them.
 - Dependabot alerts and Dependabot security updates: on.
 - A ruleset for the branch `main`: a pull request is necessary, the checks `test` and `lint`
   must pass, and a force push is not permitted.
-- A ruleset for tags `v*`: only the owner can make or delete a tag.
+- A ruleset for tags `v*`: only the owner can make a tag, and a tag cannot be changed or deleted.
+- Release immutability: on. The files and the tag of a published release cannot be changed.
+  Thus a release with a defect gets a new version, not a correction.
 - Actions: the default permission of the workflow token is "read".

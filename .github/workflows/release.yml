@@ -35,4 +35,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" "agent-skills-$TAG.tar.gz" "agent-skills-$TAG.tar.gz.sha256" --title "$TAG" --notes-file CHANGELOG.md --verify-tag
+        # A published release is immutable. Thus the files go into a draft, and the last
+        # command publishes the release.
+        run: |
+          gh release create "$TAG" --draft --title "$TAG" --notes-file CHANGELOG.md --verify-tag
+          gh release upload "$TAG" "agent-skills-$TAG.tar.gz" "agent-skills-$TAG.tar.gz.sha256"
+          gh release edit "$TAG" --draft=false
