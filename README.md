@@ -86,7 +86,7 @@ Each release has an archive of this repository and a build provenance attestatio
 the attestation. To verify an archive, use the GitHub CLI:
 
 ```bash
-gh attestation verify agent-skills-v1.0.0.tar.gz --repo cceelen/agent-skills
+gh attestation verify agent-skills-v1.0.3.tar.gz --repo cceelen/agent-skills
 ```
 
 The command shows the workflow and the commit that made the archive. If the command fails, do

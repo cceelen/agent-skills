@@ -1,6 +1,6 @@
 [project]
 name = "agent-skills"
-version = "1.0.0"
+version = "1.0.3"
 description = "Agent skills in the open SKILL.md format"
 requires-python = ">=3.9"
 license = "MIT"

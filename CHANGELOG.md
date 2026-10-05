@@ -3,6 +3,13 @@
 This file shows the changes of each version. A change of the major number means that earlier
 reports are not comparable with new reports.
 
+## 1.0.3
+
+The skill did not change.
+
+- A published release cannot be changed. The files and the tag of the release are permanent.
+- The tags `v1.0.1` and `v1.0.2` have no release. Do not use them.
+
 ## 1.0.0
 
 The first public version. It contains one skill, `library-vetting`, with the rubric
