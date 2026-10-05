@@ -1,0 +1,13 @@
+{"_scorecard":{"score":5.4,"date":"2026-09-28","checks":{"Code-Review":1,"Branch-Protection":0,"Security-Policy":0,"Maintained":10}},
+"D1.multiorg":{"a":"no","ev":"two individuals"},"D1.governed":{"a":"no"},"D1.resourced":{"a":"no"},"D1.funding":{"a":"no"},"D1.cap_single_org":{"a":"no"},
+"D2.policy":{"a":"no"},"D2.channel":{"a":"yes","ev":"zlib@gzip.org"},"D2.advisories":{"a":"no"},"D2.fix30":{"a":"no"},"D2.fix90":{"a":"yes"},"D2.backports":{"a":"na"},"D2.credit":{"a":"no"},"D2.no_history":{"a":"no"},"D2.no_silent":{"a":"yes"},
+"D3.policy":{"a":"no"},"D3.audit":{"a":"yes","ev":"OSTIF/TrailOfBits 2016 is >5y; 7ASecurity 2024?"},"D3.defaults":{"a":"no"},"D3.threat_model":{"a":"no"},"D3.consumer_docs":{"a":"yes"},"D3.misuse":{"a":"no"},"D3.handling":{"a":"yes"},
+"D4.fuzz_cov":{"a":"yes","ev":"oss-fuzz"},"D4.san_breadth":{"a":"yes"},"D4.ownership":{"a":"yes"},"D4.mem_record":{"a":"yes"},"D4.overflow":{"a":"yes"},
+"D5.sast_enforced":{"a":"no"},"D5.cov80":{"a":"unknown"},"D5.cap_defect":{"a":"no"},
+"D6.minimal":{"a":"yes"},"D6.stack_current":{"a":"no","ev":".github/workflows/cmake.yml: actions/checkout@v4, three major versions behind"},"D6.stack_clean":{"a":"unknown"},"D6.signed":{"a":"yes"},"D6.screened":{"a":"yes"},"D6.cap_red":{"a":"no"},"D6.cap_amber":{"a":"no"},"D6.cap_stale_vendor":{"a":"no"},
+"D9.policy":{"a":"yes"},"D9.discipline":{"a":"yes"},"D9.fit":{"a":"yes"},"D9.standards":{"a":"yes"},"D9.hygiene":{"a":"yes"},"D9.zero_unusable":{"a":"no"},
+"D10.compatible":{"a":"yes"},"D10.scan":{"a":"yes"},"D10.no_lever":{"a":"yes"},"D10.zero_incompatible":{"a":"no"},
+"D12.isolated":{"a":"no"},"D12.source_attested":{"a":"no","ev":"no source provenance or VSA in the repository or the releases"},"D12.verifiable":{"a":"yes"},"D13.reproducible":{"a":"no"},
+"D14.redistribution":{"a":"yes"},"D14.identity":{"a":"yes"},"D14.fork_viable":{"a":"yes"},"D14.no_controller":{"a":"yes"},"D14.no_friction":{"a":"yes"},
+"D15.versions":{"a":"yes"},"D15.targets_ci":{"a":"yes"},"D15.targets_claimed":{"a":"no"},
+"DQ.no_fix_supply":{"a":"no"},"DQ.unfixed_vuln":{"a":"no"},"DQ.stale_backlog":{"a":"no"},"DQ.red_dep":{"a":"no"},"DQ.license":{"a":"no"},"DQ.compromised":{"a":"no"},"CAP.pin":{"a":"no"}}

@@ -1,0 +1,131 @@
+# D1 Maintenance & sustainability | 12 | B
+D1.commits | 1 | A | Commit in the last 90 days. J may answer yes for a finished library: stable API, no unanswered defect reports, builds on current toolchains
+D1.release | 1 | A | Tagged or registry release in the last 12 months (same finished-library allowance)
+D1.bus3~bus | 1 | A | 24-month bus factor >= 3 (authors covering 80% of non-bot commits, at least 20 commits)
+D1.bus5~bus | 2 | A | 24-month bus factor >= 5
+D1.multiorg | 1 | E | Committers from >= 2 independent employers, each >= 5% of 24-month commits (start from history.orgs_over_5pct_24m; personal domains do not count)
+D1.response | 1 | E | [big][deep] Median first maintainer reply <= 14 days on the 10 most recent issues or PRs
+D1.governed~gov | 2 | E | [big] Foundation, umbrella project, or documented governance model covers this library today
+D1.resourced~gov | 1 | E | [big] Evidenced paid maintainer or corporate resourcing
+D1.funding | 1 | E | [big] Documented funding: sponsors, grants, consortium, commercial support
+D1.releasers | 1 | A | >= 2 people cut releases in the last 24 months
+D1.cap_single_org | cap6 | J | All committers with >= 5% share work for one employer
+D1.zero_dead | zero | A | Archived, deprecated upstream, or no commit in 24 months with open defect reports
+# D2 Vulnerability response | 10 | C
+D2.policy | 2 | A | Security policy file or documented disclosure process (the parent project's counts)
+D2.channel | 1 | A | Private reporting channel or named security contact (private vulnerability reporting on GitHub is on, else E)
+D2.advisories | 2 | E | Advisories published with affected and fixed version ranges (GHSA, OSV, registry, list)
+D2.fix30~fix | 2 | E | Median disclosure-to-fixed-release <= 30 days over the last <= 5 advisories
+D2.fix90~fix | 1 | E | Same median <= 90 days
+D2.backports | 1 | E | Fixes backported to every supported release line (na when one line exists)
+D2.no_silent | 1 | J | No silent security fix or branch-parity failure found
+D2.credit | 1 | E | Reporter credit and public timelines in advisories
+D2.no_history | cap7 | E | No advisory or CVE has ever been published, checked against the NVD and advisory results (the fix, backport and credit lines become na; the advisories line too, if no silent fix was found)
+# D3 Security posture | 10 | C
+D3.policy | 1 | A | Disclosure policy exists
+D3.audit | 2 | E | Third-party security audit published within 5 years
+D3.defaults | 1 | E | Secure defaults: hardening flags on (native) or safe parser/config defaults (managed)
+D3.misuse | 2 | J | Misuse-resistant API: the easy path is the safe path
+D3.threat_model | 2 | E | Documented threat model or untrusted-input entry points
+D3.handling | 1 | J | Past reports handled constructively
+D3.consumer_docs | 1 | E | Security guidance for consumers
+# D4 Code safety & resource management | 10 | C
+D4.fuzz_cov~fz | 3 | E | [native] Continuous fuzzing covers the primary untrusted-input surface
+D4.fuzz_any~fz | 1 | A | [native] Fuzzing exists
+D4.sanitizers | 2 | A | [native] Sanitizers (ASan+UBSan or equivalent) run in CI
+D4.san_breadth | 1 | E | [native] Further dynamic checks: MSan, TSan, CFI, valgrind, miri
+D4.ownership | 2 | J | [native] Systematic ownership discipline (RAII, checked wrappers, arenas)
+D4.mem_record | 1 | J | [native] Memory-corruption share of advisories low for the exposure, 5 years
+D4.overflow | 1 | J | [native] Overflow-checked size arithmetic in parsers and allocators
+D4.unsafe_surface | 3 | A | [managed] No unsafe/FFI/native-extension code, or it is confined to named modules with tests (start from tree.risky_constructs)
+D4.dyn_exec | 2 | A | [managed] No dynamic code execution or unsafe deserialization reachable from input (read every risky_constructs hit)
+D4.fuzz_prop | 2 | A | [managed] Fuzzing or property-based testing present
+D4.strict | 1 | E | [managed] Strict typing or deny-level lint enforced in CI
+D4.limits | 1 | J | [managed] Resource limits on untrusted input: size, depth, regex backtracking
+D4.class_record | 1 | J | [managed] No repeated vulnerability class in 5 years
+# D5 Code quality | 8 | D
+D5.sast_ci | 1 | A | Static analysis or lint runs in CI
+D5.sast_enforced | 2 | E | It fails the job on findings and the rule set is substantive (bug/security classes, not style only)
+D5.tests_ci | 1 | A | Test suite runs in CI
+D5.cov80 | 1 | E | Measured line coverage >= 80% published
+D5.review | 2 | A | Code review before merge (Scorecard Code-Review >= 7, else E samples 10 recent merges)
+D5.standard | 1 | A | Coding standard or formatter config in tree
+D5.own_run | 1 | E | [deep] Our analyzer run on core paths is clean
+D5.cap_defect | cap5 | J | Our own reading or analysis found a real defect in shipped code
+# D6 Dependencies & supply chain | 8 | D
+D6.minimal | 2 | E | <= 5 required runtime deps and no stale vendored code (vendored copy within one minor of upstream)
+D6.pinned | 2 | A | The project's own dependencies are pinned by lockfile or digest
+D6.signed | 2 | E | Releases signed or registry provenance attested by a verified mechanism
+D6.sbom | 1 | A | SBOM published
+D6.no_binaries | 1 | A | No checked-in binaries
+D6.ci_release | 1 | A | Releases built and published from CI, not a maintainer machine
+D6.update_bot | 1 | A | Dependency-update automation
+D6.no_install_exec | 1 | A | [registry] No code runs at install or build time on the consumer (install scripts, build.rs, setup.py-only sdist)
+D6.screened | 2 | A | Every screened required runtime dep is Green (facts dep_screen; repo-only deps: E screens up to 5 from their clones)
+D6.stack_current | 1 | A | The base stack is current: no CI action a major version behind, no floating reference, no toolchain past its end of life (facts base_stack)
+D6.stack_clean | 1 | A | No component of the base stack has a known vulnerability in the version that the library uses (facts base_stack)
+D6.cap_red | cap3 | A | A required runtime dep screens Red: deprecated, yanked, archived, or carrying a known unfixed advisory
+D6.cap_amber | cap6 | A | A required runtime dep screens Amber: no release in 36 months, or a single publisher
+D6.cap_stale_vendor | cap4 | E | Vendored code > 2 majors or > 3 years behind upstream
+# D7 Performance & footprint | 7 | A
+D7.bench | 3 | E | Independent benchmark <= 3 years old shows parity or better with peers
+D7.regress | 2 | E | Performance regression tracking in CI
+D7.footprint | 1 | E | Footprint documented and fit for the category
+D7.scale | 2 | E | Concurrency or production-scale evidence
+D7.no_regress | 2 | J | No known unresolved regression against peers
+# D8 OpenSSF Scorecard | 5 | B
+# D9 API stability & integration fit | 6 | A
+D9.policy | 2 | E | Documented versioning, stability or deprecation policy (semver, ABI policy, LTS lines)
+D9.discipline | 2 | E | Breaking changes in the last 24 months landed only in major versions, with migration notes
+D9.fit | 3 | J | Usable from the consumer's language version, runtime, toolchain and framework; in a migration, covers the needed subset of the incumbent
+D9.standards | 2 | J | Conforms to the standards of its domain and uses the ecosystem's standard types, error and packaging conventions
+D9.hygiene | 1 | J | No global-state, namespace, macro or monkey-patch pollution
+D9.zero_unusable | zero | J | Unusable from the consumer's toolchain, or a compatibility claim verified false
+# D10 Licensing & legal | 7 | A
+D10.osi | 3 | A | One OSI-approved license, SPDX-clean
+D10.compatible | 3 | J | Compatible with the consumer's distribution and linkage model
+D10.scan | 2 | E | Nested, vendored and required-dependency licenses all compatible
+D10.no_lever | 1 | E | No CLA relicensing lever and no relicensing history
+D10.patent | 1 | A | Explicit patent grant or public-domain equivalent
+D10.zero_incompatible | zero | J | No license, or incompatible with the consumer's use
+# D11 Industry compliance | 4 | C
+D11.cert_current~c | 10 | J | Active certificate covers a current version, for the consumer's regime
+D11.cert_old~c | 7 | J | Active certificate, significantly older version
+D11.pipeline~c | 5 | J | Credible validation in progress
+D11.claims~c | 3 | J | Claims without certificates
+# D12 Release integrity (SLSA) | 4 | D
+D12.scripted | 1 | A | Build and release scripted from checked-in config
+D12.generated | 1 | A | The release build generates provenance (registry attestation, or a provenance step in CI)
+D12.provenance | 2 | A | A hosted build platform signs the release provenance (registry attestation, deps.dev record, or a known generator in CI with an identity token on a hosted runner; else E)
+D12.isolated | 2 | A | Isolated builder, provenance not forgeable by maintainers (a known generator workflow in CI, else E)
+D12.protected | 1 | A | Protected default branch (Scorecard Branch-Protection >= 5, else E)
+D12.two_party | 1 | A | Two-party review of protected-branch changes (Scorecard Code-Review >= 8, else E)
+D12.source_attested | 1 | A | Source provenance or a source verification summary (VSA) is published for the released revision (a source attestation step in CI; E corrects with evidence)
+D12.verifiable | 1 | A | Documented verification procedure a consumer can follow (a verify command in the documents, else E)
+D12.ci_hardened | 1 | A | CI actions pinned by digest (>= 80%) and no dangerous triggers
+D12.matches_source | 1 | E | [deep] Published artifact reproduced from the tagged source
+# D13 Build & packaging maturity | 4 | D
+D13.floor | 1 | A | Builds and tests run from documented commands in CI
+D13.packaging | 1 | A | Consumable through the ecosystem's standard manifest or registry
+D13.locked | 1 | A | Manifest plus lockfile with hashes
+D13.toolchain | 1 | A | Toolchain or runtime version pinned in tree
+D13.reproducible | 2 | E | Reproducible build verified or documented with evidence
+D13.declarative | 1 | A | No arbitrary build-time scripting on the consumer's path
+D13.hermetic | 1 | A | Hermetic build definition present (Bazel, Buck2, Nix)
+D13.zero_nobuild | zero | E | [deep] Could not build following the docs
+# D14 Sovereignty & jurisdictional control | 3 | B
+D14.redistribution | 2 | E | Independently redistributed by >= 3 distributions, vendors or registry mirrors
+D14.fork_viable | 2 | J | Fork-viable: permissive license and public build+test infrastructure
+D14.no_controller | 1 | J | No single compellable entity controls access and releases
+D14.identity | 1 | E | Maintainers and release signers have known identities
+D14.no_friction | 1 | J | No export-control or sanctions friction for this consumer
+D14.multi_juris | 2 | E | [deep] Maintainers or governance span jurisdictions
+D14.mirrored | 1 | E | [deep] Source and releases mirrored outside one jurisdiction
+# D15 Portability | 2 | A
+D15.targets_ci~t | 3 | J | The consumer's targets and runtimes are CI-tested
+D15.targets_claimed~t | 1 | J | The consumer's targets are claimed, not CI-tested
+D15.os3~os | 1 | A | >= 3 OS families in CI
+D15.os5~os | 2 | A | >= 5 OS families in CI
+D15.arch2~ar | 1 | A | [native] >= 2 architectures in CI
+D15.arch4~ar | 2 | A | [native] >= 4 architectures in CI
+D15.versions | 2 | E | >= 3 compiler, runtime or language versions CI-tested

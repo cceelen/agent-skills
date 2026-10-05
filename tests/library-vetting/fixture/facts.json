@@ -1,0 +1,188 @@
+{
+ "clone": "shallow-since-25mo",
+ "collected_at": "2026-10-05T16:40:36+00:00",
+ "detected_ecosystems": [
+  "bazel",
+  "c-cpp"
+ ],
+ "errors": {
+  "depsdev_project": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+  "github": "HTTP Error 403: Forbidden",
+  "osv": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+  "scorecard": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+ },
+ "fetch_plan": [
+  {
+   "extract": "overall score, date, every check name with its score",
+   "id": "scorecard",
+   "url": "https://api.scorecard.dev/projects/github.com/madler/zlib"
+  },
+  {
+   "extract": "totalResults; each CVE id, published date, CVSS score, one-line description, fixed version if stated. Keep only CVEs in this library itself, not in products that embed it",
+   "id": "nvd",
+   "url": "https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=zlib&resultsPerPage=20"
+  },
+  {
+   "extract": "each published advisory: GHSA id, severity, date; or 'none published'. Then for the most recent id fetch https://api.osv.dev/v1/vulns/<id> for published date and fixed versions (counts toward the fetch_plan)",
+   "id": "advisories",
+   "url": "https://github.com/madler/zlib/security/advisories"
+  }
+ ],
+ "history": {
+  "authors_24m": 42,
+  "bus_factor_24m": 2,
+  "commits_12m": 251,
+  "commits_24m": 421,
+  "commits_90d": 12,
+  "days_since_last_commit": 14,
+  "days_since_last_tag": 230,
+  "head": "767c4c947852e143f582c85f14cf573411df1b35",
+  "last_commit": "2026-09-20T20:39:44-07:00",
+  "last_commit_authored": "2026-06-09T18:23:30+03:00",
+  "latest_tag_signed": true,
+  "orgs_over_5pct_24m": [
+   "caltech.edu",
+   "madler.net",
+   "vollstreckernet.de"
+  ],
+  "release_actors_24m": 1,
+  "tags": [
+   {
+    "annotated": true,
+    "date": "2026-02-17T05:38:53-08:00",
+    "tag": "v1.3.2"
+   },
+   {
+    "annotated": true,
+    "date": "2025-12-08T05:40:55-08:00",
+    "tag": "v1.3.1.2"
+   },
+   {
+    "annotated": true,
+    "date": "2024-01-22T10:49:07-08:00",
+    "tag": "v1.3.1"
+   },
+   {
+    "annotated": true,
+    "date": "2023-08-18T02:10:26-07:00",
+    "tag": "v1.3"
+   },
+   {
+    "annotated": true,
+    "date": "2022-10-13T23:58:52-07:00",
+    "tag": "v1.2.13"
+   }
+  ],
+  "tags_24m": 2,
+  "top_authors_24m": [],
+  "top_org_share_pct": 62
+ },
+ "repo": "https://github.com/madler/zlib",
+ "target": "madler/zlib",
+ "tree": {
+  "bench_paths": [],
+  "build_scripts": [
+   "contrib/minizip/configure.ac"
+  ],
+  "changelog": [
+   "ChangeLog"
+  ],
+  "checked_in_binaries": [],
+  "ci": {
+   "actions_sha_pinned": 0,
+   "actions_total": 28,
+   "arch_matrix": [
+    "aarch64",
+    "arm64",
+    "ppc64",
+    "riscv",
+    "s390x"
+   ],
+   "compilers": [
+    "clang",
+    "gcc",
+    "msvc"
+   ],
+   "count": 7,
+   "coverage": false,
+   "dangerous_triggers": false,
+   "dep_review": false,
+   "files": [
+    ".github/workflows/c-std.yml",
+    ".github/workflows/cmake.yml",
+    ".github/workflows/configure.yml",
+    ".github/workflows/contribs.yml",
+    ".github/workflows/fuzz.yml",
+    ".github/workflows/msys-cygwin.yml",
+    ".github/workflows/others.yml"
+   ],
+   "fuzzing": true,
+   "os_matrix": [
+    "freebsd",
+    "ios",
+    "macos",
+    "ubuntu",
+    "windows"
+   ],
+   "provenance": false,
+   "publish": false,
+   "sanitizers": false,
+   "sast": false,
+   "sbom": false,
+   "tests": true,
+   "warnings_as_errors": true
+  },
+  "coding_standard": [],
+  "contributing": [],
+  "ecosystems": [
+   "bazel",
+   "c-cpp"
+  ],
+  "file_count": 271,
+  "first_party_sloc": 33950,
+  "funding": [],
+  "fuzz_paths": [],
+  "governance": [],
+  "license_files": [
+   "LICENSE"
+  ],
+  "license_spdx_guess": "Zlib",
+  "licenses_named_in_root_file": [
+   "Zlib"
+  ],
+  "lockfiles": [],
+  "manifest_runtime_deps": [],
+  "manifests": [
+   "BUILD.bazel",
+   "CMakeLists.txt",
+   "MODULE.bazel",
+   "Makefile"
+  ],
+  "nested_license_files": [
+   "contrib/dotzlib/LICENSE_1_0.txt",
+   "contrib/minizip/LICENSE.Info-Zip"
+  ],
+  "primary_language": "c",
+  "risky_constructs": {
+   "c:system": 3,
+   "c:unbounded-copy": 18,
+   "csharp:pinvoke": 18
+  },
+  "sbom_files": [],
+  "security_policy": [],
+  "source_files_by_language": {
+   "c": 74,
+   "cpp": 5,
+   "csharp": 9
+  },
+  "submodule_list": [],
+  "submodules": false,
+  "test_paths": [
+   "contrib",
+   "test"
+  ],
+  "toolchain_pins": [],
+  "update_bot": [],
+  "vendored_dirs": []
+ }
+}
