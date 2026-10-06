@@ -43,6 +43,12 @@ jobs:
         # A published release is immutable. Thus the files go into a draft, and the last
         # command publishes the release.
         run: |
-          gh release create "$TAG" --draft --title "$TAG" --notes-file CHANGELOG.md --verify-tag
+          # the notes are the section of this version in CHANGELOG.md, without its heading
+          awk -v h="## ${TAG#v}" '$0 == h {on = 1; next} /^## / {on = 0} on' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then
+            echo "::error::CHANGELOG.md has no section for ${TAG#v}."
+            exit 1
+          fi
+          gh release create "$TAG" --draft --title "$TAG" --notes-file notes.md --verify-tag
           gh release upload "$TAG" "agent-skills-$TAG.tar.gz" "agent-skills-$TAG.tar.gz.sha256"
           gh release edit "$TAG" --draft=false
