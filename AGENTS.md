@@ -9,6 +9,22 @@ the folders in `skills/` without a build step. Thus each skill folder must be co
 
 ## Structure
 
+The repository holds four types of artifact, the state-of-the-art (SOTA) documents and the
+catalog. Each type has one top-level folder. Each artifact folder is complete by itself.
+
+| Folder | Contents |
+|---|---|
+| `agents/<name>/` | One agent: an I-shaped role, independent of technology. |
+| `skills/<name>/` | One skill: instructions and programs for one task on named technologies. |
+| `processes/<name>/` | One process: the procedure, and one executable form for each technology. |
+| `template-sets/<name>/` | One template set: files that a project copies or applies, for named technologies. |
+| `sota/<aspect>/` | The SOTA summaries of one aspect, one Markdown file for each research date, with references as URLs. |
+| `catalog/` | The list of the aspects and the artifacts that rest on them, as files. |
+
+Each artifact has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The
+inner layout of `agents/`, `processes/`, `template-sets/`, `sota/` and `catalog/` is set by the
+specifications that build them. The layout of a skill is:
+
 - `skills/<name>/SKILL.md`: the instructions for the agent that uses the skill.
 - `skills/<name>/scripts/`: the programs of the skill.
 - `skills/<name>/prompts/`: the tasks that the skill gives to its agents. The skill tells an
@@ -16,7 +32,7 @@ the folders in `skills/` without a build step. Thus each skill folder must be co
 - `skills/<name>/agent-templates/`: the templates for agent files. A setup program fills in the
   model and the tool names for the local agent product.
 - `docs/<name>.md`: the documentation for the user.
-- `tests/<name>/`: the tests of the skill.
+- `tests/<name>/`: the tests of the artifact.
 - `.claude-plugin/plugin.json`: the plugin manifest.
 - `.github/workflows/test.yml`: the tests and the checks for each push and each pull request.
 - `.github/workflows/release.yml`: the release with build provenance, for each version tag.
@@ -43,6 +59,8 @@ Run the two commands before each commit. The two commands must pass.
 - Do not write a model name in `SKILL.md`, in a prompt or in a template. Put model names only in
   the table of `scripts/models.py`.
 - Do not put secrets, personal data or absolute paths in a skill.
+- A skill or an agent holds instructions, summaries and references (URLs with dates). Do not
+  store the material that was read while writing it.
 
 ## Rules for the programs
 
