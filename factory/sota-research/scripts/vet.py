@@ -489,7 +489,7 @@ def cmd_score(data, args):
         path = pathlib.Path(work) / f"{source['id']}.json"
         try:
             signal_file = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
-        except OSError, ValueError:
+        except (OSError, ValueError):
             signal_file = None
         results.append(score_source(source, rows.get(source["id"]), signal_file, rubric, limit))
     results.sort(key=lambda r: r["id"])
