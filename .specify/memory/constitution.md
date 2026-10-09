@@ -113,6 +113,9 @@ one meaning, an instruction is a command, and the condition comes before the ins
    its recipe. Layer two is one specification per set of implementation skills, with the helper
    software, built through the product flow of Spec Kit. The layers iterate.
 
+The main branch holds the machinery and the delivered skills only. Each specification, with its
+evidence and its research records, stays on its own branch.
+
 A specification keeps a short evidence record: for each source a summary of what it contributes,
 where in the source that is, and the date read. A quote is kept only where the wording itself is
 the point. Nothing else that was read is stored. The owner starts a refresh and accepts a recipe;
@@ -129,4 +132,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.2.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
+**Version**: 3.2.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
