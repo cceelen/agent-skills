@@ -4,10 +4,23 @@ These rules apply to each agent and each person who changes this repository.
 
 ## Purpose
 
-This repository is a collection of agent skills in the open `SKILL.md` format. Users install
-the folders in `skills/` without a build step. Thus each skill folder must be complete.
+This repository is a construction kit for software engineering with AI agents. For each major
+aspect it holds a recipe, a strategy and a generic checklist, and the skills that carry one
+product each. All of them are agent skills in the open `SKILL.md` format. Users install the
+folders in `skills/` without a build step. Thus each skill folder must be complete.
 
 ## Structure
+
+| Folder | Contents |
+|---|---|
+| `specs/<number>-<name>/` | One specification. An aspect specification is the source of a recipe; a product specification builds implementation skills and helper software. |
+| `skills/<name>/` | One skill. A recipe skill is rendered from its aspect specification. An implementation skill carries one product. |
+| `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
+
+Each skill has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The agent
+files that wrap a recipe skill for one agent product are templates inside the skill. Do not
+edit a rendered recipe skill by hand: change its specification and render it again. The layout
+of a skill is:
 
 - `skills/<name>/SKILL.md`: the instructions for the agent that uses the skill.
 - `skills/<name>/scripts/`: the programs of the skill.
@@ -43,9 +56,16 @@ Run the two commands before each commit. The two commands must pass.
 - Do not write a model name in `SKILL.md`, in a prompt or in a template. Put model names only in
   the table of `scripts/models.py`.
 - Do not put secrets, personal data or absolute paths in a skill.
+- A skill holds instructions, knowledge and references (URLs with dates). Do not store the
+  material that was read while writing it. A specification keeps only a short evidence record:
+  a summary of what each source contributes.
+- An implementation skill points at the maintained templates and tools of its product and uses
+  their latest pinned version. Do not copy them into the skill.
 
 ## Rules for the programs
 
+- Write helper software in Python. Do not write it in a shell language. Prefer a declarative
+  tool where one exists.
 - Use Python 3.9 or later, and only the standard library.
 - The tools for development (`pytest`, `ruff`, `pre-commit`) need Python 3.10 or later. The CI
   runs the tests of the programs on Python 3.9 also.
