@@ -8,9 +8,10 @@ contracts/files.md, quickstart.md
 **Tests**: included. The specification requires tests without the network for each program
 (FR-029), and fixtures prove the success criteria.
 
-**Organization**: one phase for each user story. Each story is one delivery: a short-lived
-branch from `main` and one pull request into `main` that carries only `factory/`, `tests/`,
-`docs/` and the rule files. Mark the tasks as done on the branch `002-research-tooling`.
+**Organization**: one phase for each user story, and one commit for each phase, on the working
+branch `002-research-tooling-tasks`. Mark the tasks of a phase as done in the commit of that
+phase. The branch is merged as a whole into `002-research-tooling`. One delivery then carries
+`factory/`, `tests/`, `docs/` and the rule files to `main`.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -19,14 +20,16 @@ branch from `main` and one pull request into `main` that carries only `factory/`
 
 ## Rules for each task
 
-- Python 3.9 or later, standard library only, no shell script. Each program starts with the
-  same script header as `skills/library-vetting/scripts/collect.py`.
+- The latest stable Python (3.14), standard library only, no shell script. Each program
+  starts with a script header with `requires-python = ">=3.14"` and `dependencies = []`. Run a
+  program with `uv run <program>`, and a tool with `uvx` or `uv run`.
 - Same input gives same output: sort the output, do not read the clock.
 - Result codes: `0` nothing fails or remains, `1` something fails or remains, `2` the input
   cannot be read.
 - Each program keeps its messages in one table `MESSAGES` at the top of the file, in
   ASD-STE100, with a maximum of 25 words in a sentence.
-- Before each commit: `uv run pytest`, `uv run ruff check`, `uv run pre-commit run --all-files`.
+- Before each commit: `uv run --python 3.14 pytest`, `uv run ruff check`,
+  `uv run pre-commit run --all-files`.
 
 ---
 
@@ -37,7 +40,8 @@ branch from `main` and one pull request into `main` that carries only `factory/`
 - [ ] T001 Create `factory/sota-research/` with the folders `scripts/`, `references/`, `prompts/`, `agent-templates/`, and a first `factory/sota-research/SKILL.md` with front matter (`name: sota-research`, a `description` that says what it does and when to use it) and one paragraph that points at `references/procedure.md`
 - [ ] T002 [P] Add `"factory"` to `ARTIFACT_TYPES` in `tests/test_repo.py`, and make `test_skill_layout` run for the folders in `factory/` also
 - [ ] T003 [P] Create `docs/sota-research.md` in ASD-STE100 with the purpose of the tooling and one section for each program (filled by the stories)
-- [ ] T004 [P] Add to `AGENTS.md`, section "Structure", one sentence that tells a session to read `factory/sota-research/SKILL.md` to distil an aspect
+- [ ] T004 [P] Add to `AGENTS.md`: in the section "Structure", one sentence that tells a session to read `factory/sota-research/SKILL.md` to distil an aspect; in the section "Rules for the programs", that the programs in `factory/` use the latest stable Python, declare it in their script header and run with `uv run`, and that the rule for Python 3.9 applies to the skills that users install
+- [ ] T050 [P] Create `tests/sota-research/conftest.py` that skips the folder on a Python older than 3.14, and add `"3.14"` to the matrix of `.github/workflows/test.yml`
 - [ ] T005 Add the field `**Accepted**: [person and date, or pending]` to the head line, and the optional field `- **Target folder**: [folder, or leave out for skills/<name>/]` to the recipe skill block of section 5, in `.specify/templates/overrides/aspect-spec-template.md` (formats: `contracts/files.md`)
 
 ---
@@ -75,9 +79,10 @@ fixture it names that defect and no other; two runs print the same bytes.
 - [ ] T015 [US1] Implement the command line of `check.py` as in `contracts/programs.md`: the report lines, the summary (failing checks, pending levels, pending vettings, items that need judgement, accepted or not), `--json`, the result codes
 - [ ] T016 [US1] Fill the section for `check.py` in `docs/sota-research.md`, and write in `factory/sota-research/references/procedure.md` when to run the check and how to get the earlier revision (`git show <commit>:specs/<name>/spec.md`)
 
-**Checkpoint**: deliver to `main`. Then, on the branch `001-sota-research`, run
-`check.py specs/001-sota-research` and correct that specification in a pull request into its
-branch (expected: the new fields `Accepted` and `Target folder` are missing).
+**Checkpoint**: commit the phase. After the delivery to `main`, on the branch
+`001-sota-research`, run `check.py specs/001-sota-research` and correct that specification in
+a pull request into its branch (expected: the new fields `Accepted` and `Target folder` are
+missing).
 
 ---
 
@@ -104,7 +109,7 @@ committed skill differs (FR-006 to FR-010).
 - [ ] T024 [US2] In `tests/test_repo.py`, let a skill whose `SKILL.md` carries a stamp pass without a folder `tests/<name>/`: `test_fresh.py` covers it
 - [ ] T025 [US2] Fill the section for `render.py` in `docs/sota-research.md`, and add the delivery of a rendered skill to `factory/sota-research/references/procedure.md`: render on the branch of the specification, then carry only the rendered files to a branch from `main`
 
-**Checkpoint**: deliver to `main`.
+**Checkpoint**: commit the phase.
 
 ---
 
@@ -127,7 +132,7 @@ committed skill differs (FR-006 to FR-010).
 - [ ] T030 [P] [US3] Write `factory/sota-research/prompts/risk-answers.md`: the task to record the six answers for one item, each with its source or `(judgement)`, and to name the risk dimension for an item whose return depends on the risk of a project; the task says that a program computes the level
 - [ ] T031 [US3] Fill the section for `place.py` in `docs/sota-research.md`, and add the step to `factory/sota-research/references/procedure.md`
 
-**Checkpoint**: deliver to `main`.
+**Checkpoint**: commit the phase.
 
 ---
 
@@ -151,8 +156,9 @@ source is rejected by a gate, and `check.py` reports the item that rests on an u
 - [ ] T037 [US4] Implement `vet.py collect` for a repository: run `skills/library-vetting/scripts/collect.py --lite` with the interpreter of the current process and take the facts that the rubric names; when the collector is absent or fails, record that and continue
 - [ ] T038 [US4] Fill the section for `vet.py` in `docs/sota-research.md`, and add the two steps and the confirmation of the owner to `factory/sota-research/references/procedure.md`
 
-**Checkpoint**: deliver to `main`. Then, on the branch `001-sota-research`, apply `vet.py` and
-`place.py` to that specification in a pull request into its branch (SC-003).
+**Checkpoint**: commit the phase. After the delivery to `main`, on the branch
+`001-sota-research`, apply `vet.py` and `place.py` to that specification in a pull request
+into its branch (SC-003).
 
 ---
 
@@ -168,18 +174,18 @@ a specification whose check reports no failure other than "not accepted".
 - [ ] T041 [P] [US5] Write `factory/sota-research/agent-templates/source-reader.md` (web search and web fetch only) and `factory/sota-research/agent-templates/second-reader.md` (web fetch only), with placeholders for the model and the tool names
 - [ ] T042 [US5] Implement `factory/sota-research/scripts/models.py` for the roles `source-reader` and `second-reader`, with the contract of `skills/library-vetting/scripts/models.py` (`detect`, `apply`, `show`), and write `tests/sota-research/test_models.py`: the rendered agent file of each product lists no shell, read, write or search-in-files tool for the two roles
 - [ ] T043 [US5] Complete `factory/sota-research/references/procedure.md` for the four phases: (1) settle the aspect, its contexts, its risk dimensions and its boundaries with the owner, start a specification branch with the next number, record the date; (2) research with isolated readers, give each source its class, vet, distil, write the evidence record in ASD-STE100, let the second reader check it, record the answers, place the items, record where the sources disagree and what was not verified; (3) stop and give the owner the findings, the strategy, the disagreements and the open judgements; (4) after the acceptance render and deliver; and the refresh from the watch list. The procedure says: stop before the first source when the agent product cannot limit the tools of an agent; do not store what was read; record the roles of the models and the person who accepted
-- [ ] T044 [US5] On the branch `001-sota-research`: set `- **Target folder**: \`factory/sota-research/\`` and the acceptance in that specification, render it, and deliver the rendered `SKILL.md` and `references/checklist.md` into `factory/sota-research/` on `main`, in place of the first `SKILL.md` of T001
+- [ ] T044 [US5] After the delivery to `main`, on the branch `001-sota-research`: set `- **Target folder**: \`factory/sota-research/\`` and the acceptance in that specification, render it, and deliver the rendered `SKILL.md` and `references/checklist.md` into `factory/sota-research/` on `main`, in place of the first `SKILL.md` of T001
 - [ ] T045 [US5] Do one trial run with the owner on a small aspect that the owner names, and record the result against SC-005 and SC-007 in `specs/002-research-tooling/quickstart.md`
 - [ ] T046 [US5] Complete `docs/sota-research.md` with the four phases, and add a section for the change to `CHANGELOG.md`
 
-**Checkpoint**: deliver to `main`.
+**Checkpoint**: commit the phase.
 
 ---
 
 ## Phase 8: Polish
 
 - [ ] T047 Run each scenario of `specs/002-research-tooling/quickstart.md` and correct what differs
-- [ ] T048 [P] Run the tests of `tests/sota-research` on Python 3.9 and on the newest Python of the CI, and make sure that `.github/workflows/test.yml` runs them on both
+- [ ] T048 [P] Make sure that the job for Python 3.14 in `.github/workflows/test.yml` runs the tests of `tests/sota-research`, and that the jobs for older versions pass without them
 - [ ] T049 Measure `check.py` on the specification 001 against SC-006 (less than 10 seconds) and record the time in `specs/002-research-tooling/quickstart.md`
 
 ---
@@ -205,8 +211,9 @@ T011 fixtures for --previous    (files in tests/sota-research/fixture/previous/)
 
 ## Implementation Strategy
 
-1. Phases 1 and 2, then US1. Deliver. The check is useful on the specification 001 at once.
-2. US2, deliver. US3 and US4, one delivery each. Then apply both to the specification 001.
-3. US5, with the trial run. Then Phase 8.
-
-Each delivery is one pull request into `main`, and the owner reviews it before the next starts.
+1. Phases 1 and 2, then US1 to US5 and Phase 8, one commit for each phase, on the working
+   branch.
+2. Merge the working branch as a whole into `002-research-tooling`.
+3. Deliver `factory/`, `tests/`, `docs/` and the rule files to `main` in one pull request.
+4. Then apply the tooling to the specification 001 on its branch (the checkpoints of US1 and
+   US4, T044), and do the trial run with the owner (T045).

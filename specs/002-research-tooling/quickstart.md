@@ -6,7 +6,7 @@ Run the commands from the root of the repository. The contracts are in
 ## All parts
 
 ```text
-uv run pytest tests/sota-research
+uv run --python 3.14 pytest tests/sota-research
 uv run ruff check
 ```
 
@@ -15,8 +15,8 @@ Expected: all tests pass, without the network.
 ## 1. The check (user story 1)
 
 ```text
-python factory/sota-research/scripts/check.py tests/sota-research/fixture/good
-python factory/sota-research/scripts/check.py tests/sota-research/fixture/defect-unknown-source
+uv run factory/sota-research/scripts/check.py tests/sota-research/fixture/good
+uv run factory/sota-research/scripts/check.py tests/sota-research/fixture/defect-unknown-source
 ```
 
 Expected: the first command reports no failing check and has result code 0. The second names
@@ -25,7 +25,7 @@ the item and the unknown source and has result code 1. Two runs print the same b
 On the branch `001-sota-research`:
 
 ```text
-python factory/sota-research/scripts/check.py specs/001-sota-research
+uv run factory/sota-research/scripts/check.py specs/001-sota-research
 ```
 
 Expected: no failing check; the levels and four vettings are listed as "remains".
@@ -33,7 +33,7 @@ Expected: no failing check; the levels and four vettings are listed as "remains"
 ## 2. The renderer (user story 2)
 
 ```text
-python factory/sota-research/scripts/render.py tests/sota-research/fixture/good --commit 0000000 --out <empty folder>
+uv run factory/sota-research/scripts/render.py tests/sota-research/fixture/good --commit 0000000 --out <empty folder>
 ```
 
 Expected: the folder holds the same files as `tests/sota-research/fixture/good-rendered`.
@@ -42,7 +42,7 @@ With the fixture `not-accepted`, the program writes nothing and names the missin
 ## 3. The calculation (user story 3)
 
 ```text
-python factory/sota-research/scripts/place.py tests/sota-research/fixture/good
+uv run factory/sota-research/scripts/place.py tests/sota-research/fixture/good
 ```
 
 Expected: each item has a return, a cost, a score, an admission result and a level that are
@@ -52,7 +52,7 @@ stays `pending` and the result code is 1.
 ## 4. The vetting (user story 4)
 
 ```text
-python factory/sota-research/scripts/vet.py score tests/sota-research/fixture/good --work tests/sota-research/fixture/signals
+uv run factory/sota-research/scripts/vet.py score tests/sota-research/fixture/good --work tests/sota-research/fixture/signals
 ```
 
 Expected: three sources with the expected scores; one is rejected by a gate; none is

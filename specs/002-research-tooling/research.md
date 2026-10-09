@@ -141,6 +141,27 @@ repository (read on 2026-10-09) unless a source is named.
 - **Open for the review**: the path. It is the first file that the kit puts into a project of
   a user.
 
+## R14. Python version and how the programs run
+
+- **Decision**: the latest stable Python, today 3.14, for the tooling of the factory. Each
+  program has a script header with `requires-python = ">=3.14"` and no dependencies, and runs
+  with `uv run <program>`. Tools run with `uvx` or through `uv run`. The tests of the tooling
+  run on Python 3.14; a `conftest.py` in `tests/sota-research/` skips the folder on an older
+  version, and the CI gets a job for 3.14.
+- **Reason**: decision of the owner, 2026-10-09. Fact: `uv` 0.12.19 offers 3.14 as the newest
+  stable version; 3.15 is a release candidate. The tooling runs only on the workstation of the
+  owner and in the CI, so it does not need an old version.
+- **This supersedes** the decision of the same day to require Python 3.11 for helpers. The
+  skills that users install keep the rule of `AGENTS.md`.
+
+## R15. One working branch, one commit for each phase
+
+- **Decision**: the implementation is done on the branch of the tasks pull request, with one
+  commit for each phase. The branch is merged as a whole into `002-research-tooling`. One
+  delivery to `main` follows.
+- **Reason**: decision of the owner, 2026-10-09.
+- **This supersedes** one pull request into `main` for each user story.
+
 ## R13. Simplified Technical English in the programs
 
 - **Decision**: each program keeps its messages in one table at the top of the file. A test
