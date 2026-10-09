@@ -11,8 +11,8 @@ software engineering from what to build to an accepted aspect specification and 
 recipe skill, with a person in the loop."
 
 This is a product specification, layer two of the factory. Its requirements come from the
-aspect specification `specs/001-sota-research/spec.md` (the checklist items C-01 to C-22 and
-section 5) and from the constitution, version 3.2.0. The tooling is for this repository. It is
+aspect specification `specs/001-sota-research/spec.md` on the branch `001-sota-research` (the
+checklist items C-01 to C-22 and section 5) and from the constitution, version 3.2.0. The tooling is for this repository. It is
 not a plugin for users of the kit.
 
 Two roles use it. The **owner** decides what to build, confirms results and accepts a recipe.
