@@ -8,7 +8,8 @@
 2. The factory has a person in the loop: settle with the owner what to build, do the research,
    let the owner review the findings and the strategies, and only then specify and implement.
 3. Use the Spec Kit skills in `.claude/skills/speckit-*` for each step. Do one step in each pull
-   request, as one commit. Let the owner review between the steps.
+   request, as one commit. Let the owner review between the steps. A step goes into the branch
+   of its specification, not into `main`: see "Branches" in `AGENTS.md`.
 4. Ask the owner before each decision that changes the scope, the layout or the principles. Do
    not ask the owner for facts: find them, with a subagent where the search is wide.
 5. Delegate reading and extraction to the smallest capable model, drafting and review to a
