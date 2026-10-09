@@ -195,5 +195,6 @@ The owner sets these one time. The files in the repository cannot set them.
 - Release immutability: on. The files and the tag of a published release cannot be changed.
   Thus a release with a defect gets a new version, not a correction.
 - Actions: the default permission of the workflow token is "read".
-- Codecov: the Codecov app is installed for this repository. The CI sends the reports with
-  OIDC, thus no token is stored as a secret.
+- Codecov: the CI sends the reports with OIDC, thus no token is stored as a secret. The
+  Codecov app must be installed for this repository: it writes the checks and the comment of
+  Codecov into a pull request.

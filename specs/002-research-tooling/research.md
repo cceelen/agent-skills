@@ -187,8 +187,10 @@ repository (read on 2026-10-09) unless a source is named.
 - **Reason**: direction of the owner, 2026-10-09: track the coverage on the long-lived branches
   and during pull requests. Facts: the repository is public; Codecov knows it but it is not
   active there yet; the action v7.1.1 supports OIDC.
-- **Part of the owner**: install the Codecov app for the repository one time.
-- **Open**: `fail_ci_if_error` is off until the first upload works. Then it is set to on.
+- **Result**: the first upload worked without a token and without a setup step: Codecov shows
+  92.8 percent for 7 files. Thus the CI now fails when an upload fails.
+- **Part of the owner**: install the Codecov app for the repository one time. Codecov needs it
+  to write its checks and its comment into a pull request.
 
 ## R13. Simplified Technical English in the programs
 

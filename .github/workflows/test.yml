@@ -33,7 +33,7 @@ jobs:
           files: coverage.xml
           disable_search: true
           use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
-          fail_ci_if_error: false
+          fail_ci_if_error: true
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
