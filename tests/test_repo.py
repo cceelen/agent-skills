@@ -3,6 +3,7 @@
 import doctest
 import importlib.util
 import json
+import os
 import pathlib
 import re
 import subprocess
@@ -115,6 +116,10 @@ def test_factory_programs_validate_themselves_and_meet_the_coverage_minimum(tmp_
         check=False,
         cwd=ROOT,
     )
+    # The CI gives a path for the report that it sends to Codecov.
+    if os.environ.get("COVERAGE_XML"):
+        xml = pathlib.Path(os.environ["COVERAGE_XML"]).resolve()
+        subprocess.run([*coverage, "xml", f"--data-file={combined}", "-o", str(xml)], check=True, cwd=ROOT)
     assert report.returncode == 0, "the coverage is below the minimum:\n" + report.stdout
 
 

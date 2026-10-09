@@ -236,6 +236,7 @@ examine all new code
 - [x] T060 Move each test of `tests/sota-research/` into its program as an example: short examples in the docstring of a function, scenarios in the table `__test__` at the end of the file
 - [x] T061 Remove the folder `tests/sota-research/` with its fixtures
 - [x] T062 In `tests/test_repo.py`: run each program of `factory/` with `--selftest` under coverage, fail below the minimum of `pyproject.toml` (90 percent, with branches), and accept an artifact whose programs validate themselves in place of a folder `tests/<name>/`
+- [x] T064 Send the coverage report of each branch and each pull request to Codecov from `.github/workflows/test.yml` with OIDC, and set the rules for a change in `codecov.yml`: the project must not lose more than one point, and the lines of a pull request need 90 percent
 - [x] T063 Add `coverage` to the development group in `pyproject.toml`, and write the rule for tests into `AGENTS.md`
 
 ---

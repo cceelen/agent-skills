@@ -1,0 +1,29 @@
+# Codecov tracks the coverage of the programs in factory/ on each branch and each pull request.
+# The CI sends the report (.github/workflows/test.yml). The minimum for a commit is in
+# pyproject.toml; these rules compare a change with its base.
+codecov:
+  branch: main
+  require_ci_to_pass: true
+
+coverage:
+  precision: 1
+  round: down
+  range: "80...100"
+  status:
+    # The coverage of the whole project must not decrease by more than one point.
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    # The lines that a pull request adds or changes need this coverage.
+    patch:
+      default:
+        target: 90%
+
+comment:
+  layout: "condensed_header, diff, files"
+  behavior: default
+  require_changes: false
+
+ignore:
+  - "tests/**"

@@ -177,6 +177,19 @@ repository (read on 2026-10-09) unless a source is named.
   real network read of one page.
 - **This supersedes** the folder `tests/sota-research/` of the plan.
 
+## R17. Coverage tracking with Codecov
+
+- **Decision**: the job for Python 3.14 writes `coverage.xml` and sends it to Codecov with the
+  action `codecov/codecov-action`, pinned by its commit. The upload uses OIDC; no token is
+  stored. The workflow runs on each push and each pull request, thus on `main`, on each
+  specification branch and on each working branch. `codecov.yml` sets two checks for a pull
+  request: the project must not lose more than one point, and the added lines need 90 percent.
+- **Reason**: direction of the owner, 2026-10-09: track the coverage on the long-lived branches
+  and during pull requests. Facts: the repository is public; Codecov knows it but it is not
+  active there yet; the action v7.1.1 supports OIDC.
+- **Part of the owner**: install the Codecov app for the repository one time.
+- **Open**: `fail_ci_if_error` is off until the first upload works. Then it is set to on.
+
 ## R13. Simplified Technical English in the programs
 
 - **Decision**: each program keeps its messages in one table at the top of the file. A test

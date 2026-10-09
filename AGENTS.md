@@ -107,6 +107,8 @@ Run the two commands before each commit. The two commands must pass.
   examples use in a Python file beside the program, not in a fixture folder.
 - `tests/test_repo.py` runs each program of `factory/` with `--selftest` under coverage. The
   coverage must be at or above the minimum in `pyproject.toml`. Ruff examines each new file.
+- The CI sends the coverage of each branch and each pull request to Codecov. The rules for a
+  change are in `codecov.yml`: the lines that a pull request adds need a coverage of 90 percent.
 - The tests must not use the network. For a skill that has test files, put the input data in
   `tests/<name>/fixture/`.
 - If you change the scoring of `library-vetting`, update the expected values in the test and
@@ -193,3 +195,5 @@ The owner sets these one time. The files in the repository cannot set them.
 - Release immutability: on. The files and the tag of a published release cannot be changed.
   Thus a release with a defect gets a new version, not a correction.
 - Actions: the default permission of the workflow token is "read".
+- Codecov: the Codecov app is installed for this repository. The CI sends the reports with
+  OIDC, thus no token is stored as a secret.

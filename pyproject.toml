@@ -27,6 +27,8 @@ testpaths = ["tests"]
 [tool.coverage.run]
 branch = true
 source = ["factory"]
+# Paths relative to the root of the repository: the report for Codecov must match the files.
+relative_files = true
 
 [tool.coverage.report]
 fail_under = 90

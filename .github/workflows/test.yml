@@ -6,6 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # the upload to Codecov proves its origin with OIDC; no token is stored
     strategy:
       fail-fast: false
       matrix:
@@ -20,6 +23,17 @@ jobs:
         run: uv run --python 3.9 --no-project --with pytest==8.4.2 pytest -q
       - if: matrix.python != '3.9'
         run: uv run --python ${{ matrix.python }} pytest -q
+        env:
+          COVERAGE_XML: coverage.xml
+      # Only the newest Python measures the coverage. A pull request from a fork has no OIDC
+      # token; Codecov accepts its report without one, because the repository is public.
+      - if: matrix.python == '3.14'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          files: coverage.xml
+          disable_search: true
+          use_oidc: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork) }}
+          fail_ci_if_error: false
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
