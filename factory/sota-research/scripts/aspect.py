@@ -163,9 +163,12 @@ def item_ids(cell):
 
 
 def level_of(cell):
-    """(level, dimension) of a Level cell. The level is 1, 2, 3, "pending", "not admitted" or None."""
+    """(level, dimension) of a Level cell.
+
+    The level is 1, 2, 3, "pending", "not admitted", "retired", or None for a cell that is wrong.
+    """
     cell = (cell or "").strip()
-    if cell in ("pending", "not admitted"):
+    if cell in ("pending", "not admitted", "retired"):
         return cell, None
     m = re.fullmatch(r"([123])(?:\s*,\s*(\S.*))?", cell)
     return (int(m.group(1)), m.group(2)) if m else (None, None)

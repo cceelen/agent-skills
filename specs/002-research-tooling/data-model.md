@@ -16,22 +16,23 @@ data below. No program writes `spec.md` except `place.py`, which fills the Level
 | 5 Skill set | name, target folder, goal, reads first, applies, delegates, stops when; rows of implementation skills | name obeys the rule for a skill name |
 | 6 Watch list | signal, where, cadence | one row or more |
 | 7 Decisions | date, decision, reason, revisit when | each row has a date |
-| 8 Glossary | term, meaning here, other meanings | each cell is filled |
+| 8 Glossary | term, meaning here, other meanings | term and meaning are filled |
 
 ### Checklist item
 
 | Field | Values | Rule |
 |---|---|---|
-| id | `C-` and a number | unique; with `--previous`: the same id has the same item, and a retired id is not in use |
+| id | `C-` and a number | unique; with `--previous`: an item of the earlier revision is still present (a retired item keeps its row with the level `retired`), a retired id is not in use again, and an id with a changed text is listed for judgement |
 | item | one sentence | names no product of the word list of the aspect |
 | why | text | names the risk that the item answers |
-| level | `1`, or `2, <dimension>`, or `3, <dimension>`, or `pending`, or `not admitted` | the dimension is one of section 1; the renderer leaves out an item that is `not admitted` |
+| level | `1`, or `2, <dimension>`, or `3, <dimension>`, or `pending`, or `not admitted`, or `retired` | the dimension is one of section 1; the renderer leaves out an item that is `not admitted` |
 | admitted by | `authority (n)`, `practice`, `own rule (<principle>)`, with an optional `, vetting pending` | |
 | check | a check, or `judgement` | not empty |
 | source | one or more of `S-nn <unit>` or `constitution <principle>` | each id is known; each cited source has an evidence row that names the item |
 
-An item **rests on** a source when it cites it. The check reports an item whose sources are all
-read `no`, or all independent and not confirmed.
+An item **rests on** a source when it cites it. The check fails for an item whose sources are
+all read `no`, or all independent and rejected. An item whose sources are all independent and
+not confirmed yet is listed under "what remains": only the owner can end that state.
 
 ## Evidence record (`evidence.md`)
 
