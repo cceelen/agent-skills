@@ -50,10 +50,10 @@ phase. The branch is merged as a whole into `002-research-tooling`. One delivery
 
 **Purpose**: the shared reader and the base fixture. Each story needs them.
 
-- [ ] T006 Create the fixture `tests/sota-research/fixture/good/` with `spec.md`, `evidence.md` and `vetting.md`: a small aspect specification made from the template, with 4 sources (one `standard`, one `research`, two `independent`), 5 checklist items, 2 risk dimensions, `**Accepted**: A. Person, 2026-01-15`, and no rule of `data-model.md` broken
-- [ ] T007 Write `tests/sota-research/test_aspect.py`: reading the fixture `good` gives the head fields, the fields of section 1, the rows of each table of `data-model.md` by header name, and the block of section 5; a cell with an escaped pipe is one cell; a missing file gives a clear error
-- [ ] T008 Implement `factory/sota-research/scripts/aspect.py`: `load(folder)` returns plain dictionaries and lists for `spec.md`, `evidence.md` and `vetting.md` (absent files give empty data); sections are found by their number, tables by their header row; each row keeps its line number; a function writes one changed cell back without a change to any other byte of the file
-- [ ] T009 [P] Write `tests/sota-research/test_messages.py`: for each program in `factory/sota-research/scripts/`, each sentence in `MESSAGES` has a maximum of 25 words; no file in `prompts/` or `agent-templates/` or `SKILL.md` contains a model name of the table in `scripts/models.py`
+- [x] T006 Create the fixture `tests/sota-research/fixture/good/` with `spec.md`, `evidence.md` and `vetting.md`: a small aspect specification made from the template, with 4 sources (one `standard`, one `research`, two `independent`), 5 checklist items, 2 risk dimensions, `**Accepted**: A. Person, 2026-01-15`, and no rule of `data-model.md` broken
+- [x] T007 Write `tests/sota-research/test_aspect.py`: reading the fixture `good` gives the head fields, the fields of section 1, the rows of each table of `data-model.md` by header name, and the block of section 5; a cell with an escaped pipe is one cell; a missing file gives a clear error
+- [x] T008 Implement `factory/sota-research/scripts/aspect.py`: `load(folder)` returns plain dictionaries and lists for `spec.md`, `evidence.md` and `vetting.md` (absent files give empty data); sections are found by their number, tables by their header row; each row keeps its line number; a function writes one changed cell back without a change to any other byte of the file
+- [x] T009 [P] Write `tests/sota-research/test_messages.py`: for each program in `factory/sota-research/scripts/`, each sentence in `MESSAGES` has a maximum of 25 words; no file in `prompts/` or `agent-templates/` or `SKILL.md` contains a model name of the table in `scripts/models.py`
 
 **Checkpoint**: `uv run pytest tests/sota-research` passes.
 

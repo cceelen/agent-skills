@@ -8,7 +8,7 @@ data below. No program writes `spec.md` except `place.py`, which fills the Level
 | Part | Fields | Rules that the check applies |
 |---|---|---|
 | Head | branch, research date, supersedes, accepted | accepted is a person and a date, or `pending` |
-| 1 Aspect | aspect, field, contexts, risk dimensions, boundaries, agreed on | each field is filled; agreed on has a date; each risk dimension has a name and a question |
+| 1 Aspect | aspect, field, contexts, risk dimensions, boundaries, agreed on | each field is filled; agreed on has a date; each risk dimension is one line below the field, in the form `` - `name`: question and opinion `` |
 | 2 Sources | id, source, issuer, version or date, class, license, read, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
@@ -25,7 +25,7 @@ data below. No program writes `spec.md` except `place.py`, which fills the Level
 | id | `C-` and a number | unique; with `--previous`: the same id has the same item, and a retired id is not in use |
 | item | one sentence | names no product of the word list of the aspect |
 | why | text | names the risk that the item answers |
-| level | `1`, or `2, <dimension>`, or `3, <dimension>`, or `pending` | the dimension is one of section 1 |
+| level | `1`, or `2, <dimension>`, or `3, <dimension>`, or `pending`, or `not admitted` | the dimension is one of section 1; the renderer leaves out an item that is `not admitted` |
 | admitted by | `authority (n)`, `practice`, `own rule (<principle>)`, with an optional `, vetting pending` | |
 | check | a check, or `judgement` | not empty |
 | source | one or more of `S-nn <unit>` or `constitution <principle>` | each id is known; each cited source has an evidence row that names the item |
