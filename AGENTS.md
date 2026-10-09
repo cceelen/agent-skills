@@ -20,6 +20,8 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 | `hooks/` | The hooks of the plugin. A hook puts the rules into the context of a session. |
 | `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
 
+To distil an aspect, read `factory/sota-research/SKILL.md` and do its steps.
+
 Each skill has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The agent
 files that wrap a recipe skill for one agent product are templates inside the skill. Do not
 edit a rendered recipe skill by hand: change its specification and render it again. The layout
@@ -84,7 +86,10 @@ Run the two commands before each commit. The two commands must pass.
 
 - Write helper software in Python. Do not write it in a shell language. Prefer a declarative
   tool where one exists.
-- Use Python 3.9 or later, and only the standard library.
+- For a skill that users install, use Python 3.9 or later, and only the standard library.
+- For the tooling in `factory/`, use the latest stable Python and only the standard library.
+  Declare the version in the script header of each program. Run a program with `uv run`, and
+  a tool with `uvx` or `uv run`.
 - The tools for development (`pytest`, `ruff`, `pre-commit`) need Python 3.10 or later. The CI
   runs the tests of the programs on Python 3.9 also.
 - A program must not stop when the network is not available. It must record the error and

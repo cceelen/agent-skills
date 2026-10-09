@@ -37,12 +37,12 @@ phase. The branch is merged as a whole into `002-research-tooling`. One delivery
 
 **Purpose**: the folder of the tooling and the rules that let it exist on `main`
 
-- [ ] T001 Create `factory/sota-research/` with the folders `scripts/`, `references/`, `prompts/`, `agent-templates/`, and a first `factory/sota-research/SKILL.md` with front matter (`name: sota-research`, a `description` that says what it does and when to use it) and one paragraph that points at `references/procedure.md`
-- [ ] T002 [P] Add `"factory"` to `ARTIFACT_TYPES` in `tests/test_repo.py`, and make `test_skill_layout` run for the folders in `factory/` also
-- [ ] T003 [P] Create `docs/sota-research.md` in ASD-STE100 with the purpose of the tooling and one section for each program (filled by the stories)
-- [ ] T004 [P] Add to `AGENTS.md`: in the section "Structure", one sentence that tells a session to read `factory/sota-research/SKILL.md` to distil an aspect; in the section "Rules for the programs", that the programs in `factory/` use the latest stable Python, declare it in their script header and run with `uv run`, and that the rule for Python 3.9 applies to the skills that users install
-- [ ] T050 [P] Create `tests/sota-research/conftest.py` that skips the folder on a Python older than 3.14, and add `"3.14"` to the matrix of `.github/workflows/test.yml`
-- [ ] T005 Add the field `**Accepted**: [person and date, or pending]` to the head line, and the optional field `- **Target folder**: [folder, or leave out for skills/<name>/]` to the recipe skill block of section 5, in `.specify/templates/overrides/aspect-spec-template.md` (formats: `contracts/files.md`)
+- [x] T001 Create `factory/sota-research/` with the folders `scripts/`, `references/`, `prompts/`, `agent-templates/`, and a first `factory/sota-research/SKILL.md` with front matter (`name: sota-research`, a `description` that says what it does and when to use it) and one paragraph that points at `references/procedure.md`
+- [x] T002 [P] Add `"factory"` to `ARTIFACT_TYPES` in `tests/test_repo.py`, and make `test_skill_layout` run for the folders in `factory/` also
+- [x] T003 [P] Create `docs/sota-research.md` in ASD-STE100 with the purpose of the tooling and one section for each program (filled by the stories)
+- [x] T004 [P] Add to `AGENTS.md`: in the section "Structure", one sentence that tells a session to read `factory/sota-research/SKILL.md` to distil an aspect; in the section "Rules for the programs", that the programs in `factory/` use the latest stable Python, declare it in their script header and run with `uv run`, and that the rule for Python 3.9 applies to the skills that users install
+- [x] T050 [P] Create `tests/sota-research/conftest.py` that skips the folder on a Python older than 3.14, and add `"3.14"` to the matrix of `.github/workflows/test.yml`
+- [x] T005 Add the field `**Accepted**: [person and date, or pending]` to the head line, and the optional field `- **Target folder**: [folder, or leave out for skills/<name>/]` to the recipe skill block of section 5, in `.specify/templates/overrides/aspect-spec-template.md` (formats: `contracts/files.md`)
 
 ---
 

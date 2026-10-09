@@ -1,6 +1,6 @@
 # Aspect specification: [MAJOR ASPECT]
 
-**Branch**: `[###-name]` | **Research date**: [DATE] | **Supersedes**: [the research date of the earlier revision, or none]
+**Branch**: `[###-name]` | **Research date**: [DATE] | **Supersedes**: [the research date of the earlier revision, or none] | **Accepted**: [the person and the date, or pending]
 
 Layer one of the factory: the exploration of one major aspect of software engineering. This
 specification is the source of the recipe for the aspect, a strategy and a generic checklist
@@ -16,10 +16,12 @@ file high level. It holds nothing that an agent can learn from the project or fr
 - **Contexts**: [the values of each dimension that change the strategy: use case; how the
   software reaches its users; exposure (who depends on the project); team; industry and
   regulation; data; forge; stack]
-- **Risk dimensions**: [the dimensions on which the risk of a project differs for this aspect,
-  one line each, with the question that finds it out and the opinion of the kit on the answer;
-  for example operative (can an operation be undone?), regulatory (is personal data
-  involved?), commercial (what is the data worth?)]
+- **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
+  One line each: the name, the question that finds it out, and the opinion of the kit on the
+  answer.
+  - `[operative]`: [Can an operation be undone? Opinion: ...]
+  - `[regulatory]`: [Is personal data involved? Opinion: ...]
+  - `[commercial]`: [What is the data worth? Opinion: ...]
 - **Boundaries**: [what neighbouring aspects own, one line each]
 - **Agreed with the owner on**: [DATE; what to build and for whom]
 
@@ -99,6 +101,7 @@ and reads a source in the turn in which it uses a value from it.
 
 ### Recipe skill and agent: [name]
 
+- **Target folder**: [the folder of the rendered skill; leave this line out for `skills/<name>/`]
 - **Goal**: [the state it brings a case to]
 - **Reads first**: [the contexts of section 1 it finds out; the risk analysis and the selection
   of the project]

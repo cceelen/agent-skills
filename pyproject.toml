@@ -24,6 +24,11 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 110
 
+# The tooling of the factory uses the latest stable Python.
+[tool.ruff.per-file-target-version]
+"factory/**" = "py314"
+"tests/sota-research/**" = "py314"
+
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 ignore = ["UP015"]

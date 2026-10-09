@@ -10,11 +10,12 @@ import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 # The folders that hold installable artifacts. AGENTS.md defines them.
-ARTIFACT_TYPES = ("skills",)
+ARTIFACT_TYPES = ("skills", "factory")
 ARTIFACTS = sorted(
     p for kind in ARTIFACT_TYPES if (ROOT / kind).is_dir() for p in (ROOT / kind).iterdir() if p.is_dir()
 )
-SKILLS = [p for p in ARTIFACTS if p.parent.name == "skills"]
+# The tooling of the factory has the layout of a skill.
+SKILLS = ARTIFACTS
 
 
 @pytest.mark.parametrize("artifact", ARTIFACTS, ids=lambda p: f"{p.parent.name}/{p.name}")
@@ -24,7 +25,7 @@ def test_artifact_has_documentation_and_tests(artifact):
     assert (ROOT / "tests" / artifact.name).is_dir(), "each artifact has tests in tests/<name>/"
 
 
-@pytest.mark.parametrize("skill", SKILLS, ids=lambda p: p.name)
+@pytest.mark.parametrize("skill", SKILLS, ids=lambda p: f"{p.parent.name}/{p.name}")
 def test_skill_layout(skill):
     text = (skill / "SKILL.md").read_text()
     m = re.match(r"---\n(.*?)\n---\n", text, re.S)
