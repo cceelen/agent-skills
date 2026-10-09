@@ -13,7 +13,8 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 
 | Folder | Contents |
 |---|---|
-| `specs/<number>-<name>/` | One specification. An aspect specification is the source of a recipe; a product specification builds implementation skills and helper software. |
+| `specs/<number>-<name>/` | One specification. An aspect specification is the source of a recipe; a product specification builds implementation skills and helper software. This folder is only on the branch of its specification, not on `main`. |
+| `factory/<name>/` | The tooling of the factory, in the layout of a skill. Users do not install it. |
 | `skills/<name>/` | One skill. A recipe skill is rendered from its aspect specification. An implementation skill carries one product. |
 | `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
 
@@ -116,8 +117,24 @@ Write the files for the user in ASD-STE100 Simplified Technical English. These f
 Use a version number of the form `major.minor.patch`. Increase the major number when a change
 makes earlier reports not comparable.
 
-This repository uses trunk-based development. There is no release branch. Each change is a
-short-lived branch and a pull request into `main`. A release is a tag on `main`.
+This repository uses trunk-based development. There is no release branch. A release is a tag
+on `main`.
+
+## Branches
+
+- `main` holds the machinery and the delivered skills only: `factory/`, `.specify/`, `skills/`,
+  their documentation, their tests and the files of the repository.
+- Each specification has one branch with the name of its folder, for example
+  `001-sota-research`. The branch holds `specs/<number>-<name>/` with its evidence and its
+  research records. It stays for the life of the specification. Do not merge it into `main`.
+- One Spec Kit step is one short-lived branch and one pull request into the branch of its
+  specification.
+- A delivery is a short-lived branch from `main` and a pull request into `main`. It carries
+  only machinery or delivered skills. A rendered recipe skill records the branch and the
+  commit of the specification that it was rendered from.
+- Merge `main` into the branch of a specification to get new machinery.
+- To number a new specification, use the highest number of the specification branches plus
+  one. The folder `specs/` on `main` is empty.
 
 Procedure for a release:
 
