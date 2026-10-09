@@ -256,6 +256,19 @@ to add the tests that are missing
 
 ---
 
+## Phase 12: First trial of phase 1
+
+**Purpose**: a new agent session did phase 1 of the procedure for the aspect DevSecOps, with a
+simulated owner. This phase corrects what the trial found.
+
+- [x] T071 Let an agent that knows only `factory/sota-research/SKILL.md` do "Before the first run" and phase 1 in an isolated copy of the repository, and collect its notes on the procedure
+- [x] T072 Give `factory/sota-research/scripts/check.py` the option `--scope`, which examines only the head line and section 1: in phase 1 the other sections are empty and failed the check
+- [x] T073 Complete phase 1 in `factory/sota-research/references/procedure.md`: settle the short name, the field and "for whom" with the owner; find the next number from all branches, local and remote; stop if `main` does not have the tooling; write `pending` for the research date; run the check with `--scope`; show section 1 to the owner and stop; commit and push after the agreement
+- [x] T074 Add `tests/conftest.py`, which removes the git variables of a hook from the environment of the tests: in a commit inside a worktree, two tests of `library-vetting` wrote into the index of the repository
+- [ ] T075 Decide with the owner if the kit keeps a list of candidate aspects, so that the first question of phase 1 has a good recommendation
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

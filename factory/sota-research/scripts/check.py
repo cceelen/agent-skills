@@ -6,11 +6,14 @@
 """Check of one aspect specification and its evidence record. Standard library only.
 
   check.py SPEC [--previous FILE] [--words FILE] [--json]
+  check.py SPEC --scope
 
   SPEC             the folder with spec.md, evidence.md and, if present, vetting.md
   --previous FILE  an earlier revision of spec.md, for the check of stable identifiers
   --words FILE     the product words of the aspect, one in each line; an item must not use one
   --json           print one JSON object in place of the text report
+  --scope          check only the head line and section 1. Use this in phase 1, when the owner
+                   and the agent settle what to build and the other sections are empty.
 
 The report lists each failing rule with its place, then what remains. Result code 0: no rule
 fails. Result code 1: a rule fails. Result code 2: the input cannot be read. Pending levels,
@@ -66,6 +69,7 @@ MESSAGES = {
     "skill-field-empty": "The field '{0}' of the recipe skill in section 5 is empty.",
     "skill-refers-to-section": "The field '{0}' of the recipe skill refers to a section of spec.md.",
     "no-failure": "No check fails.",
+    "scope-only": "Only the head line and section 1 were checked. The other sections wait for the research.",
     "failures": "Failing checks: {0}.",
     "remains-head": "What remains:",
     "remains-levels": "Levels that are pending: {0}.",
@@ -687,6 +691,29 @@ def report(data, found, remains, previous_given):
     return "\n".join(lines)
 
 
+def scope_report(data):
+    """The report of phase 1: only the head line and section 1, before the research.
+
+    The other sections of the sample have a defect here. The scope is correct, so nothing fails.
+
+    >>> import sample
+    >>> print(scope_report(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |"))))
+    No check fails.
+    Only the head line and section 1 were checked. The other sections wait for the research.
+    >>> old = "- **Boundaries**: the recovery of a complete site belongs to a different aspect."
+    >>> print(scope_report(sample.load(("spec.md", old, "- **Boundaries**:"))))
+    FAIL aspect-field-empty spec.md:16: The field 'boundaries' of section 1 is empty.
+    Failing checks: 1.
+    Only the head line and section 1 were checked. The other sections wait for the research.
+    """
+    found = sorted(check_head_and_aspect(data), key=lambda f: (f["line"], f["rule"], f["id"]))
+    lines = [
+        f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
+    ]
+    lines.append(MESSAGES["failures"].format(len(found)) if found else MESSAGES["no-failure"])
+    return "\n".join([*lines, MESSAGES["scope-only"]])
+
+
 def option(args, flag):
     """Take an option and its value out of the arguments. Returns the value, or None.
 
@@ -739,6 +766,15 @@ def main(argv=None):
     >>> code, brief(result["findings"]), result["remains"]["changed"], result["previous"]
     (1, [('product-word', 'C-05')], ['C-02'], True)
 
+    --scope checks only the head line and section 1, for phase 1.
+
+    >>> code, out, _ = sample.run(main, bad, "--scope")
+    >>> code, out.splitlines()[0]
+    (0, 'No check fails.')
+    >>> no_field = sample.folder(("spec.md", " | **Accepted**: A. Person, 2026-01-15", ""))
+    >>> sample.run(main, no_field, "--scope")[0]
+    1
+
     Input that cannot be read gives the result code 2. No argument prints the usage text.
 
     >>> import tempfile
@@ -771,6 +807,9 @@ def main(argv=None):
     except (aspect.Unreadable, OSError) as e:
         print(MESSAGES["unreadable"].format(e), file=sys.stderr)
         sys.exit(2)
+    if "--scope" in args:
+        print(scope_report(data))
+        sys.exit(1 if check_head_and_aspect(data) else 0)
     found, remains = run_checks(data, previous_rows, words)
     if as_json:
         result = {

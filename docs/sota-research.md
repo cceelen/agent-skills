@@ -90,6 +90,8 @@ uv run factory/sota-research/scripts/check.py specs/<number>-<name> --previous p
 To find product names in the checklist, write the names into a file, one in each line. Then
 use `--words <file>`. To get the report as JSON, use `--json`.
 
+In phase 1 only the head line and section 1 are written. To check only these, use `--scope`.
+
 ## Render a recipe skill
 
 Use `render.py` after the owner accepted an aspect specification. The owner accepts it in the

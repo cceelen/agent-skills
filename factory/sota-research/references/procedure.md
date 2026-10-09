@@ -5,9 +5,10 @@ rendered recipe skill. It has four phases. A person, the owner, is in the loop: 
 decides what to build, confirms the sources, corrects the answers and accepts the result.
 
 The programs are in `scripts/`. Run each program with `uv run` from the root of the
-repository. A program without an argument prints its usage text. Result code 0: nothing fails
-or remains. Result code 1: something fails or remains. Result code 2: the input cannot be
-read.
+repository; the folder `scripts/` is `factory/sota-research/scripts/`. A program without an
+argument prints its usage text. Result code 0: nothing fails or remains. Result code 1:
+something fails or remains. Result code 2: the input cannot be read, or the arguments are
+wrong.
 
 Rules for all phases:
 
@@ -22,20 +23,49 @@ Rules for all phases:
 
 1. Run `uv run factory/sota-research/scripts/models.py apply`. It writes the agent files of
    the two readers for your agent product. The readers have web tools only.
-2. If the program reports that the agent product has no agent files, stop. Tell the owner
-   that the tools of a reader cannot be limited in this agent product. Do not read a source.
+2. If the output has `"writes_agent_files": false` and the result code is 1, the agent product
+   has no agent files. Stop. Tell the owner that the tools of a reader cannot be limited in
+   this agent product. Do not read a source.
 
 ## Phase 1: what to build
 
-1. Settle with the owner, in dialogue: the aspect, its contexts, its risk dimensions and its
-   boundaries. Ask one question at a time, and give your recommendation with each question.
-2. Find the next number: the highest number of the specification branches plus one
-   (`git branch -r`). Make the branch `<number>-<name>` from `main`.
-3. Copy `.specify/templates/overrides/aspect-spec-template.md` to
-   `specs/<number>-<name>/spec.md`. Fill the head line and section 1. Write the date of the
-   agreement into "Agreed with the owner on".
-4. Do not search before the owner agreed to section 1. If the owner changes the scope later,
-   record the change with its reason and date in section 7.
+Do not search and do not read a source in this phase.
+
+1. Settle these points with the owner, in dialogue. Ask one question at a time, and give your
+   recommendation with each question.
+   - The aspect, in one line. If the owner has no aspect in mind, propose one that the kit
+     does not have: read the boundaries of the specifications that exist.
+   - The short name of the aspect, in lowercase letters, digits and hyphens. It becomes the
+     name of the branch, of the folder and of the recipe skill.
+   - The field and the disciplines of the aspect.
+   - The contexts: the values of each dimension that change the strategy.
+   - The risk dimensions: for each one a name, the question that finds it out, and the opinion
+     of the kit on the answer.
+   - The boundaries: what each neighbouring aspect owns, and what this aspect keeps.
+   - For whom the recipe is built first.
+2. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
+   the owner: the tooling must be delivered to `main` first.
+3. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
+   highest number at the start of a branch name, and add one. A step branch such as
+   `002-name-plan` counts also, thus the number is never used two times.
+4. Make the branch `<number>-<name>` from `main`.
+5. Copy `.specify/templates/overrides/aspect-spec-template.md` to
+   `specs/<number>-<name>/spec.md`. Fill the head line and section 1 only.
+   - In the head line, write `pending` for "Research date" and for "Accepted", and `none` for
+     "Supersedes" if no earlier revision exists.
+   - Write one sub-item for each context dimension, each risk dimension and each boundary, in
+     the form `` - `name`: text ``.
+   - Write the date of today and "for whom" into "Agreed with the owner on".
+6. Run the check for this phase. It examines only the head line and section 1:
+   `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
+   Correct each line that starts with `FAIL`.
+7. Stop. Show the owner section 1 as it is written, and ask if the owner agrees to it. Tell
+   the owner each point that you filled without a question.
+8. After the owner agreed, commit `spec.md` on the branch and push the branch. This first
+   commit makes the branch of the specification. Each later step is a pull request into it.
+
+If the owner changes the scope later, record the change with its reason and its date in
+section 7.
 
 ## Phase 2: research
 
@@ -116,6 +146,7 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 ```
 
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
+- In phase 1, add `--scope`: the other sections are empty until the research.
 - Give the list "What remains" to the owner as it is.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.

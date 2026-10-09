@@ -9,6 +9,7 @@ cannot be read. The output is sorted and holds no current time.
 
 ```text
 check.py SPEC [--previous FILE] [--words FILE] [--json]
+check.py SPEC --scope
 ```
 
 - Reads `SPEC/spec.md`, `SPEC/evidence.md` and, when present, `SPEC/vetting.md`.
@@ -19,6 +20,7 @@ check.py SPEC [--previous FILE] [--words FILE] [--json]
   wrong. Then the summary: failing checks, pending levels, pending vettings, items that need
   judgement, and whether the specification is accepted.
 - `--json`: the same content as one JSON object with sorted keys.
+- `--scope`: examines only the head line and section 1, for phase 1. The report says so.
 - Result code `1` when a check fails. Pending levels, pending vettings and a missing
   acceptance are listed as "remains" and do not fail the check.
 
