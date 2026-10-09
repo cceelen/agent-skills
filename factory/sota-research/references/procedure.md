@@ -17,3 +17,16 @@ uv run scripts/check.py <folder of the specification>
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.
 - Keep the row of an item that is no longer valid, and set its level to `retired`.
+
+## The rendering and the delivery
+
+Render only after the owner wrote the acceptance into the head line of `spec.md`.
+
+1. Commit the specification on its branch. Get the commit: `git rev-parse --short HEAD`.
+2. Render from the root of the repository:
+   `uv run factory/sota-research/scripts/render.py <folder of the specification> --commit <commit>`
+3. Commit the rendered files on the branch of the specification.
+4. Make a branch from `main`. Get only the rendered files from the branch of the
+   specification with `git checkout <branch> -- <paths>`. Open a pull request into `main`.
+
+Do not edit a rendered file. If `render.py --check` reports a difference, render again.

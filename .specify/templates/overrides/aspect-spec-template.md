@@ -97,7 +97,9 @@ a project is the list of adopted items whose check fails.
 
 What the recipe skill and its agent wrapper do, and which implementation skills layer two must
 work out. Each skill of the set holds the rules of the kit, `rules/evidence-before-action.md`,
-and reads a source in the turn in which it uses a value from it.
+and reads a source in the turn in which it uses a value from it. The renderer copies the fields
+of the recipe skill into the skill as they are. Thus write them for the reader of the skill,
+and do not refer to a section of this specification.
 
 ### Recipe skill and agent: [name]
 

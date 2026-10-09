@@ -65,6 +65,18 @@ DEFECTS = {
         "### Where the sources disagree",
         "",
     ),
+    "skill-field-empty": (
+        "spec.md",
+        "- **Applies**: the order of the work below; it judges C-04.",
+        "- **Applies**:",
+        "",
+    ),
+    "skill-refers-to-section": (
+        "spec.md",
+        "- **Applies**: the order of the work below; it judges C-04.",
+        "- **Applies**: the strategy of section 3; it judges C-04.",
+        "",
+    ),
     "glossary-cell-empty": ("spec.md", "| a copy that is kept to make lost data again |", "| |", "backup"),
     "decision-without-date": (
         "spec.md",

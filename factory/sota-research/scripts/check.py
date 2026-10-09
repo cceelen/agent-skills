@@ -62,6 +62,8 @@ MESSAGES = {
     "product-word": "The item uses the product word '{0}'.",
     "id-removed": "The earlier revision has this item. Keep the row and set its level to 'retired'.",
     "id-reused": "The earlier revision retired this identifier. Use a new identifier.",
+    "skill-field-empty": "The field '{0}' of the recipe skill in section 5 is empty.",
+    "skill-refers-to-section": "The field '{0}' of the recipe skill refers to a section of spec.md.",
     "no-failure": "No check fails.",
     "failures": "Failing checks: {0}.",
     "remains-head": "What remains:",
@@ -220,6 +222,18 @@ def check_other_sections(data):
     return out
 
 
+def check_skill(data):
+    """The fields of the recipe skill go into the rendered skill as they are."""
+    out = []
+    for name in ("goal", "reads first", "applies", "delegates", "stops when"):
+        value = data["skill"].get(name)
+        if not value or not value["value"]:
+            out.append(finding("skill-field-empty", value or {}, "", name))
+        elif re.search(r"\bsection \d|\b\d\.\d\b", value["value"]):
+            out.append(finding("skill-refers-to-section", value, "", name))
+    return out
+
+
 def live_items(data):
     """The items that are not retired."""
     return [r for r in data["checklist"] if aspect.level_of(r.get("level"))[0] != "retired"]
@@ -284,6 +298,7 @@ def run_checks(data, previous_rows=None, words=()):
         + check_items(data)
         + check_evidence(data)
         + check_other_sections(data)
+        + check_skill(data)
         + support
         + check_words(data, words)
     )

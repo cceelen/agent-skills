@@ -101,18 +101,23 @@ committed skill differs (FR-006 to FR-010).
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US2] Create `tests/sota-research/fixture/not-accepted/` (a copy of `good` with `**Accepted**: pending`) and `tests/sota-research/fixture/target-folder/` (a copy with `- **Target folder**: \`factory/example/\`` in section 5)
-- [ ] T018 [US2] Write `tests/sota-research/test_render.py`: rendering `good` with `--commit 0000000 --out <tmp>` gives exactly the files of `tests/sota-research/fixture/good-rendered/`; each rendered file starts with the stamp of `contracts/files.md`; `SKILL.md` has the front matter and fewer than 500 lines; the checklist reference holds id, item, risk, level and check, and no Source cell; `not-accepted` and each defect fixture write nothing and have result code 1; `target-folder` writes into that folder; `--check` has result code 1 and names the file after one item changed; a word of the word list in the rendered text fails the rendering
+- [x] T017 [P] [US2] Create `tests/sota-research/fixture/not-accepted/` (a copy of `good` with `**Accepted**: pending`) and `tests/sota-research/fixture/target-folder/` (a copy with `- **Target folder**: \`factory/example/\`` in section 5)
+- [x] T018 [US2] Write `tests/sota-research/test_render.py`: rendering `good` with `--commit 0000000 --out <tmp>` gives exactly the files of `tests/sota-research/fixture/good-rendered/`; each rendered file starts with the stamp of `contracts/files.md`; `SKILL.md` has the front matter and fewer than 500 lines; the checklist reference holds id, item, risk, level and check, and no Source cell; `not-accepted` and each defect fixture write nothing and have result code 1; `target-folder` writes into that folder; `--check` has result code 1 and names the file after one item changed; a word of the word list in the rendered text fails the rendering
+
+Done differently than T017 says: the tests make the copies `not-accepted` and `target-folder`
+from the fixture `good` at run time. One rule was added to the check: a field of the recipe
+skill in section 5 must not refer to a section of the specification, because the renderer
+copies it into the skill.
 
 ### Implementation for User Story 2
 
-- [ ] T019 [US2] Implement the rendering of `SKILL.md` in `factory/sota-research/scripts/render.py`: front matter (`name` from section 5, `description` from the aspect and the goal), the stamp, the goals (3.1), the order of the work (3.2), the decisions by context (3.3), the handling of disagreement (3.4, without the positions), how to lead the risk analysis along the risk dimensions of section 1 with the opinion of the kit (FR-008), how to show and change the selection in `.agents/kit/<aspect>.md` (FR-008a, format of `contracts/files.md`), what to delegate, when to stop
-- [ ] T020 [US2] Implement the rendering of `references/checklist.md`, `agent-templates/<name>.md` and `docs/<name>.md` in `factory/sota-research/scripts/render.py`; the documentation is in ASD-STE100
-- [ ] T021 [US2] Implement the command line of `render.py` as in `contracts/programs.md`: run the rules of `check.py` first; refuse when a check fails or the acceptance is missing; `--commit`, `--branch`, `--out`, `--check`; the target folder from section 5 or `skills/<name>/`
-- [ ] T022 [US2] Create `tests/sota-research/fixture/good-rendered/` from the reviewed output of T019 to T021
-- [ ] T023 [US2] Write `tests/sota-research/test_fresh.py`: for each `specs/*/spec.md` in the repository that is an aspect specification and is accepted, `render.py --check` passes; with no such file (the case on `main`) the test checks only that each skill with a stamp has a stamp of the right form
-- [ ] T024 [US2] In `tests/test_repo.py`, let a skill whose `SKILL.md` carries a stamp pass without a folder `tests/<name>/`: `test_fresh.py` covers it
-- [ ] T025 [US2] Fill the section for `render.py` in `docs/sota-research.md`, and add the delivery of a rendered skill to `factory/sota-research/references/procedure.md`: render on the branch of the specification, then carry only the rendered files to a branch from `main`
+- [x] T019 [US2] Implement the rendering of `SKILL.md` in `factory/sota-research/scripts/render.py`: front matter (`name` from section 5, `description` from the aspect and the goal), the stamp, the goals (3.1), the order of the work (3.2), the decisions by context (3.3), the handling of disagreement (3.4, without the positions), how to lead the risk analysis along the risk dimensions of section 1 with the opinion of the kit (FR-008), how to show and change the selection in `.agents/kit/<aspect>.md` (FR-008a, format of `contracts/files.md`), what to delegate, when to stop
+- [x] T020 [US2] Implement the rendering of `references/checklist.md`, `agent-templates/<name>.md` and `docs/<name>.md` in `factory/sota-research/scripts/render.py`; the documentation is in ASD-STE100
+- [x] T021 [US2] Implement the command line of `render.py` as in `contracts/programs.md`: run the rules of `check.py` first; refuse when a check fails or the acceptance is missing; `--commit`, `--branch`, `--out`, `--check`; the target folder from section 5 or `skills/<name>/`
+- [x] T022 [US2] Create `tests/sota-research/fixture/good-rendered/` from the reviewed output of T019 to T021
+- [x] T023 [US2] Write `tests/sota-research/test_fresh.py`: for each `specs/*/spec.md` in the repository that is an aspect specification and is accepted, `render.py --check` passes; with no such file (the case on `main`) the test checks only that each skill with a stamp has a stamp of the right form
+- [x] T024 [US2] In `tests/test_repo.py`, let a skill whose `SKILL.md` carries a stamp pass without a folder `tests/<name>/`: `test_fresh.py` covers it
+- [x] T025 [US2] Fill the section for `render.py` in `docs/sota-research.md`, and add the delivery of a rendered skill to `factory/sota-research/references/procedure.md`: render on the branch of the specification, then carry only the rendered files to a branch from `main`
 
 **Checkpoint**: commit the phase.
 

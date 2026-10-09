@@ -39,7 +39,7 @@ def test_tables_by_header_name():
 def test_skill_block_and_strategy():
     data = aspect.load(GOOD)
     assert data["skill_name"] == "backups"
-    assert data["skill"]["goal"]["value"].startswith("each record")
+    assert data["skill"]["goal"]["value"].startswith("Each record")
     assert "target folder" not in data["skill"]
     assert data["goals"].startswith("A lost record")
     assert data["order"].startswith("1. Find out")

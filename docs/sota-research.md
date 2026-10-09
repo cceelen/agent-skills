@@ -53,3 +53,31 @@ uv run factory/sota-research/scripts/check.py specs/<number>-<name> --previous p
 
 To find product names in the checklist, write the names into a file, one in each line. Then
 use `--words <file>`. To get the report as JSON, use `--json`.
+
+## Render a recipe skill
+
+Use `render.py` after the owner accepted an aspect specification. The owner accepts it in the
+head line of `spec.md`: `**Accepted**: <person>, <date>`.
+
+```text
+uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <commit>
+```
+
+- The program writes `SKILL.md`, `references/checklist.md` and one agent template into the
+  folder of the skill. It writes the documentation to `docs/<name>.md`.
+- The folder of the skill is `skills/<name>/`. A different folder comes from the field
+  `Target folder` in section 5 of the specification.
+- Each rendered file starts with a stamp: the branch, the commit and the digest of the
+  specification. Do not edit a rendered file. Change the specification and render it again.
+- The program renders nothing if a check fails or if the acceptance is missing.
+
+To find out if a rendered skill is current, use `--check`. The program then writes nothing and
+compares the files with a fresh rendering.
+
+To deliver a rendered skill, do these steps:
+
+1. Render the skill on the branch of the specification, and commit it there.
+2. Make a branch from `main`.
+3. Get only the rendered files from the branch of the specification:
+   `git checkout <branch of the specification> -- skills/<name> docs/<name>.md`
+4. Open a pull request into `main`.

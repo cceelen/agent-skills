@@ -64,12 +64,12 @@ A lost record can be made again in the time that the project agreed on.
 
 ### Recipe skill and agent: backups
 
-- **Goal**: each record that cannot be made again has a backup that was restored one time.
-- **Reads first**: the contexts of section 1; the risk analysis and the selection of the
-  project.
-- **Applies**: the strategy of section 3; it judges C-04.
-- **Delegates**: the making of a backup, to an implementation skill.
-- **Stops when**: the goal is reached, or a decision of 3.3 needs a person.
+- **Goal**: Each record that cannot be made again has a backup that was restored one time.
+- **Reads first**: the size of the data, who operates the software, and where the data is;
+  the selection of the project.
+- **Applies**: the order of the work below; it judges C-04.
+- **Delegates**: The making and the restore of a backup go to an implementation skill.
+- **Stops when**: the goal is reached, or a decision that depends on context needs a person.
 
 ### Implementation skills (layer two)
 
