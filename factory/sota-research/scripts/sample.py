@@ -30,12 +30,12 @@ A small specification for the tests of the tooling. Its sources are invented.
 - **Aspect**: backups of the data of a software project.
 - **Field and disciplines**: operations; it cuts across development and support.
 - **Contexts**: the size of the data; who operates the software; the place where the data
-  is.
+  is. (S-01 section 1)
 - **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
-  - `operative`: Can a lost record be made again? Opinion: if not, go past level 1.
-  - `regulatory`: Is personal data in the backup? Opinion: if yes, aim for level 3.
-- **Boundaries**: the recovery of a complete site belongs to a different aspect.
-- **Agreed with the owner on**: 2026-01-05; a recipe for small teams.
+  - `operative`: Can a lost record be made again? Opinion: if not, go past level 1. (S-02 section 4)
+  - `regulatory`: Is personal data in the backup? Opinion: if yes, aim for level 3. (S-01 section 5)
+- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)
+- **Agreed with the owner on**: 2026-01-05; a recipe for backups of project data.
 
 ## 2. Sources
 
@@ -123,7 +123,7 @@ EVIDENCE = """\
 
 | Source | What it contributes | Where | Supports | Read |
 |---|---|---|---|---|
-| S-01 | Make a backup of data that cannot be made again. Keep a copy in a second place. Use a program for it. | sections 2, 3, 5 | C-01, C-03, C-05; 3.3 frequency; 3.4 one copy | 2026-01-10 |
+| S-01 | Make a backup of data that cannot be made again. Keep a copy in a second place. Use a program for it. | sections 1, 2, 3, 5 | C-01, C-03, C-05; 3.3 frequency; 3.4 one copy | 2026-01-10 |
 | S-02 | Many backups fail at the restore. A restore test finds this. | abstract; section 4 | C-01, C-02; 3.4 one copy | 2026-01-10 |
 | S-03 | A written review after a drill finds errors that occur again. | "After the drill" | C-04 | 2026-01-10 |
 | S-04 | An example of a scheduled backup program. | README | C-05 | 2026-01-10 |

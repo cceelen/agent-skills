@@ -50,8 +50,8 @@ uv run factory/sota-research/scripts/check.py specs/001-sota-research
 One trial run with the owner on a small aspect, on a new specification branch:
 
 1. The session reads `factory/sota-research/SKILL.md`.
-2. The owner is asked for the aspect, its contexts, its risk dimensions and its boundaries
-   before the first search.
+2. The owner is asked only for the field and the thing to build before the first search. The
+   contexts, the risk dimensions and the boundaries come from the research.
 3. The readers run with web tools only.
 4. The run stops for the review. `check.py` reports no failing check, and "not accepted"
    remains.
@@ -67,4 +67,4 @@ Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
 |---|---|
 | All parts | 671 examples in 7 programs, 0 failed. Each line has an example; the coverage with branches is 99 percent. On Python 3.9 the examples are skipped and the other tests pass; that job stays until the migration to one Python version. |
 | The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
-| The research skill | Open. It needs the delivery to `main` and the owner (T044, T045). |
+| The research skill | Open. A first trial of phase 1 on 2026-10-09 was not valid: the scoping narrowed the aspect to one use case before the research, and the simulated owner added a use case. The specification, the procedure and the check were corrected. The research itself was not tried yet. |

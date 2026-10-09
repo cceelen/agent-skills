@@ -29,20 +29,19 @@ Rules for all phases:
 
 ## Phase 1: what to build
 
+Settle only the field and the thing to build. Do not narrow the aspect: do not ask for a use
+case, a first user, a reference project, contexts, risk dimensions or boundaries, and do not
+propose them. They come from the sources in phase 2, and the owner reviews them in phase 3. A
+use case is chosen only when the finished recipe is applied to a project.
+
 Do not search and do not read a source in this phase.
 
-1. Settle these points with the owner, in dialogue. Ask one question at a time, and give your
-   recommendation with each question.
-   - The aspect, in one line. If the owner has no aspect in mind, propose one that the kit
-     does not have: read the boundaries of the specifications that exist.
+1. Ask the owner which field and which thing to build. If the owner named them, do not ask
+   again. Settle only these points:
+   - The aspect, in one line, as wide as the owner states it.
+   - The field and the disciplines that the aspect covers.
    - The short name of the aspect, in lowercase letters, digits and hyphens. It becomes the
-     name of the branch, of the folder and of the recipe skill.
-   - The field and the disciplines of the aspect.
-   - The contexts: the values of each dimension that change the strategy.
-   - The risk dimensions: for each one a name, the question that finds it out, and the opinion
-     of the kit on the answer.
-   - The boundaries: what each neighbouring aspect owns, and what this aspect keeps.
-   - For whom the recipe is built first.
+     name of the branch, of the folder and of the recipe skill. Propose one.
 2. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
    the owner: the tooling must be delivered to `main` first.
 3. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
@@ -50,28 +49,30 @@ Do not search and do not read a source in this phase.
    `002-name-plan` counts also, thus the number is never used two times.
 4. Make the branch `<number>-<name>` from `main`.
 5. Copy `.specify/templates/overrides/aspect-spec-template.md` to
-   `specs/<number>-<name>/spec.md`. Fill the head line and section 1 only.
+   `specs/<number>-<name>/spec.md`. Fill the head line and the first three fields of section 1
+   only: "Aspect", "Field and disciplines" and "Agreed with the owner on".
    - In the head line, write `pending` for "Research date" and for "Accepted", and `none` for
      "Supersedes" if no earlier revision exists.
-   - Write one sub-item for each context dimension, each risk dimension and each boundary, in
-     the form `` - `name`: text ``.
-   - Write the date of today and "for whom" into "Agreed with the owner on".
-6. Run the check for this phase. It examines only the head line and section 1:
+   - Write the date of today, the field and the thing to build into "Agreed with the owner
+     on".
+   - Leave "Contexts", "Risk dimensions" and "Boundaries" as the template has them.
+6. Run the check for this phase:
    `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
    Correct each line that starts with `FAIL`.
-7. Stop. Show the owner section 1 as it is written, and ask if the owner agrees to it. Tell
-   the owner each point that you filled without a question.
-8. After the owner agreed, commit `spec.md` on the branch and push the branch. This first
+7. Tell the owner the three fields as they are written, and that the research starts now. If
+   the owner does not object, commit `spec.md` on the branch and push the branch. This first
    commit makes the branch of the specification. Each later step is a pull request into it.
 
-If the owner changes the scope later, record the change with its reason and its date in
-section 7.
+If the owner changes the field or the thing to build later, record the change with its reason
+and its date in section 7.
 
 ## Phase 2: research
 
 1. **List what exists.** The state of the art of most aspects is written down. Find the
    existing descriptions first: standards, frameworks of foundations, the documentation of
-   platform vendors, research, recognized books. Then find the practice sources.
+   platform vendors, research, recognized books. Then find the practice sources. Search for
+   the aspect as wide as the owner stated it. Do not search for one use case, one industry or
+   one product only.
 2. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
    `prompts/reader.md`. Start the readers in parallel. A reader returns text; you write the
    files.
@@ -80,6 +81,10 @@ section 7.
    `independent`. Mark a paid source that was read from its preview as `part`.
 4. **Vet** each independent source. See "The vetting of independent sources".
 5. **Distil.**
+   - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
+     risk dimensions with their question and the opinion of the kit, and the boundaries to
+     the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
+     range of contexts that the sources show, from a single maintainer to a company.
    - A statement that holds across contexts becomes a checklist item: one short sentence that
      names no product. Its "Why" is the risk that it answers.
    - A statement that depends on context becomes a decision in section 3.3.
@@ -104,12 +109,14 @@ section 7.
 
 Stop. A model does not accept a recipe. Give the owner, in this order:
 
-1. The strategy: the goals, the order of the work and the decisions that depend on context.
-2. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
-3. The points where the sources disagree, and how the recipe handles each.
-4. The independent sources with their signals and scores, for the confirmation.
-5. The list "What remains" of the check, as it is.
-6. What was not verified.
+1. The contexts, the risk dimensions and the boundaries that the research found, each with
+   its source. The owner sees them here for the first time and can correct each one.
+2. The strategy: the goals, the order of the work and the decisions that depend on context.
+3. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
+4. The points where the sources disagree, and how the recipe handles each.
+5. The independent sources with their signals and scores, for the confirmation.
+6. The list "What remains" of the check, as it is.
+7. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
 change an item. When the owner accepts, the owner's name and the date go into the field
@@ -146,7 +153,7 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 ```
 
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
-- In phase 1, add `--scope`: the other sections are empty until the research.
+- In phase 1, add `--scope`: it examines only what is settled before the research.
 - Give the list "What remains" to the owner as it is.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.

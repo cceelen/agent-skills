@@ -197,6 +197,21 @@ repository (read on 2026-10-09) unless a source is named.
 - **Part of the owner**: install the Codecov app for the repository one time. Codecov needs it
   to write its checks and its comment into a pull request.
 
+## R18. No narrowing before the research
+
+- **Decision**: phase 1 settles only the field and the thing to build. The contexts, the risk
+  dimensions and the boundaries of an aspect are findings of the research: each names its
+  source, and the owner sees them in the review. `check.py --scope` examines only what is
+  settled before the research.
+- **Reason**: direction of the owner, 2026-10-09, after a first trial of phase 1: the scoping
+  narrowed the aspect to one use case, two steps before the place where a use case belongs.
+  The kit aims at the global state of the art; a use case is chosen when a recipe is applied
+  to a project.
+- **What was wrong**: the specification 001 asked to confirm the aspect, its contexts and its
+  boundaries before the search (C-01), after the guidelines for systematic reviews. The
+  procedure and the template followed it, and the trial added a first user.
+- **This supersedes** the scope of phase 1 in R-rows above and the first trial.
+
 ## R13. Simplified Technical English in the programs
 
 - **Decision**: each program keeps its messages in one table at the top of the file. A test

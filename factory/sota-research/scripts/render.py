@@ -123,6 +123,17 @@ def table(header, rows):
     return "\n".join(lines) + "\n"
 
 
+def without_source(text):
+    """The text of a finding without the source at its end. A recipe names no source.
+
+    >>> without_source("Can it be undone? Opinion: if not, go past level 1. (S-02 section 4)")
+    'Can it be undone? Opinion: if not, go past level 1.'
+    >>> without_source("Is it public? (judgement)"), without_source("Text (with a note) only.")
+    ('Is it public?', 'Text (with a note) only.')
+    """
+    return re.sub(r"\s*\((?:S-\d+[^)]*|judgement)\)\s*$", "", text, flags=re.I)
+
+
 def field(data, name):
     """The value of one field of the recipe skill in section 5, or "".
 
@@ -199,7 +210,7 @@ def render_skill(data, name, mark):
     ['## Order of the work', '## What to delegate', '## When to stop']
     """
     title = data["title"]
-    dims = [[f"`{d['name']}`", d["text"]] for d in data["risk_dimensions"]]
+    dims = [[f"`{d['name']}`", without_source(d["text"])] for d in data["risk_dimensions"]]
     decisions = [
         [r.get("decision", ""), r.get("depends on", ""), r.get("options", "")]
         for r in data["context_decisions"]
@@ -340,7 +351,7 @@ def render_docs(data, name, mark):
     <BLANKLINE>
     <BLANKLINE>
     """
-    dims = [[f"`{d['name']}`", d["text"]] for d in data["risk_dimensions"]]
+    dims = [[f"`{d['name']}`", without_source(d["text"])] for d in data["risk_dimensions"]]
     counts = {}
     for row in rendered_items(data):
         level = aspect.level_of(row.get("level"))[0]

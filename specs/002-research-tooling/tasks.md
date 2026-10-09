@@ -265,7 +265,22 @@ simulated owner. This phase corrects what the trial found.
 - [x] T072 Give `factory/sota-research/scripts/check.py` the option `--scope`, which examines only the head line and section 1: in phase 1 the other sections are empty and failed the check
 - [x] T073 Complete phase 1 in `factory/sota-research/references/procedure.md`: settle the short name, the field and "for whom" with the owner; find the next number from all branches, local and remote; stop if `main` does not have the tooling; write `pending` for the research date; run the check with `--scope`; show section 1 to the owner and stop; commit and push after the agreement
 - [x] T074 Add `tests/conftest.py`, which removes the git variables of a hook from the environment of the tests: in a commit inside a worktree, two tests of `library-vetting` wrote into the index of the repository
-- [ ] T075 Decide with the owner if the kit keeps a list of candidate aspects, so that the first question of phase 1 has a good recommendation
+
+---
+
+## Phase 13: No narrowing before the research
+
+**Purpose**: direction of the owner, 2026-10-09: the trial of phase 12 was not valid. The
+scoping narrowed the aspect to one use case before the research, and the simulated owner added
+a use case that belongs two steps later. The narrowing was built into the specification.
+
+- [x] T076 In the specification 001 (pull request into its branch): settle only the field and the thing to build before the research; retire C-01 and add C-23; record the decision
+- [x] T077 In this specification: change FR-019 and add FR-019a; the contexts, the risk dimensions and the boundaries are findings of the research with a source each
+- [x] T078 In `.specify/templates/overrides/aspect-spec-template.md` and `.specify/memory/constitution.md`: divide section 1 into what is settled before the research and what the research finds
+- [x] T079 In `factory/sota-research/scripts/check.py`: `--scope` examines only the head line, the aspect, the field and the date of the agreement; the complete check needs a source or "judgement" for each context, risk dimension and boundary
+- [x] T080 In `factory/sota-research/scripts/render.py`: leave the source of a risk dimension out of the rendered skill
+- [x] T081 In `factory/sota-research/references/procedure.md`: phase 1 asks only for the field and the thing to build; phase 2 finds the rest in the sources; phase 3 shows it to the owner first
+- [ ] T082 Do the trial again for the aspect DevSecOps, through the research, with an owner who says only the field and the thing to build
 
 ---
 

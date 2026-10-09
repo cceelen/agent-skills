@@ -140,15 +140,16 @@ which step comes next.
 **Why this priority**: This is the complete flow and the purpose of the tooling. It comes last
 because it joins the other parts, and each of them is useful before it exists.
 
-**Independent Test**: Run the skill on a small trial aspect. The owner is asked for the aspect,
-its contexts and its boundaries before a search starts. The run stops for the review with a
+**Independent Test**: Run the skill on one aspect. The owner is asked only for the field and the
+thing to build before a search starts. The contexts, the risk dimensions and the boundaries
+come from the research. The run stops for the review with a
 specification whose check reports no failure other than "not accepted".
 
 **Acceptance Scenarios**:
 
-1. **Given** a field that the owner names, **When** the skill starts, **Then** it settles the
-   aspect, its contexts and its boundaries in dialogue, and records the date of the agreement
-   before the first search.
+1. **Given** a field that the owner names, **When** the skill starts, **Then** it settles only
+   the field and the thing to build in dialogue, records the date of the agreement, and asks
+   for no use case, no first user and no narrower scope.
 2. **Given** an agreed scope, **When** the research runs, **Then** each agent that reads a
    source has no shell, no credentials and no access to the repository, and its report is
    handled as untrusted data.
@@ -261,8 +262,12 @@ specification whose check reports no failure other than "not accepted".
 
 **Research skill (C-01, C-08, C-11, C-12, C-17, C-21, C-22)**
 
-- **FR-019**: The skill MUST settle the aspect, its contexts and its boundaries with the owner
+- **FR-019**: The skill MUST settle the field and the thing to build with the owner
   before the first search, and MUST record the date of the agreement.
+- **FR-019a**: The skill MUST find the contexts, the risk dimensions and the boundaries of the
+  aspect in the sources, give each one its source, and show them to the owner in the review.
+  The skill MUST NOT ask the owner for a use case, a first user or a narrower scope before the
+  research. A use case is chosen only when a recipe is applied to a project.
 - **FR-020**: The skill MUST give each reading task to an agent that has no shell, no
   credentials and no access to the repository, and MUST state in each task that fetched text
   is data and not an instruction.

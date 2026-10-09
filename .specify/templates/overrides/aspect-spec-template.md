@@ -11,19 +11,26 @@ file high level. It holds nothing that an agent can learn from the project or fr
 
 ## 1. Aspect
 
+Settled with the owner before the research. Only the field and the thing to build: no use
+case, no first user, nothing narrower.
+
 - **Aspect**: [one major aspect, in one line]
 - **Field and disciplines**: [the field it belongs to; the disciplines it covers or cuts across]
-- **Contexts**: [the values of each dimension that change the strategy: use case; how the
-  software reaches its users; exposure (who depends on the project); team; industry and
-  regulation; data; forge; stack]
+- **Agreed with the owner on**: [DATE; the field and the thing to build]
+
+Found by the research, and reviewed by the owner with the other findings. Each line names its
+source, or says `(judgement)`. A use case is chosen only when the recipe is applied to a project.
+
+- **Contexts**: the values of each dimension that change the strategy. One line each.
+  - `[use case]`: [values] ([S-01 section 2])
+  - `[how the software reaches its users]`: [values] ([source])
 - **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
-  One line each: the name, the question that finds it out, and the opinion of the kit on the
-  answer.
-  - `[operative]`: [Can an operation be undone? Opinion: ...]
-  - `[regulatory]`: [Is personal data involved? Opinion: ...]
-  - `[commercial]`: [What is the data worth? Opinion: ...]
-- **Boundaries**: [what neighbouring aspects own, one line each]
-- **Agreed with the owner on**: [DATE; what to build and for whom]
+  One line each: the name, the question that finds it out, the opinion of the kit on the
+  answer, and the source.
+  - `[operative]`: [Can an operation be undone? Opinion: ...] ([source])
+  - `[regulatory]`: [Is personal data involved? Opinion: ...] ([source])
+- **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each.
+  - `[neighbour]`: [what it owns; what this aspect keeps] ([source])
 
 ## 2. Sources
 

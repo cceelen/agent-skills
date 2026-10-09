@@ -12,8 +12,8 @@
   --previous FILE  an earlier revision of spec.md, for the check of stable identifiers
   --words FILE     the product words of the aspect, one in each line; an item must not use one
   --json           print one JSON object in place of the text report
-  --scope          check only the head line and section 1. Use this in phase 1, when the owner
-                   and the agent settle what to build and the other sections are empty.
+  --scope          check only what is settled before the research: the head line, the aspect,
+                   the field and the date of the agreement. Use this in phase 1.
 
 The report lists each failing rule with its place, then what remains. Result code 0: no rule
 fails. Result code 1: a rule fails. Result code 2: the input cannot be read. Pending levels,
@@ -29,7 +29,8 @@ import aspect
 CLASSES = ("standard", "foundation", "vendor", "research", "trusted-data", "independent")
 READ = ("full", "part", "no")
 SOURCE_CELLS = ("id", "source", "issuer", "version or date", "class", "license", "read", "url")
-ASPECT_FIELDS = ("aspect", "field and disciplines", "contexts", "boundaries", "agreed with the owner on")
+SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
+FINDING_FIELDS = ("contexts", "boundaries")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 NOT_CONFIRMED = ("", "pending", "rejected")
 
@@ -37,6 +38,7 @@ MESSAGES = {
     "accepted-missing": "The head line has no field Accepted.",
     "aspect-field-empty": "The field '{0}' of section 1 is empty.",
     "agreed-without-date": "The field 'Agreed with the owner on' has no date.",
+    "finding-without-source": "This finding of section 1 names no source. Name it, or write 'judgement'.",
     "risk-dimensions-missing": "Section 1 names no risk dimension.",
     "risk-dimension-empty": "The risk dimension '{0}' has no question.",
     "source-cell-empty": "The cell '{0}' of the source is empty.",
@@ -69,7 +71,7 @@ MESSAGES = {
     "skill-field-empty": "The field '{0}' of the recipe skill in section 5 is empty.",
     "skill-refers-to-section": "The field '{0}' of the recipe skill refers to a section of spec.md.",
     "no-failure": "No check fails.",
-    "scope-only": "Only the head line and section 1 were checked. The other sections wait for the research.",
+    "scope-only": "Only the field and the thing to build were checked. The findings wait for the research.",
     "failures": "Failing checks: {0}.",
     "remains-head": "What remains:",
     "remains-levels": "Levels that are pending: {0}.",
@@ -159,45 +161,100 @@ def rejected_sources(data):
     return out
 
 
-def check_head_and_aspect(data):
-    r"""The head line and section 1: the acceptance field, each field, the risk dimensions.
+def check_scope(data):
+    r"""What the owner and the agent settle before the research: the field and the thing to build.
+
+    These are the head line and three fields of section 1: the aspect, the field, and the date
+    of the agreement. Nothing narrower is settled before the research.
 
     >>> import sample
-    >>> check_head_and_aspect(sample.load())
+    >>> check_scope(sample.load())
     []
-    >>> brief(check_head_and_aspect(sample.load(("spec.md", " | **Accepted**: A. Person, 2026-01-15", ""))))
+    >>> brief(check_scope(sample.load(("spec.md", " | **Accepted**: A. Person, 2026-01-15", ""))))
     [('accepted-missing', '')]
-    >>> old = "- **Boundaries**: the recovery of a complete site belongs to a different aspect."
-    >>> check_head_and_aspect(sample.load(("spec.md", old, "- **Boundaries**:")))[0]["text"]
-    "The field 'boundaries' of section 1 is empty."
+    >>> empty = ("spec.md", "- **Aspect**: backups of the data of a software project.", "- **Aspect**:")
+    >>> check_scope(sample.load(empty))[0]["text"]
+    "The field 'aspect' of section 1 is empty."
     >>> date = ("spec.md", "2026-01-05; a recipe for", "in January; a recipe for")
-    >>> brief(check_head_and_aspect(sample.load(date)))
+    >>> brief(check_scope(sample.load(date)))
     [('agreed-without-date', '')]
 
-    Each risk dimension needs a name and a question. A specification without one fails.
+    The contexts, the risk dimensions and the boundaries are not part of the scope.
 
-    >>> old = "  - `operative`: Can a lost record be made again? Opinion: if not, go past level 1."
-    >>> brief(check_head_and_aspect(sample.load(("spec.md", old, "  - `operative`:"))))
-    [('risk-dimension-empty', 'operative')]
-    >>> regulatory = "  - `regulatory`: Is personal data in the backup? Opinion: if yes, aim for level 3.\n"
-    >>> brief(check_head_and_aspect(sample.load(("spec.md", old + "\n", ""), ("spec.md", regulatory, ""))))
-    [('risk-dimensions-missing', '')]
+    >>> findings = ("- **Contexts", "  ", "- **Boundaries")
+    >>> lines = [x for x in sample.SPEC.splitlines() if not x.startswith(findings)]
+    >>> folder = sample.folder()
+    >>> _ = (folder / "spec.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    >>> check_scope(aspect.load(folder))
+    []
     """
     out, head = [], data["head"]
     if "accepted" not in head:
         out.append(finding("accepted-missing", head))
-    for name in ASPECT_FIELDS:
+    for name in SCOPE_FIELDS:
         field = data["aspect"].get(name)
         if not field or not field["value"]:
             out.append(finding("aspect-field-empty", field or {}, "", name))
     agreed = data["aspect"].get("agreed with the owner on")
     if agreed and agreed["value"] and not DATE.search(agreed["value"]):
         out.append(finding("agreed-without-date", agreed))
+    return out
+
+
+def check_scope_findings(data):
+    r"""What the research finds for section 1: the contexts, the risk dimensions, the boundaries.
+
+    They are findings, as the checklist items are. Thus each one is filled and names its source,
+    or says "judgement".
+
+    >>> import sample
+    >>> check_scope_findings(sample.load())
+    []
+    >>> old = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
+    >>> check_scope_findings(sample.load(("spec.md", old, "- **Boundaries**:")))[0]["text"]
+    "The field 'boundaries' of section 1 is empty."
+    >>> brief(check_scope_findings(sample.load(("spec.md", old, old.removesuffix(" (judgement)")))))
+    [('finding-without-source', 'boundaries')]
+
+    Each risk dimension needs a name, a question and a source. A specification without one fails.
+
+    >>> operative = "  - `operative`: Can a lost record be made again? Opinion: if not, go past level 1."
+    >>> source = " (S-02 section 4)"
+    >>> brief(check_scope_findings(sample.load(("spec.md", operative + source, "  - `operative`:"))))
+    [('risk-dimension-empty', 'operative')]
+    >>> brief(check_scope_findings(sample.load(("spec.md", operative + source, operative))))
+    [('finding-without-source', 'operative')]
+    >>> regulatory = "  - `regulatory`: Is personal data in the backup? Opinion: if yes, aim for level 3."
+    >>> first, second = operative + source + "\n", regulatory + " (S-01 section 5)\n"
+    >>> none = sample.load(("spec.md", first, ""), ("spec.md", second, ""))
+    >>> brief(check_scope_findings(none))
+    [('risk-dimensions-missing', '')]
+
+    A field can hold one sub-item for each finding. Then each sub-item names its source.
+
+    >>> one = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
+    >>> two = "- **Boundaries**: what the neighbours own.\n"
+    >>> two += "  - `recovery`: a complete site. (S-01 section 5)\n  - `tests`: test design."
+    >>> brief(check_scope_findings(sample.load(("spec.md", one, two))))
+    [('finding-without-source', 'tests')]
+    """
+    out = []
+    for name in FINDING_FIELDS:
+        field = data["aspect"].get(name)
+        if not field or not (field["value"] or field["items"]):
+            out.append(finding("aspect-field-empty", field or {}, "", name))
+            continue
+        parts = field["items"] or [{"name": name, "text": field["value"], "_line": field["_line"]}]
+        for part in parts:
+            if not aspect.source_ids(part["text"]) and "judgement" not in part["text"].lower():
+                out.append(finding("finding-without-source", part, part["name"]))
     if not data["risk_dimensions"]:
         out.append(finding("risk-dimensions-missing", data["aspect"].get("risk dimensions", {})))
     for dim in data["risk_dimensions"]:
         if not dim["text"]:
             out.append(finding("risk-dimension-empty", dim, dim["name"], dim["name"]))
+        elif not aspect.source_ids(dim["text"]) and "judgement" not in dim["text"].lower():
+            out.append(finding("finding-without-source", dim, dim["name"]))
     return out
 
 
@@ -264,6 +321,10 @@ def check_references(data):
     out = []
     rows = [(r, r.get("source", ""), r.get("id", "")) for r in data["checklist"]]
     rows += [(r, r.get("sources", ""), "") for r in data["context_decisions"] + data["disagreement"]]
+    for name in FINDING_FIELDS:
+        field = data["aspect"].get(name) or {"value": "", "items": []}
+        rows += [(field, field["value"], name)] + [(i, i["text"], i["name"]) for i in field["items"]]
+    rows += [(d, d["text"], d["name"]) for d in data["risk_dimensions"]]
     for row, cell, ident in rows:
         for sid in aspect.source_ids(cell):
             if sid not in known:
@@ -588,7 +649,8 @@ def run_checks(data, previous_rows=None, words=()):
     """
     support, waiting = check_support(data)
     found = (
-        check_head_and_aspect(data)
+        check_scope(data)
+        + check_scope_findings(data)
         + check_sources(data)
         + check_references(data)
         + check_items(data)
@@ -692,21 +754,22 @@ def report(data, found, remains, previous_given):
 
 
 def scope_report(data):
-    """The report of phase 1: only the head line and section 1, before the research.
+    """The report of phase 1: only what is settled before the research.
 
-    The other sections of the sample have a defect here. The scope is correct, so nothing fails.
+    That is the head line, the aspect, the field and the date of the agreement. The other parts
+    of the sample have a defect here. The scope is correct, so nothing fails.
 
     >>> import sample
     >>> print(scope_report(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |"))))
     No check fails.
-    Only the head line and section 1 were checked. The other sections wait for the research.
-    >>> old = "- **Boundaries**: the recovery of a complete site belongs to a different aspect."
-    >>> print(scope_report(sample.load(("spec.md", old, "- **Boundaries**:"))))
-    FAIL aspect-field-empty spec.md:16: The field 'boundaries' of section 1 is empty.
+    Only the field and the thing to build were checked. The findings wait for the research.
+    >>> old = "- **Aspect**: backups of the data of a software project."
+    >>> print(scope_report(sample.load(("spec.md", old, "- **Aspect**:"))))
+    FAIL aspect-field-empty spec.md:9: The field 'aspect' of section 1 is empty.
     Failing checks: 1.
-    Only the head line and section 1 were checked. The other sections wait for the research.
+    Only the field and the thing to build were checked. The findings wait for the research.
     """
-    found = sorted(check_head_and_aspect(data), key=lambda f: (f["line"], f["rule"], f["id"]))
+    found = sorted(check_scope(data), key=lambda f: (f["line"], f["rule"], f["id"]))
     lines = [
         f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
     ]
@@ -766,7 +829,7 @@ def main(argv=None):
     >>> code, brief(result["findings"]), result["remains"]["changed"], result["previous"]
     (1, [('product-word', 'C-05')], ['C-02'], True)
 
-    --scope checks only the head line and section 1, for phase 1.
+    --scope checks only what is settled before the research, for phase 1.
 
     >>> code, out, _ = sample.run(main, bad, "--scope")
     >>> code, out.splitlines()[0]
@@ -809,7 +872,7 @@ def main(argv=None):
         sys.exit(2)
     if "--scope" in args:
         print(scope_report(data))
-        sys.exit(1 if check_head_and_aspect(data) else 0)
+        sys.exit(1 if check_scope(data) else 0)
     found, remains = run_checks(data, previous_rows, words)
     if as_json:
         result = {

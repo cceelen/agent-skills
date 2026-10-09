@@ -334,7 +334,7 @@ def load(folder):
     >>> data["is_aspect"], data["title"], data["head"]["branch"], data["head"]["accepted"]
     (True, 'Backups of project data', '900-backups', 'A. Person, 2026-01-15')
     >>> data["aspect"]["contexts"]["value"]
-    'the size of the data; who operates the software; the place where the data is.'
+    'the size of the data; who operates the software; the place where the data is. (S-01 section 1)'
     >>> [d["name"] for d in data["risk_dimensions"]]
     ['operative', 'regulatory']
 

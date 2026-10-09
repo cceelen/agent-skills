@@ -11,9 +11,9 @@ The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 
 | Phase | What occurs | Your part as the owner |
 |---|---|---|
-| 1. What to build | The agent settles the aspect, its contexts, its risk dimensions and its boundaries with you. | You decide the scope. |
-| 2. Research | Isolated readers read the sources. The agent distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
-| 3. Review | The agent stops and gives you the findings. | You confirm the sources, correct the answers and accept the result. |
+| 1. What to build | The agent settles only the field and the thing to build with you. | You name the field and the thing. |
+| 2. Research | Isolated readers read the sources. The agent finds the contexts, the risk dimensions and the boundaries, and distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
+| 3. Review | The agent stops and gives you the findings. | You correct the contexts, the risk dimensions and the boundaries, confirm the sources, correct the answers and accept the result. |
 | 4. Rendering | A program renders the recipe skill. A pull request delivers it. | You review the pull request. |
 
 To start, tell your agent to read `factory/sota-research/SKILL.md` and to distil an aspect.
@@ -90,7 +90,8 @@ uv run factory/sota-research/scripts/check.py specs/<number>-<name> --previous p
 To find product names in the checklist, write the names into a file, one in each line. Then
 use `--words <file>`. To get the report as JSON, use `--json`.
 
-In phase 1 only the head line and section 1 are written. To check only these, use `--scope`.
+In phase 1 only the head line, the aspect, the field and the date of the agreement are written.
+To check only these, use `--scope`.
 
 ## Render a recipe skill
 
