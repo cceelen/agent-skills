@@ -25,8 +25,9 @@ library only; the collector of `library-vetting` for sources that are repositori
 **Storage**: Markdown files on the branch of a specification (`spec.md`, `evidence.md`,
 `vetting.md`); two rubric text files in the tooling; no database, no index
 
-**Testing**: pytest through `uv run`, with fixtures in `tests/sota-research/fixture/`, without
-the network. The CI gets a job on Python 3.14; the jobs on older versions skip this folder.
+**Testing**: examples (doctests) in each program, run with `--selftest`, without the network
+and without test files. `tests/test_repo.py` runs them under coverage on Python 3.14; the
+minimum is 90 percent. See R16 in `research.md`.
 
 **Target Platform**: the workstation of the owner and the CI of the repository (Linux, macOS,
 Windows); no shell scripts
@@ -103,18 +104,11 @@ factory/sota-research/
     ├── place.py                # user story 3
     ├── vet.py                  # user story 4
     ├── models.py               # the table of models and tool names for the agent templates
+    ├── sample.py               # the sample data that the examples of the programs use
     ├── rubric-items.txt        # questions, scales and thresholds of risk and reward
     └── rubric-sources.txt      # gates, signals and weights for independent sources
 
-tests/sota-research/
-├── fixture/                    # a good specification, defect copies, signals, answers,
-│                               # the expected rendered skill
-├── test_aspect.py
-├── test_check.py
-├── test_render.py
-├── test_place.py
-├── test_vet.py
-└── test_messages.py            # sentence length of the messages; no model name in prompts
+tests/test_repo.py              # runs each program with --selftest, under coverage (R16)
 
 docs/sota-research.md           # the documentation for the owner
 ```

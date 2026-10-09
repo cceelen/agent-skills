@@ -34,6 +34,20 @@ a research run with that agent product.
 - Install `uv`. The programs use the latest stable Python, and `uv` gets it.
 - Work on the branch of the specification. The folder `specs/` is not on the branch `main`.
 
+## Make sure that the programs are correct
+
+Each program holds its tests as examples in the program itself. No test files are necessary.
+To run the examples of one program, use the option `--selftest`:
+
+```text
+uv run factory/sota-research/scripts/check.py --selftest
+```
+
+The program prints the number of examples and the number of failures. The examples use the
+sample specification in `factory/sota-research/scripts/sample.py`. They do not use the network.
+
+To run the examples of all programs and to measure the coverage, run `uv run pytest`.
+
 ## The programs
 
 Run each program with `uv run`. A program without an argument prints its usage text.

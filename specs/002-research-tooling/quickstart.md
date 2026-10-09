@@ -2,26 +2,42 @@
 
 Run the commands from the root of the repository. The contracts are in
 [contracts/programs.md](contracts/programs.md) and [contracts/files.md](contracts/files.md).
-`GOOD` is the folder `tests/sota-research/fixture/good`.
 
 ## All parts
 
 ```text
-uv run --python 3.14 pytest tests/sota-research
+uv run pytest
 uv run ruff check
 ```
 
-Expected: all tests pass, without the network.
+Expected: all tests pass, without the network. On Python 3.14, `tests/test_repo.py` runs each
+program of `factory/` with `--selftest` under coverage and fails below 90 percent.
 
-## 1. The check (user story 1)
+## One program
+
+Each program holds its tests as examples and validates itself:
 
 ```text
-uv run factory/sota-research/scripts/check.py GOOD
+uv run factory/sota-research/scripts/check.py --selftest
+uv run factory/sota-research/scripts/render.py --selftest
+uv run factory/sota-research/scripts/place.py --selftest
+uv run factory/sota-research/scripts/vet.py --selftest
+uv run factory/sota-research/scripts/models.py --selftest
+uv run factory/sota-research/scripts/aspect.py --selftest
 ```
 
-Expected: "No check fails.", one item that needs judgement, and result code 0. The tests plant
-one defect for each rule in a copy of the fixture (the table `DEFECTS` in
-`tests/sota-research/test_check.py`); each copy gives exactly its finding and result code 1.
+Expected for each: the number of examples, "0 failed", and result code 0. The examples use the
+sample specification in `factory/sota-research/scripts/sample.py`.
+
+| User story | Program | What its examples prove |
+|---|---|---|
+| 1 | `check.py` | The sample passes. Each of 27 planted defects gives exactly its finding. What remains does not fail the check. |
+| 2 | `render.py` | The sample gives four files with the stamp. Nothing is rendered without the acceptance, with a failing check or with a pending level. |
+| 3 | `place.py` | The limits of the calculation: admission at 20, level 1 at 40 with a breadth of 3, level 3 above a cost of 4. A write changes only its cells. |
+| 4 | `vet.py` | The scores of the sample, each gate, and a collection that records each error and continues. |
+| 5 | `models.py` | The two readers get web tools only. |
+
+## On a real specification
 
 On the branch `001-sota-research`:
 
@@ -29,37 +45,7 @@ On the branch `001-sota-research`:
 uv run factory/sota-research/scripts/check.py specs/001-sota-research
 ```
 
-## 2. The renderer (user story 2)
-
-```text
-uv run factory/sota-research/scripts/render.py GOOD --commit 0000000 --out <empty folder>
-```
-
-Expected: the folder holds the same files as `tests/sota-research/fixture/good-rendered`. With
-`**Accepted**: pending` in the head line, the program writes nothing and names the missing
-acceptance.
-
-## 3. The calculation (user story 3)
-
-```text
-uv run factory/sota-research/scripts/place.py GOOD
-```
-
-Expected: C-01 and C-05 on level 1, C-02 on `2, operative`, C-03 on `3, regulatory`, C-04 not
-admitted, and result code 0. With one answer removed, that item stays `pending` and the result
-code is 1.
-
-## 4. The vetting (user story 4)
-
-```text
-uv run factory/sota-research/scripts/vet.py score GOOD --work tests/sota-research/fixture/signals
-```
-
-Expected: S-03 with 9 of 10 and S-04 with 8 of 10, the two confirmed, and result code 0. With
-"Confirmed by" set to `pending` for S-03, `check.py` lists C-04 as an item that rests only on a
-source with a pending vetting.
-
-## 5. The research skill (user story 5)
+## The research skill (user story 5)
 
 One trial run with the owner on a small aspect, on a new specification branch:
 
@@ -79,7 +65,6 @@ Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
 
 | Scenario | Result |
 |---|---|
-| All parts | 269 tests pass on Python 3.14, after the review phase. On Python 3.9 the folder `tests/sota-research` is skipped and the other 99 tests pass. Python 3.13 is not installed on this machine; the CI runs it. |
-| 1 to 4 | As expected. |
+| All parts | 424 examples in 7 programs, 0 failed. Coverage 94 percent with branches. On Python 3.9 the examples are skipped and the other tests pass. |
 | The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
-| 5 | Open. It needs the delivery to `main` and the owner (T044, T045). |
+| The research skill | Open. It needs the delivery to `main` and the owner (T044, T045). |

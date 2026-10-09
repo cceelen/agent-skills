@@ -331,7 +331,15 @@ def run_checks(data, previous_rows=None, words=()):
 
 
 def is_accepted(data):
-    """The head line names the person and the date of the acceptance."""
+    """The head line names the person and the date of the acceptance.
+
+    >>> [is_accepted({"head": {"accepted": v}}) for v in ("A. Person, 2026-01-15", "pending", "no")]
+    [True, False, False]
+    >>> [is_accepted({"head": {"accepted": v}}) for v in ("A. Person", "2026-01-15", "")]
+    [False, False, False]
+    >>> is_accepted({"head": {}})
+    False
+    """
     value = data["head"].get("accepted", "pending").strip()
     return value.lower() != "pending" and bool(DATE.search(value)) and bool(DATE.sub("", value).strip(" ,;"))
 
@@ -369,10 +377,13 @@ def option(args, flag):
     return None
 
 
-def main():
-    args = sys.argv[1:]
+def main(argv=None):
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args[:1] == ["--selftest"]:
+        sys.exit(aspect.selftest())
     if not args or args[0] in ("-h", "--help"):
-        sys.exit(__doc__)
+        print(__doc__, file=sys.stderr)
+        sys.exit(2)
     previous, words_file = option(args, "--previous"), option(args, "--words")
     as_json = "--json" in args
     folder = next((a for a in args if not a.startswith("--")), "")
@@ -398,6 +409,161 @@ def main():
     else:
         print(report(data, found, remains, previous is not None))
     sys.exit(1 if found else 0)
+
+
+__test__ = {
+    "the sample specification passes": r"""
+    >>> import sample
+    >>> good = sample.folder()
+    >>> code, out, err = sample.run(main, good)
+    >>> code, err
+    (0, '')
+    >>> print(out)
+    No check fails.
+    What remains:
+    - Items that need judgement: C-04.
+    Accepted: A. Person, 2026-01-15.
+    The check of stable identifiers was skipped: no earlier revision was given.
+
+    The same input gives the same output, as text and as JSON.
+
+    >>> sample.run(main, good) == sample.run(main, good)
+    True
+    >>> report = json.loads(sample.run(main, good, "--json")[1])
+    >>> report["accepted"], report["findings"], report["previous"]
+    (True, [], False)
+    >>> report["remains"]
+    {'changed': [], 'judgement': ['C-04'], 'levels': [], 'vettings': [], 'waiting': []}
+    >>> long_message = aspect.long_sentences(MESSAGES)
+    >>> long_message
+    []
+    """,
+    "each planted defect is reported, and no other": r"""
+    >>> import sample
+    >>> def findings(folder, *args):
+    ...     code, out, _ = sample.run(main, folder, "--json", *args)
+    ...     return code, [(f["rule"], f["id"]) for f in json.loads(out)["findings"]]
+    >>> for rule, (file, old, new, ident) in sorted(sample.DEFECTS.items()):
+    ...     got = findings(sample.folder((file, old, new)))
+    ...     assert got == (1, [(rule, ident)]), (rule, got)
+    >>> len(sample.DEFECTS)
+    27
+
+    The text report names the rule, the file, the line and the row.
+
+    >>> file, old, new, _ = sample.DEFECTS["unknown-source"]
+    >>> print(sample.run(main, sample.folder((file, old, new)))[1].splitlines()[0])
+    FAIL unknown-source spec.md:56 C-02: The row cites 'S-09'. Section 2 does not list this source.
+
+    Rules that need more than one changed line:
+
+    >>> folder = sample.folder()
+    >>> spec = folder / "spec.md"
+    >>> lines = spec.read_text(encoding="utf-8").splitlines()
+    >>> _ = spec.write_text("\n".join(x for x in lines if not x.startswith("  - `")) + "\n", encoding="utf-8")
+    >>> sorted({rule for rule, _ in findings(folder)[1]})
+    ['dimension-unknown', 'risk-dimensions-missing']
+    >>> kept = [x for x in lines if not x.startswith(("| C-0", "| S-0"))]
+    >>> _ = spec.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    >>> sorted({rule for rule, _ in findings(folder)[1]})
+    ['checklist-empty', 'sources-empty', 'unknown-source']
+
+    A product word in an item is reported when a word list is given.
+
+    >>> words = folder / "words.txt"
+    >>> _ = words.write_text("Restic\nprogram\n", encoding="utf-8")
+    >>> findings(sample.folder(), "--words", words)
+    (1, [('product-word', 'C-05')])
+    """,
+    "what remains does not fail the check": r"""
+    >>> import sample
+    >>> folder = sample.folder(
+    ...     ("spec.md", "| 2, operative |", "| pending |"),
+    ...     ("spec.md", "**Accepted**: A. Person, 2026-01-15", "**Accepted**: pending"),
+    ...     ("vetting.md", sample.CONFIRMED_S04, "| 8 of 10 | 2026-01-10 | pending |"),
+    ... )
+    >>> code, out, _ = sample.run(main, folder)
+    >>> code
+    0
+    >>> print(out)
+    No check fails.
+    What remains:
+    - Levels that are pending: C-02.
+    - Vettings that are pending: S-04.
+    - Items that need judgement: C-04.
+    - The owner did not accept the specification.
+    The check of stable identifiers was skipped: no earlier revision was given.
+
+    An item that rests only on a source with a pending vetting waits. Only the owner can end that.
+
+    >>> folder = sample.folder(("vetting.md", sample.CONFIRMED_S03, "| 9 of 10 | 2026-01-10 | pending |"))
+    >>> code, out, _ = sample.run(main, folder, "--json")
+    >>> code, json.loads(out)["remains"]["waiting"], json.loads(out)["remains"]["vettings"]
+    (0, ['C-04'], ['S-03'])
+
+    A source that was not read does not help: C-04 then still waits, and C-02 has no usable source.
+
+    >>> folder = sample.folder(
+    ...     ("spec.md", '| S-03 "After the drill" |', '| S-03 "After the drill"; S-02 section 9 |'),
+    ...     ("spec.md", "| CC BY 4.0 | full |", "| CC BY 4.0 | no |"),
+    ...     ("evidence.md", "section 4 | C-01, C-02;", "section 4 | C-01, C-02, C-04;"),
+    ...     ("vetting.md", sample.CONFIRMED_S03, "| 9 of 10 | 2026-01-10 | pending |"),
+    ... )
+    >>> report = json.loads(sample.run(main, folder, "--json")[1])
+    >>> report["remains"]["waiting"], [(f["rule"], f["id"]) for f in report["findings"]]
+    (['C-04'], [('only-unread-source', 'C-02')])
+
+    A rejection by a gate is stronger than an earlier confirmation of the owner.
+
+    >>> folder = sample.folder(("vetting.md", "| S-03 | page | pass |", "| S-03 | page | rejected: old |"))
+    >>> report = json.loads(sample.run(main, folder, "--json")[1])
+    >>> [(f["rule"], f["id"]) for f in report["findings"]], report["remains"]["vettings"]
+    ([('only-rejected-source', 'C-04')], ['S-03'])
+
+    A retired item keeps its row and is not checked.
+
+    >>> old = "| 2, operative | authority (1) | the record of the last restore has a date |"
+    >>> sample.run(main, sample.folder(("spec.md", old, "| retired | authority (1) | |")))[0]
+    0
+    """,
+    "an earlier revision": r"""
+    >>> import sample
+    >>> good = sample.folder()
+
+    In the earlier revision, C-02 had a different text, C-05 was retired, and an item C-06 existed.
+
+    >>> text = sample.SPEC.replace("A restore from the backup was done and recorded.", "A restore was done.")
+    >>> text = text.replace("| 1 | practice | the schedule", "| retired | practice | the schedule")
+    >>> row = "| C-06 | An old item. | Risk: none. | 1 | practice | judgement | S-01 |\n"
+    >>> text = text.replace("\n**Selection.**", row + "\n**Selection.**")
+    >>> previous = good.parent / "previous.md"
+    >>> _ = previous.write_text(text, encoding="utf-8")
+    >>> code, out, _ = sample.run(main, good, "--previous", previous, "--json")
+    >>> report = json.loads(out)
+    >>> code, sorted((f["rule"], f["id"]) for f in report["findings"])
+    (1, [('id-removed', 'C-06'), ('id-reused', 'C-05')])
+    >>> report["remains"]["changed"], report["previous"]
+    (['C-02'], True)
+    """,
+    "input that cannot be read": r"""
+    >>> import sample, tempfile
+    >>> code, out, err = sample.run(main, tempfile.mkdtemp(prefix="sota-empty-"))
+    >>> code, out, err.startswith("The input cannot be read:")
+    (2, '', True)
+    >>> good = sample.folder()
+    >>> bad = good.parent / "bad.txt"
+    >>> _ = bad.write_bytes(b"\xff\xfe")
+    >>> sample.run(main, good, "--words", bad)[0], sample.run(main, good, "--previous", bad)[0]
+    (2, 2)
+    >>> for name in ("spec.md", "evidence.md", "vetting.md"):
+    ...     folder = sample.folder()
+    ...     _ = (folder / name).write_bytes((folder / name).read_bytes() + b"\xff\n")
+    ...     code, _, err = sample.run(main, folder)
+    ...     assert code == 2 and "not UTF-8" in err, name
+    >>> sample.run(main)[0]
+    2
+    """,
+}
 
 
 if __name__ == "__main__":

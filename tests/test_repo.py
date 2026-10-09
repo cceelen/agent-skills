@@ -5,6 +5,8 @@ import importlib.util
 import json
 import pathlib
 import re
+import subprocess
+import sys
 
 import pytest
 
@@ -22,9 +24,14 @@ SKILLS = ARTIFACTS
 def test_artifact_has_documentation_and_tests(artifact):
     assert re.fullmatch(r"[a-z0-9-]+", artifact.name), "names use lowercase letters, digits and hyphens"
     assert (ROOT / "docs" / f"{artifact.name}.md").exists(), "each artifact has a page in docs/"
-    # A rendered recipe skill carries a stamp. The test of the renderer covers it.
+    # A rendered recipe skill carries a stamp: the renderer covers it. A program with examples
+    # validates itself with --selftest. Each other artifact has tests in tests/<name>/.
     rendered = "Rendered from the specification branch" in (artifact / "SKILL.md").read_text()
-    assert rendered or (ROOT / "tests" / artifact.name).is_dir(), "each artifact has tests in tests/<name>/"
+    programs = sorted((artifact / "scripts").glob("*.py"))
+    self_validating = bool(programs) and all(">>> " in p.read_text() for p in programs)
+    assert rendered or self_validating or (ROOT / "tests" / artifact.name).is_dir(), (
+        "each artifact has examples in its programs or tests in tests/<name>/"
+    )
 
 
 @pytest.mark.parametrize("skill", SKILLS, ids=lambda p: f"{p.parent.name}/{p.name}")
@@ -70,3 +77,77 @@ def test_plugin_hook_prints_the_rules():
     hooks = json.loads((ROOT / "hooks" / "hooks.json").read_text())["hooks"]["SessionStart"]
     assert "compact" in hooks[0]["matcher"]
     assert "rules/apply.py" in hooks[0]["hooks"][0]["command"]
+
+
+# The programs of the factory hold their tests as examples (doctests) and need the latest Python.
+FACTORY_PROGRAMS = sorted(ROOT.glob("factory/*/scripts/*.py"))
+LATEST_PYTHON = sys.version_info >= (3, 14)
+
+
+def test_each_factory_program_has_examples():
+    for program in FACTORY_PROGRAMS:
+        text = program.read_text()
+        assert ">>> " in text and "selftest" in text, f"{program.name} must validate itself with --selftest"
+
+
+@pytest.mark.skipif(not LATEST_PYTHON, reason="the tooling of the factory needs Python 3.14")
+def test_factory_programs_validate_themselves_and_meet_the_coverage_minimum(tmp_path):
+    """Run the examples of each program under coverage. The minimum is in pyproject.toml."""
+    pytest.importorskip("coverage")
+    coverage = [sys.executable, "-m", "coverage"]
+    for program in FACTORY_PROGRAMS:
+        data = tmp_path / f".coverage.{program.parents[1].name}.{program.stem}"
+        done = subprocess.run(
+            [*coverage, "run", f"--data-file={data}", str(program), "--selftest"],
+            capture_output=True,
+            text=True,
+            check=False,
+            cwd=ROOT,
+        )
+        assert done.returncode == 0, f"{program.name}:\n" + done.stdout[-4000:] + done.stderr[-2000:]
+        assert " examples, 0 failed" in done.stdout, program.name
+    combined = tmp_path / ".coverage"
+    subprocess.run([*coverage, "combine", f"--data-file={combined}", str(tmp_path)], check=True, cwd=ROOT)
+    report = subprocess.run(
+        [*coverage, "report", f"--data-file={combined}"],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=ROOT,
+    )
+    assert report.returncode == 0, "the coverage is below the minimum:\n" + report.stdout
+
+
+def test_each_stamp_of_a_rendered_skill_has_the_right_form():
+    stamp = re.compile(
+        r"specification branch `[^`]*`, commit `[0-9a-f]{4,40}`, spec\.md sha256 `[0-9a-f]{64}`"
+    )
+    wrong = []
+    for kind in ARTIFACT_TYPES:
+        for skill in sorted((ROOT / kind).glob("*/SKILL.md")):
+            text = skill.read_text()
+            if "Rendered from the specification" in text and not stamp.search(text):
+                wrong.append(str(skill.relative_to(ROOT)))
+    assert not wrong
+
+
+@pytest.mark.skipif(not LATEST_PYTHON, reason="the tooling of the factory needs Python 3.14")
+def test_rendered_skills_are_fresh():
+    """Only the branch of an aspect specification has the folder specs/. On main nothing is compared."""
+    render = ROOT / "factory" / "sota-research" / "scripts" / "render.py"
+    stale = []
+    for spec in sorted(ROOT.glob("specs/*/spec.md")):
+        head = spec.read_text()[:2000]
+        if not head.startswith("# Aspect specification") or "**Accepted**: pending" in head:
+            continue
+        if "**Accepted**:" not in head:
+            continue
+        done = subprocess.run(
+            [sys.executable, str(render), str(spec.parent), "--check", "--out", str(ROOT)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if done.returncode != 0:
+            stale.append(f"{spec.parent.name}: {done.stdout.strip()}")
+    assert not stale

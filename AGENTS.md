@@ -22,7 +22,8 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 
 To distil an aspect, read `factory/sota-research/SKILL.md` and do its steps.
 
-Each skill has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The agent
+Each skill has its documentation in `docs/<name>.md`. Its tests are examples in its programs, or
+files in `tests/<name>/`. The agent
 files that wrap a recipe skill for one agent product are templates inside the skill. Do not
 edit a rendered recipe skill by hand: change its specification and render it again. The layout
 of a skill is:
@@ -99,7 +100,15 @@ Run the two commands before each commit. The two commands must pass.
 
 ## Rules for the tests
 
-- The tests must not use the network. Put the input data in `tests/<name>/fixture/`.
+- Write the tests of a new program as examples (doctests) in the program itself. Do not add a
+  test file when an example can do the work. Thus a user installs a program that validates
+  itself, without test files.
+- A program with examples runs them with the option `--selftest`. Keep the sample data that the
+  examples use in a Python file beside the program, not in a fixture folder.
+- `tests/test_repo.py` runs each program of `factory/` with `--selftest` under coverage. The
+  coverage must be at or above the minimum in `pyproject.toml`. Ruff examines each new file.
+- The tests must not use the network. For a skill that has test files, put the input data in
+  `tests/<name>/fixture/`.
 - If you change the scoring of `library-vetting`, update the expected values in the test and
   increase the rubric version in `score.py`.
 - Do not change the identifier of a criterion in `rubric.txt`. Earlier reports refer to it.

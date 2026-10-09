@@ -163,6 +163,20 @@ repository (read on 2026-10-09) unless a source is named.
 - **Reason**: decision of the owner, 2026-10-09.
 - **This supersedes** one pull request into `main` for each user story.
 
+## R16. Tests inside the programs
+
+- **Decision**: each program holds its tests as examples (doctests) and runs them with
+  `--selftest`. Short examples are in the docstring of a function; scenarios are in the table
+  `__test__` at the end of the file. The sample data is a Python file, `sample.py`. There is no
+  test folder for the tooling. `tests/test_repo.py` runs each program with `--selftest` under
+  coverage; the minimum is 90 percent with branches. Ruff examines all files; only the sample
+  data is free of the rule for the line length, because a table row cannot be split.
+- **Reason**: direction of the owner, 2026-10-09: a program then validates itself, and a user
+  installs the Python files without test files.
+- **Result**: 424 examples in 7 files; coverage 94 percent. The part without examples is the
+  real network read of one page.
+- **This supersedes** the folder `tests/sota-research/` of the plan.
+
 ## R13. Simplified Technical English in the programs
 
 - **Decision**: each program keeps its messages in one table at the top of the file. A test

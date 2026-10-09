@@ -225,6 +225,21 @@ and the correction of its findings
 
 ---
 
+## Phase 10: Tests inside the programs
+
+**Purpose**: direction of the owner, 2026-10-09: use doctest in place of test files as much as
+possible, so that an installed program validates itself; measure the coverage; let ruff
+examine all new code
+
+- [x] T058 Create `factory/sota-research/scripts/sample.py` with the sample specification, its evidence and vetting records, the signal files, two pages and the table of planted defects, and with the helpers `folder`, `work` and `run`
+- [x] T059 Give each program in `factory/sota-research/scripts/` the option `--selftest`, which runs its examples and prints the number of examples and of failures
+- [x] T060 Move each test of `tests/sota-research/` into its program as an example: short examples in the docstring of a function, scenarios in the table `__test__` at the end of the file
+- [x] T061 Remove the folder `tests/sota-research/` with its fixtures
+- [x] T062 In `tests/test_repo.py`: run each program of `factory/` with `--selftest` under coverage, fail below the minimum of `pyproject.toml` (90 percent, with branches), and accept an artifact whose programs validate themselves in place of a folder `tests/<name>/`
+- [x] T063 Add `coverage` to the development group in `pyproject.toml`, and write the rule for tests into `AGENTS.md`
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

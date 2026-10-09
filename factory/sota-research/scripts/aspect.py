@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.14"
+# dependencies = []
+# ///
 """Reader of the folder of one aspect specification. Standard library only.
 
   load(folder)  reads spec.md, evidence.md and vetting.md into plain dictionaries and lists
@@ -10,9 +15,11 @@ in the section. Each row is a dictionary: the header names in lowercase are the 
 only a missing spec.md is an error.
 """
 
+import doctest
 import itertools
 import pathlib
 import re
+import sys
 
 HEADING = re.compile(r"^(#{1,6})\s+(?:(\d+(?:\.\d+)?)\.?\s+)?(.*\S)\s*$")
 FIELD = re.compile(r"^- \*\*([^*]+)\*\*:\s*(.*)$")
@@ -36,6 +43,13 @@ def cell_spans(line):
 
 
 def split_row(line):
+    r"""The cells of one table row.
+
+    >>> split_row("| a | b c |  |")
+    ['a', 'b c', '']
+    >>> split_row(r"| a \| b | c |")
+    ['a | b', 'c']
+    """
     return [line[a:b].strip().replace("\\|", "|") for a, b in cell_spans(line)]
 
 
@@ -160,15 +174,29 @@ class Doc:
 
 
 def source_ids(cell):
+    """The source identifiers in a cell, sorted.
+
+    >>> source_ids("S-03 items 1, 13; S-04 guideline 11; S-03")
+    ['S-03', 'S-04']
+    """
     return sorted(set(SOURCE_ID.findall(cell or "")))
 
 
 def principles(cell):
+    """The principles of the constitution in a cell, sorted.
+
+    >>> principles("constitution IV; S-21 abstract; Constitution iii")
+    ['III', 'IV']
+    """
     return sorted({p.upper() for p in PRINCIPLE.findall(cell or "")})
 
 
 def item_ids(cell):
-    """The item identifiers in a cell. "C-02 to C-04" gives the three of them."""
+    """The item identifiers in a cell. "C-02 to C-04" gives the three of them.
+
+    >>> item_ids("C-02 to C-04, C-09; 3.3 depth")
+    ['C-02', 'C-03', 'C-04', 'C-09']
+    """
     cell = cell or ""
     ids = set(ITEM_ID.findall(cell))
     for a, b in ITEM_RANGE.findall(cell):
@@ -181,6 +209,11 @@ def level_of(cell):
     """(level, dimension) of a Level cell.
 
     The level is 1, 2, 3, "pending", "not admitted", "retired", or None for a cell that is wrong.
+
+    >>> level_of("2, operative"), level_of("1"), level_of("pending"), level_of("retired")
+    ((2, 'operative'), (1, None), ('pending', None), ('retired', None))
+    >>> level_of("high"), level_of(""), level_of(None)
+    ((None, None), (None, None), (None, None))
     """
     cell = (cell or "").strip()
     if cell in ("pending", "not admitted", "retired"):
@@ -234,9 +267,17 @@ def load(folder):
 
 
 def set_cell(path, line_number, column, text):
-    """Replace one cell of one table row. No other byte of the file changes.
+    r"""Replace one cell of one table row. No other byte of the file changes.
 
     Returns False, and changes nothing, if the row has no cell in that column.
+
+    >>> import tempfile
+    >>> path = pathlib.Path(tempfile.mkdtemp(prefix="sota-cell-")) / "t.md"
+    >>> _ = path.write_text("| a | b |\n|---|---|\n| short |\n", encoding="utf-8")
+    >>> set_cell(path, 3, 1, "x"), set_cell(path, 9, 0, "x"), set_cell(path, 3, -1, "x")
+    (False, False, False)
+    >>> set_cell(path, 3, 0, "x | y"), path.read_text(encoding="utf-8").splitlines()[2]
+    (True, '| x \\| y |')
     """
     try:
         with open(path, encoding="utf-8", newline="") as f:  # a byte order mark stays in the text
@@ -259,3 +300,130 @@ def column_of(row, name):
     """The position of a column in the table of the row, or -1."""
     header = row.get("_header", [])
     return header.index(name) if name in header else -1
+
+
+def long_sentences(messages, limit=25):
+    """The sentences of a message table that have more words than the limit.
+
+    The text for the person in the loop is in Simplified Technical English: short sentences.
+
+    >>> long_sentences({"a": "One short sentence. And a second one: with {0} parts."})
+    []
+    >>> long_sentences({"a": "one two three four. five"}, limit=3)
+    ['one two three four.']
+    """
+    out = []
+    for text in messages.values():
+        flat = re.sub(r"\s+", " ", re.sub(r"^\s*(?:-|\d+\.)\s+", "", text, flags=re.M))
+        out += [s for s in re.split(r"(?<=[.:;])\s+", flat) if len(s.split()) > limit]
+    return out
+
+
+def selftest(name="__main__"):
+    """Run the examples (doctests) of one module of the tooling. Returns the result code.
+
+    Each program validates itself with the option --selftest. No test file is necessary.
+    """
+    flags = doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE
+    result = doctest.testmod(sys.modules[name], optionflags=flags)
+    print(f"{result.attempted} examples, {result.failed} failed")
+    return 1 if result.failed or not result.attempted else 0
+
+
+__test__ = {
+    "the sample specification": r"""
+    >>> import sample
+    >>> data = load(sample.folder())
+    >>> data["is_aspect"], data["title"], data["head"]["branch"], data["head"]["accepted"]
+    (True, 'Backups of project data', '900-backups', 'A. Person, 2026-01-15')
+
+    A field that continues on the next line is one value. A field can have sub-items.
+
+    >>> data["aspect"]["contexts"]["value"]
+    'the size of the data; who operates the software; the place where the data is.'
+    >>> [(d["name"], d["text"][:31]) for d in data["risk_dimensions"]]
+    [('operative', 'Can a lost record be made again'), ('regulatory', 'Is personal data in the backup?')]
+
+    Each table is found in its section, and each row knows its place.
+
+    >>> [s["id"] for s in data["sources"]], data["sources"][0]["version or date"]
+    (['S-01', 'S-02', 'S-03', 'S-04'], '2.0, 2025-03')
+    >>> [c["id"] for c in data["checklist"]]
+    ['C-01', 'C-02', 'C-03', 'C-04', 'C-05']
+    >>> [c["level"] for c in data["checklist"]]
+    ['1', '2, operative', '3, regulatory', 'not admitted', '1']
+    >>> row = data["checklist"][0]
+    >>> row["_file"], column_of(row, "level"), column_of(row, "no such column")
+    ('spec.md', 3, -1)
+    >>> [len(data[k]) for k in ("context_decisions", "disagreement", "watch", "decisions", "glossary")]
+    [1, 1, 1, 2, 1]
+    >>> data["skill_name"], data["skill"]["goal"]["value"][:11], "target folder" in data["skill"]
+    ('backups', 'Each record', False)
+    >>> data["goals"][:13], data["order"][:11]
+    ('A lost record', '1. Find out')
+    >>> [e["source"] for e in data["evidence"]], [v["source"] for v in data["vetting_sources"]]
+    (['S-01', 'S-02', 'S-03', 'S-04'], ['S-03', 'S-04'])
+    >>> data["vetting_items"][0]["severity"]
+    '3 (S-02 abstract)'
+    """,
+    "files that are absent or wrong": r"""
+    >>> import sample, tempfile, pathlib
+    >>> def error_of(folder):
+    ...     try:
+    ...         load(folder)
+    ...     except Unreadable as e:
+    ...         return str(e).split("spec.md: ")[1]
+    >>> error_of(tempfile.mkdtemp(prefix="sota-empty-"))
+    'No such file or directory'
+    >>> folder = sample.folder()
+    >>> (folder / "evidence.md").unlink(); (folder / "vetting.md").unlink()
+    >>> data = load(folder)
+    >>> data["evidence"], data["vetting_items"], data["has_vetting"]
+    ([], [], False)
+
+    A file that is not UTF-8 cannot be read. A byte order mark is accepted.
+
+    >>> spec = folder / "spec.md"
+    >>> good = spec.read_bytes()
+    >>> _ = spec.write_bytes(b"\xef\xbb\xbf" + good)
+    >>> load(folder)["is_aspect"]
+    True
+    >>> _ = spec.write_bytes(good + b"\xff\n")
+    >>> error_of(folder)
+    'the file is not UTF-8'
+    """,
+    "a write changes one cell only": r"""
+    >>> import sample
+    >>> folder = sample.folder()
+    >>> spec = folder / "spec.md"
+    >>> before = spec.read_text(encoding="utf-8")
+    >>> row = load(folder)["checklist"][3]
+    >>> set_cell(spec, row["_line"], column_of(row, "level"), "pending")
+    True
+    >>> spec.read_text(encoding="utf-8") == before.replace("| not admitted |", "| pending |")
+    True
+
+    Only a line feed ends a line. A different separator above the table must not move the write.
+
+    >>> for separator in (chr(0x2028), chr(0x2029), "\x0c", "\x0b", "\x85"):
+    ...     folder = sample.folder(("spec.md", "A small spec", "A small" + separator + "spec"))
+    ...     row = load(folder)["checklist"][3]
+    ...     assert row["id"] == "C-04" and set_cell(folder / "spec.md", row["_line"], 3, "pending")
+    ...     assert load(folder)["checklist"][3]["level"] == "pending", repr(separator)
+
+    A file with the line end of Windows keeps it.
+
+    >>> folder = sample.folder()
+    >>> _ = (folder / "spec.md").write_bytes((folder / "spec.md").read_bytes().replace(b"\n", b"\r\n"))
+    >>> row = load(folder)["checklist"][1]
+    >>> row["level"], set_cell(folder / "spec.md", row["_line"], 3, "pending")
+    ('2, operative', True)
+    >>> raw = (folder / "spec.md").read_bytes()
+    >>> b"| pending |" in raw, raw.count(b"\r\n") == raw.count(b"\n")
+    (True, True)
+    """,
+}
+
+
+if __name__ == "__main__":
+    sys.exit(selftest())

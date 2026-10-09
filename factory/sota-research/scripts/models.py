@@ -19,6 +19,7 @@ of the skill library-vetting. If the agent product has no agent files, this prog
 nothing and says so: the tools of an agent then cannot be limited.
 """
 
+import doctest
 import importlib.util
 import json
 import pathlib
@@ -82,10 +83,20 @@ def render(host, mapping, hosts):
     return out
 
 
-def main():
-    args = sys.argv[1:]
+def selftest():
+    """Run the examples (doctests) of this program. Returns the result code."""
+    result = doctest.testmod(optionflags=doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE)
+    print(f"{result.attempted} examples, {result.failed} failed")
+    return 1 if result.failed or not result.attempted else 0
+
+
+def main(argv=None):
+    args = list(sys.argv[1:] if argv is None else argv)
+    if args[:1] == ["--selftest"]:
+        sys.exit(selftest())
     if not args or args[0] not in ("detect", "apply", "show"):
-        sys.exit(__doc__)
+        print(__doc__, file=sys.stderr)
+        sys.exit(2)
     lib = shared()
     host = option(args, "--host") or lib.detect_host()[0]
     mapping = mapping_for(host, args)
@@ -104,6 +115,76 @@ def main():
         result["written"] = sorted(str(folder / name) for name in files)
     print(json.dumps(result, indent=1, sort_keys=True))
     sys.exit(0 if files else 1)
+
+
+__test__ = {
+    "the readers get web tools only": r"""
+    >>> lib = shared()
+    >>> def front_matter(text):
+    ...     return dict(line.split(": ", 1) for line in text.split("---\n")[1].splitlines())
+    >>> checked = 0
+    >>> for host, entry in sorted(lib.HOSTS.items()):
+    ...     files = render(host, mapping_for(host, []), lib.HOSTS)
+    ...     if not entry["agents"]:
+    ...         assert files == {}, host
+    ...         continue
+    ...     assert sorted(files) == ["sota-second-reader.md", "sota-source-reader.md"], host
+    ...     forbidden = {entry["tools"][t] for t in FORBIDDEN}
+    ...     tools = {name: set(front_matter(text)["tools"].split(", ")) for name, text in files.items()}
+    ...     assert not any(t & forbidden for t in tools.values()), host
+    ...     assert tools["sota-source-reader.md"] == {entry["tools"]["search"], entry["tools"]["fetch"]}, host
+    ...     assert tools["sota-second-reader.md"] == {entry["tools"]["fetch"]}, host
+    ...     assert not any("{{" in text for text in files.values()), host
+    ...     checked += 1
+    >>> checked >= 1
+    True
+
+    The two roles get different models. A given model wins. An unknown product selects no model.
+
+    >>> mapping = mapping_for("claude", [])
+    >>> mapping["source-reader"] != mapping["second-reader"]
+    True
+    >>> mapping_for("claude", ["--second-reader", "inherit"])["second-reader"]
+    'inherit'
+    >>> mapping_for("other", [])
+    {'source-reader': 'inherit', 'second-reader': 'inherit'}
+
+    No model name is in the text for agents: the names are only in this file.
+
+    >>> names = {model for roles in DEFAULTS.values() for model in roles.values()} - {"inherit"}
+    >>> texts = [TOOLING / "SKILL.md", *TOOLING.glob("references/*.md"), *TOOLING.glob("prompts/*.md")]
+    >>> texts += TOOLING.glob("agent-templates/*.md")
+    >>> len(names) > 0, len(texts) > 5
+    (True, True)
+    >>> [f"{t.name}: {n}" for t in texts for n in sorted(names) if n in t.read_text(encoding="utf-8")]
+    []
+    """,
+    "the commands": r"""
+    >>> import contextlib, io
+    >>> def run(*args):
+    ...     out = io.StringIO()
+    ...     with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+    ...         try:
+    ...             main(list(args))
+    ...         except SystemExit as stop:
+    ...             code = stop.code
+    ...     return code, json.loads(out.getvalue()) if out.getvalue().startswith("{") else None
+
+    The command show writes nothing.
+
+    >>> code, result = run("show", "--host", "claude")
+    >>> code, result["writes_agent_files"], "written" in result, sorted(result["files"])
+    (0, True, False, ['sota-second-reader.md', 'sota-source-reader.md'])
+    >>> code, result = run("detect", "--host", "codex")
+    >>> code, result["writes_agent_files"], result["note"]
+    (1, False, 'This agent product has no agent files. The tools of a reader cannot be limited.')
+    >>> run("apply", "--host", "codex")[0], run()[0]
+    (1, 2)
+    >>> long = [s for text in MESSAGES.values() for s in text.split(". ") if len(s.split()) > 25]
+    >>> long
+    []
+    """,
+}
 
 
 if __name__ == "__main__":
