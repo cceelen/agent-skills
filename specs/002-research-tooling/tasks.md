@@ -204,9 +204,9 @@ a specification whose check reports no failure other than "not accepted".
 
 ## Phase 8: Polish
 
-- [ ] T047 Run each scenario of `specs/002-research-tooling/quickstart.md` and correct what differs
-- [ ] T048 [P] Make sure that the job for Python 3.14 in `.github/workflows/test.yml` runs the tests of `tests/sota-research`, and that the jobs for older versions pass without them
-- [ ] T049 Measure `check.py` on the specification 001 against SC-006 (less than 10 seconds) and record the time in `specs/002-research-tooling/quickstart.md`
+- [x] T047 Run each scenario of `specs/002-research-tooling/quickstart.md` and correct what differs
+- [x] T048 [P] Make sure that the job for Python 3.14 in `.github/workflows/test.yml` runs the tests of `tests/sota-research`, and that the jobs for older versions pass without them
+- [x] T049 Measure `check.py` on the specification 001 against SC-006 (less than 10 seconds) and record the time in `specs/002-research-tooling/quickstart.md`
 
 ---
 
