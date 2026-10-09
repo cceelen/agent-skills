@@ -103,8 +103,12 @@ Run the two commands before each commit. The two commands must pass.
 - Write the tests of a new program as examples (doctests) in the program itself. Do not add a
   test file when an example can do the work. Thus a user installs a program that validates
   itself, without test files.
+- Put each example into the documentation of the function or the class that it tests. Do not
+  collect examples in a `__test__` table. An example shows its result; do not hide a result in
+  an `assert`.
 - A program with examples runs them with the option `--selftest`. Keep the sample data that the
   examples use in a Python file beside the program, not in a fixture folder.
+- Use the coverage report to find the lines without an example, and add the example.
 - `tests/test_repo.py` runs each program of `factory/` with `--selftest` under coverage. The
   coverage must be at or above the minimum in `pyproject.toml`. Ruff examines each new file.
 - The CI sends the coverage of each branch and each pull request to Codecov. The rules for a

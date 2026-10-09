@@ -166,15 +166,16 @@ repository (read on 2026-10-09) unless a source is named.
 ## R16. Tests inside the programs
 
 - **Decision**: each program holds its tests as examples (doctests) and runs them with
-  `--selftest`. Short examples are in the docstring of a function; scenarios are in the table
-  `__test__` at the end of the file. The sample data is a Python file, `sample.py`. There is no
+  `--selftest`. Each example is in the docstring of the function or the class that it tests;
+  there is no `__test__` table. The sample data is a Python file, `sample.py`. There is no
   test folder for the tooling. `tests/test_repo.py` runs each program with `--selftest` under
-  coverage; the minimum is 90 percent with branches. Ruff examines all files; only the sample
+  coverage; the minimum is 95 percent with branches. Ruff examines all files; only the sample
   data is free of the rule for the line length, because a table row cannot be split.
 - **Reason**: direction of the owner, 2026-10-09: a program then validates itself, and a user
   installs the Python files without test files.
-- **Result**: 424 examples in 7 files; coverage 94 percent. The part without examples is the
-  real network read of one page.
+- **Result**: 671 examples in 7 files; each line has an example, and the coverage with branches
+  is 99 percent. The network read has examples also: they read from a server on the same
+  computer.
 - **This supersedes** the folder `tests/sota-research/` of the plan.
 
 ## R17. Coverage tracking with Codecov

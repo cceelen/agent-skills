@@ -76,7 +76,7 @@ vet.py score   SPEC --work DIR [--write] [--max-age DAYS] [--rubric FILE]
 ## scripts/models.py
 
 ```text
-models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M]
+models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M] [--root DIR]
 ```
 
 `apply` writes the two agent files into the project folder of the agent product in this

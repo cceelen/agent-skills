@@ -27,7 +27,7 @@ library only; the collector of `library-vetting` for sources that are repositori
 
 **Testing**: examples (doctests) in each program, run with `--selftest`, without the network
 and without test files. `tests/test_repo.py` runs them under coverage on Python 3.14; the
-minimum is 90 percent. See R16 in `research.md`.
+minimum is 95 percent. See R16 in `research.md`.
 
 **Target Platform**: the workstation of the owner and the CI of the repository (Linux, macOS,
 Windows); no shell scripts

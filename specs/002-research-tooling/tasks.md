@@ -235,9 +235,23 @@ examine all new code
 - [x] T059 Give each program in `factory/sota-research/scripts/` the option `--selftest`, which runs its examples and prints the number of examples and of failures
 - [x] T060 Move each test of `tests/sota-research/` into its program as an example: short examples in the docstring of a function, scenarios in the table `__test__` at the end of the file
 - [x] T061 Remove the folder `tests/sota-research/` with its fixtures
-- [x] T062 In `tests/test_repo.py`: run each program of `factory/` with `--selftest` under coverage, fail below the minimum of `pyproject.toml` (90 percent, with branches), and accept an artifact whose programs validate themselves in place of a folder `tests/<name>/`
+- [x] T062 In `tests/test_repo.py`: run each program of `factory/` with `--selftest` under coverage, fail below the minimum of `pyproject.toml`, and accept an artifact whose programs validate themselves in place of a folder `tests/<name>/`
 - [x] T064 Send the coverage report of each branch and each pull request to Codecov from `.github/workflows/test.yml` with OIDC, and set the rules for a change in `codecov.yml`: the project must not lose more than one point, and the lines of a pull request need 90 percent
 - [x] T063 Add `coverage` to the development group in `pyproject.toml`, and write the rule for tests into `AGENTS.md`
+
+---
+
+## Phase 11: Examples in the documentation of each function
+
+**Purpose**: direction of the owner, 2026-10-09: the examples belong into the documentation of
+the function or the class that they test, not into a `__test__` table; use the coverage report
+to add the tests that are missing
+
+- [x] T065 Move each example of the `__test__` tables into the docstring of the function or the class that it tests, in each program of `factory/sota-research/scripts/`, and remove the tables
+- [x] T066 Make each example show its result; replace the loops with `assert` where a printed result is possible
+- [x] T067 Add an example for each line that the coverage report shows without one: the class `Doc` and the errors of the reader, an identifier that is used two times, the short report, the parts of a skill that a specification can leave out, the network read (from a server on the same computer), the collector that fails, the command `apply`
+- [x] T068 Give `models.py apply` the option `--root DIR`, so that its example writes into a temporary folder
+- [x] T069 Increase the coverage minimum in `pyproject.toml` to 95 percent, and write the rule for examples into `AGENTS.md`
 
 ---
 

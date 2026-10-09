@@ -11,7 +11,7 @@ uv run ruff check
 ```
 
 Expected: all tests pass, without the network. On Python 3.14, `tests/test_repo.py` runs each
-program of `factory/` with `--selftest` under coverage and fails below 90 percent.
+program of `factory/` with `--selftest` under coverage and fails below 95 percent.
 
 ## One program
 
@@ -31,7 +31,7 @@ sample specification in `factory/sota-research/scripts/sample.py`.
 
 | User story | Program | What its examples prove |
 |---|---|---|
-| 1 | `check.py` | The sample passes. Each of 27 planted defects gives exactly its finding. What remains does not fail the check. |
+| 1 | `check.py` | The sample passes. Each rule has an example with a planted defect, in the function of that rule. What remains does not fail the check. |
 | 2 | `render.py` | The sample gives four files with the stamp. Nothing is rendered without the acceptance, with a failing check or with a pending level. |
 | 3 | `place.py` | The limits of the calculation: admission at 20, level 1 at 40 with a breadth of 3, level 3 above a cost of 4. A write changes only its cells. |
 | 4 | `vet.py` | The scores of the sample, each gate, and a collection that records each error and continues. |
@@ -65,6 +65,6 @@ Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
 
 | Scenario | Result |
 |---|---|
-| All parts | 424 examples in 7 programs, 0 failed. Coverage 94 percent with branches. On Python 3.9 the examples are skipped and the other tests pass. |
+| All parts | 671 examples in 7 programs, 0 failed. Each line has an example; the coverage with branches is 99 percent. On Python 3.9 the examples are skipped and the other tests pass. |
 | The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
 | The research skill | Open. It needs the delivery to `main` and the owner (T044, T045). |

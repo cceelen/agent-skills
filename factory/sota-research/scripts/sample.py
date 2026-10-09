@@ -6,6 +6,7 @@ folder use it: each program validates itself with the option --selftest, and nee
 file. The sources of the sample are invented.
 
   folder(edits)    writes the sample into a new temporary folder and returns the path
+  load(edits)      the same, read by aspect.load
   work(changes)    writes the signal files into a new temporary folder and returns the path
   run(main, args)  runs the function main of a program; returns (result code, output, errors)
 """
@@ -211,66 +212,11 @@ BARE_PAGE = """\
 <html><body><p>A page without an author, a date or a link.</p><time>last week</time></body></html>
 """
 
-# One planted defect for each rule of check.py: rule -> (file, text of the sample, replacement,
-# identifier in the finding). The examples of check.py make one copy of the sample for each.
+# Texts of the sample that the examples of the programs replace to plant a defect.
 SOURCE_ROW = "| S-01 | A copy | Example | 2020 | standard | public | full | u |\n| S-02 | A study"
 CONFIRMED_S03 = "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 CONFIRMED_S04 = "| 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 APPLIES = "- **Applies**: the order of the work below; it judges C-04."
-DEFECTS = {
-    "accepted-missing": ("spec.md", " | **Accepted**: A. Person, 2026-01-15", "", ""),
-    "agreed-without-date": ("spec.md", "2026-01-05; a recipe for", "in January; a recipe for", ""),
-    "aspect-field-empty": (
-        "spec.md",
-        "- **Boundaries**: the recovery of a complete site belongs to a different aspect.",
-        "- **Boundaries**:",
-        "",
-    ),
-    "check-empty": ("spec.md", "| the record of the last restore has a date |", "| |", "C-02"),
-    "class-unknown": ("spec.md", "| 2024 | research |", "| 2024 | paper |", "S-02"),
-    "decision-without-date": ("spec.md", "| 2026-01-05 | The recipe is", "| January | The recipe is", ""),
-    "dimension-unknown": ("spec.md", "| 2, operative |", "| 2, commercial |", "C-02"),
-    "evidence-does-not-name-item": (
-        "evidence.md",
-        '| "After the drill" | C-04 |',
-        '| "After the drill" | 3.3 frequency |',
-        "C-04",
-    ),
-    "evidence-without-date": (
-        "evidence.md",
-        "| README | C-05 | 2026-01-10 |",
-        "| README | C-05 | yes |",
-        "S-04",
-    ),
-    "glossary-cell-empty": ("spec.md", "| a copy that is kept to make lost data again |", "| |", "backup"),
-    "item-without-source": ("spec.md", "| S-02 section 4 |", "| a talk |", "C-02"),
-    "level-unknown": ("spec.md", "| 2, operative |", "| high |", "C-02"),
-    "level-without-dimension": ("spec.md", "| 2, operative |", "| 2 |", "C-02"),
-    "no-disagreement-section": ("spec.md", "### 3.4 Where the sources", "### Where the sources", ""),
-    "no-evidence-row": ("evidence.md", "| S-03 | A written review", "| S-07 | A written review", "C-04"),
-    "only-rejected-source": ("vetting.md", CONFIRMED_S03, "| 9 of 10 | 2026-01-10 | rejected |", "C-04"),
-    "only-unread-source": ("spec.md", "| CC BY 4.0 | full |", "| CC BY 4.0 | no |", "C-02"),
-    "read-unknown": ("spec.md", "| CC BY 4.0 | full |", "| CC BY 4.0 | yes |", "S-02"),
-    "risk-dimension-empty": (
-        "spec.md",
-        "  - `operative`: Can a lost record be made again? Opinion: if not, go past level 1.",
-        "  - `operative`:",
-        "operative",
-    ),
-    "skill-field-empty": ("spec.md", APPLIES, "- **Applies**:", ""),
-    "skill-refers-to-section": ("spec.md", APPLIES, "- **Applies**: the strategy of section 3.", ""),
-    "source-cell-empty": ("spec.md", "| Example Journal |", "| |", "S-02"),
-    "source-id-twice": ("spec.md", "| S-02 | A study", SOURCE_ROW, "S-01"),
-    "source-without-version": ("spec.md", "| 2.0, 2025-03 |", "| |", "S-01"),
-    "unknown-source": ("spec.md", "| S-02 section 4 |", "| S-09 section 4 |", "C-02"),
-    "watch-list-empty": (
-        "spec.md",
-        "| A new version of S-01 | the page of the issuer | at each refresh |\n",
-        "",
-        "",
-    ),
-    "why-empty": ("spec.md", "| Risk: a backup that cannot be restored is found too late. |", "| |", "C-02"),
-}
 
 _KEEP = []
 
@@ -283,8 +229,18 @@ def _new_folder():
 
 @atexit.register
 def _remove_folders():
+    """Remove each temporary folder of this module. This runs when the program ends.
+
+    >>> path = _new_folder()
+    >>> path.is_dir()
+    True
+    >>> _remove_folders()
+    >>> path.exists(), _KEEP
+    (False, [])
+    """
     for holder in _KEEP:
         holder.cleanup()
+    _KEEP.clear()
 
 
 def folder(*edits, files=FILES):
@@ -315,6 +271,17 @@ def folder(*edits, files=FILES):
     return path
 
 
+def load(*edits):
+    """The sample as the reader of the tooling gives it, after the edits of folder().
+
+    >>> load()["title"], load(("spec.md", "Backups of project data", "Backups"))["title"]
+    ('Backups of project data', 'Backups')
+    """
+    import aspect
+
+    return aspect.load(folder(*edits))
+
+
 def work(**changes):
     """Write the signal files into a new temporary folder. changes: S_03={signal: value}.
 
@@ -339,6 +306,16 @@ def run(main, *args):
     >>> code, out, err = run(main, "a", 2)
     >>> code, out.split(), err
     (1, ['done', 'a', '2'], '')
+
+    A program that stops with a text gives the result code 1, and the text is in the errors.
+
+    >>> def usage(argv):
+    ...     raise SystemExit("the usage text")
+    >>> code, out, err = run(usage)
+    >>> code, out, err.strip()
+    (1, '', 'the usage text')
+    >>> run(lambda argv: None), run(lambda argv: 2)
+    ((0, '', ''), (2, '', ''))
     """
     out, err = io.StringIO(), io.StringIO()
     code = 0
