@@ -16,6 +16,10 @@ file high level. It holds nothing that an agent can learn from the project or fr
 - **Contexts**: [the values of each dimension that change the strategy: use case; how the
   software reaches its users; exposure (who depends on the project); team; industry and
   regulation; data; forge; stack]
+- **Risk dimensions**: [the dimensions on which the risk of a project differs for this aspect,
+  one line each, with the question that finds it out and the opinion of the kit on the answer;
+  for example operative (can an operation be undone?), regulatory (is personal data
+  involved?), commercial (what is the data worth?)]
 - **Boundaries**: [what neighbouring aspects own, one line each]
 - **Agreed with the owner on**: [DATE; what to build and for whom]
 
@@ -62,9 +66,12 @@ each. An item that holds only in some contexts belongs in 3.3; an item for one p
 in an implementation skill. There is no fixed number of items: distil until each item earns its
 place.
 
-- **Level**: 1, 2 or 3, cumulative. The risk and reward calculation places the item: the best
-  return at the lowest cost is level 1. The exposure of a project decides which level the
-  project aims for; section 3.3 says how.
+- **Why**: the risk that the item answers, in one line. A practice of the state of the art
+  answers a specific result of a risk analysis.
+- **Level**: 1, 2 or 3, cumulative. The risk and reward calculation places the item: a good
+  return at a low cost in each context is level 1, the basic practices. An item above level 1
+  names the risk dimension of section 1 that calls for it, for example `2, regulatory`. The
+  risk of a project on each dimension decides how far the project goes past level 1.
 - **Admitted by**: `authority` (a fast-lane source states it; name how many agree), `practice`
   (vetted independent sources demonstrate it) or `own rule` (a rule of this kit, with its
   principle).
@@ -76,8 +83,10 @@ place.
 |---|---|---|---|---|---|---|
 | C-01 | | | | | | [S-01 PW.4.1] |
 
-**Selection.** The kit recommends; the user decides. For a project, the user picks a target
-level and declines single items with a reason. The selection is a Markdown checklist that is
+**Selection.** The kit recommends; the user decides. The recipe skill leads the owner of the
+project through a risk analysis of their software, their market, their context, their users and
+their data, along the risk dimensions of section 1. It gives the opinion of the kit and
+proposes a target level for each dimension. The user picks the targets and declines single items with a reason. The selection is a Markdown checklist that is
 committed in the project, and the recipe skill shows and changes it on request. A declined item
 keeps its reason, and a refresh shows the declined items whose source changed. The distance of
 a project is the list of adopted items whose check fails.
@@ -90,7 +99,8 @@ work out.
 ### Recipe skill and agent: [name]
 
 - **Goal**: [the state it brings a case to]
-- **Reads first**: [the contexts of section 1 it finds out; the selection of the project]
+- **Reads first**: [the contexts of section 1 it finds out; the risk analysis and the selection
+  of the project]
 - **Applies**: [the strategy of section 3; the checklist items it judges]
 - **Delegates**: [capabilities, each provided by an implementation skill]
 - **Stops when**: [goal reached; blocked; a decision of section 3.3 needs a person]
