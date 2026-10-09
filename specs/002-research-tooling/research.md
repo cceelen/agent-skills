@@ -152,8 +152,12 @@ repository (read on 2026-10-09) unless a source is named.
 - **Reason**: decision of the owner, 2026-10-09. Fact: `uv` 0.12.19 offers 3.14 as the newest
   stable version; 3.15 is a release candidate. The tooling runs only on the workstation of the
   owner and in the CI, so it does not need an old version.
-- **This supersedes** the decision of the same day to require Python 3.11 for helpers. The
-  skills that users install keep the rule of `AGENTS.md`.
+- **This supersedes** the decision of the same day to require Python 3.11 for helpers.
+- **One version**: direction of the owner, 2026-10-09: the repository must not use more than
+  one Python version. On this branch the CI job for 3.13 is replaced by the job for 3.14. The
+  job for 3.9 and the rule for the skill `library-vetting` stay until a migration, which is a
+  different pull request for everything that is not on this branch. After the migration the
+  workaround of R14 for ruff (the target one version lower) is no longer necessary.
 
 ## R15. One working branch, one commit for each phase
 

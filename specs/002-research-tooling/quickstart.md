@@ -65,6 +65,6 @@ Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
 
 | Scenario | Result |
 |---|---|
-| All parts | 671 examples in 7 programs, 0 failed. Each line has an example; the coverage with branches is 99 percent. On Python 3.9 the examples are skipped and the other tests pass. |
+| All parts | 671 examples in 7 programs, 0 failed. Each line has an example; the coverage with branches is 99 percent. On Python 3.9 the examples are skipped and the other tests pass; that job stays until the migration to one Python version. |
 | The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
 | The research skill | Open. It needs the delivery to `main` and the owner (T044, T045). |

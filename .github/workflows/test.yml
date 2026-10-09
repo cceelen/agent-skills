@@ -12,7 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: ["3.9", "3.13", "3.14"]
+        # One version is the goal: the latest stable Python. 3.9 stays only until the programs of
+        # the skill library-vetting are migrated; see the migration issue.
+        python: ["3.9", "3.14"]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

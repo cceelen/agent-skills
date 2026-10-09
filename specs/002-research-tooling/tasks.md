@@ -251,6 +251,7 @@ to add the tests that are missing
 - [x] T066 Make each example show its result; replace the loops with `assert` where a printed result is possible
 - [x] T067 Add an example for each line that the coverage report shows without one: the class `Doc` and the errors of the reader, an identifier that is used two times, the short report, the parts of a skill that a specification can leave out, the network read (from a server on the same computer), the collector that fails, the command `apply`
 - [x] T068 Give `models.py apply` the option `--root DIR`, so that its example writes into a temporary folder
+- [x] T070 Replace the CI job for Python 3.13 with the job for Python 3.14 in `.github/workflows/test.yml`, so that this branch adds no third version; the migration of all other code to one version is a different pull request
 - [x] T069 Increase the coverage minimum in `pyproject.toml` to 95 percent, and write the rule for examples into `AGENTS.md`
 
 ---
