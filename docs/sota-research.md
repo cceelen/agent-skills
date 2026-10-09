@@ -7,6 +7,28 @@ accepts the result.
 
 The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 
+## The four phases
+
+| Phase | What occurs | Your part as the owner |
+|---|---|---|
+| 1. What to build | The agent settles the aspect, its contexts, its risk dimensions and its boundaries with you. | You decide the scope. |
+| 2. Research | Isolated readers read the sources. The agent distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
+| 3. Review | The agent stops and gives you the findings. | You confirm the sources, correct the answers and accept the result. |
+| 4. Rendering | A program renders the recipe skill. A pull request delivers it. | You review the pull request. |
+
+To start, tell your agent to read `factory/sota-research/SKILL.md` and to distil an aspect.
+The steps of the agent are in `factory/sota-research/references/procedure.md`.
+
+The readers of sources are agents with web tools only. They have no shell, no file tools and
+no credentials. Before the first run, write their agent files:
+
+```text
+uv run factory/sota-research/scripts/models.py apply
+```
+
+If your agent product cannot limit the tools of an agent, the program tells you. Do not start
+a research run with that agent product.
+
 ## Before you start
 
 - Install `uv`. The programs use the latest stable Python, and `uv` gets it.

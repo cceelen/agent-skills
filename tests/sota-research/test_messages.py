@@ -3,7 +3,7 @@
 import ast
 import re
 
-from helpers import SCRIPTS
+from helpers import SCRIPTS, module
 
 TOOLING = SCRIPTS.parent
 PROGRAMS = sorted(p for p in SCRIPTS.glob("*.py"))
@@ -31,7 +31,10 @@ def test_no_model_name_in_the_text_for_agents():
     table = SCRIPTS / "models.py"
     if not table.is_file():
         return
-    names = set(re.findall(r'"((?:claude|gpt|gemini|o\d)[a-z0-9.\-]*)"', table.read_text()))
-    texts = [TOOLING / "SKILL.md", *TOOLING.glob("prompts/*.md"), *TOOLING.glob("agent-templates/*.md")]
+    defaults = module("models").DEFAULTS
+    names = {model for roles in defaults.values() for model in roles.values()} - {"inherit"}
+    assert names
+    texts = [TOOLING / "SKILL.md", *TOOLING.glob("references/*.md"), *TOOLING.glob("prompts/*.md")]
+    texts += TOOLING.glob("agent-templates/*.md")
     found = [f"{t.name}: {n}" for t in texts for n in sorted(names) if n in t.read_text()]
     assert not found

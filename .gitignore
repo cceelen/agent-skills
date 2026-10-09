@@ -6,3 +6,4 @@ __pycache__/
 vet/
 .DS_Store
 .claude/library-vetting/
+.claude/agents/sota-*.md
