@@ -113,3 +113,45 @@ The program computes `return = severity x probability x breadth`, `cost = adopt 
 The thresholds and the cost limit are in the rubric file. If you change the rubric, increase
 its version. As the owner, you can correct each answer in `vetting.md`. Then run the program
 again.
+
+## Vet an independent source
+
+A source of a smaller independent issuer supports an item only after its vetting. Use `vet.py`
+for each source with the class `independent`.
+
+1. Write one row for the source in the table "Sources" of `vetting.md`. Record two answers in
+   the cell Answers, each with its evidence:
+   `record: yes (<URL>); fast-lane references: 2 (S-01, S-07)`.
+   - `record` tells if the author has a record in the field.
+   - `fast-lane references` tells how many fast-lane sources of the specification refer to
+     the source.
+2. Collect the signals. This step uses the network. Use a work folder outside the repository.
+
+   ```text
+   uv run factory/sota-research/scripts/vet.py collect specs/<number>-<name> --work <folder> --today <date>
+   ```
+
+3. Compute the scores. This step uses no network.
+
+   ```text
+   uv run factory/sota-research/scripts/vet.py score specs/<number>-<name> --work <folder> --write
+   ```
+
+4. As the owner, read the signals and the score of each source that passed. Then write your
+   name and the date into the cell "Confirmed by", or write `rejected`.
+
+The program rejects a source without a question to you in these cases:
+
+- The source names no author and no issuer.
+- The source has no date.
+- The source is older than the limit of the rubric. To use a different limit for one aspect,
+  use `--max-age <days>`.
+- The address of the source answers "not found".
+- The score is below the pass score of the rubric.
+
+If the program cannot measure a signal, it records the error and continues. Collect the
+signals of that source again. The gates, the weights and the pass score are in
+`factory/sota-research/scripts/rubric-sources.txt`.
+
+For a source that is a repository, the program runs the collector of the skill
+`library-vetting`. That collector makes a clone of the repository in the work folder.

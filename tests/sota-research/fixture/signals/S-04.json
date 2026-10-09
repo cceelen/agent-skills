@@ -1,0 +1,15 @@
+{
+  "collector": 1,
+  "errors": {},
+  "kind": "repository",
+  "signals": {
+    "age_days": 69,
+    "authors_24m": 3,
+    "commits_12m": 30,
+    "date": "2025-11-02",
+    "reachable": true
+  },
+  "source": "S-04",
+  "today": "2026-01-10",
+  "url": "https://forge.example/example-org/backup-examples"
+}

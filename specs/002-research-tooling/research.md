@@ -84,8 +84,8 @@ repository (read on 2026-10-09) unless a source is named.
 - **Decision**: two steps, as in `library-vetting`. `vet.py collect` uses the network and
   writes the signals to a work folder that is not committed. `vet.py score` uses no network: it
   reads the signals and the recorded answers and writes the table in `vetting.md`.
-  - A repository: `collect` calls `skills/library-vetting/scripts/collect.py --lite` and takes
-    its facts.
+  - A repository: `collect` calls `skills/library-vetting/scripts/collect.py` and takes the
+    date of the last commit and the number of commits and authors from its facts.
   - A page: `collect` measures: the page can be reached; a date is present; the age in days
     against a date that the caller gives; an author or issuer is named; the number of links to
     other hosts.

@@ -159,16 +159,22 @@ source is rejected by a gate, and `check.py` reports the item that rests on an u
 
 ### Tests for User Story 4
 
-- [ ] T032 [P] [US4] Create `tests/sota-research/fixture/signals/` with one JSON file for each independent source of `good` and of a new fixture `tests/sota-research/fixture/vetting/`: a page that passes, a page without a date (gate), a page older than the limit (gate), a repository with facts in the form of the collector of `library-vetting`, and a source with one signal not measured
-- [ ] T033 [US4] Write `tests/sota-research/test_vet.py`: `score` gives the expected gate result and score for each source and uses no network (the test replaces `urllib.request.urlopen` with a function that fails); a signal that is not measured is shown as not measured and the run continues; `--write` fills the table "Sources" and never the cell "Confirmed by"; result code 1 while a source is not confirmed; the parsing of a saved page (`tests/sota-research/fixture/pages/*.html`) gives the date, the author and the number of links to other hosts; `collect` with a failing network writes a signal file with the error and has no exception
+- [x] T032 [P] [US4] Create `tests/sota-research/fixture/signals/` with one JSON file for each independent source of `good` and of a new fixture `tests/sota-research/fixture/vetting/`: a page that passes, a page without a date (gate), a page older than the limit (gate), a repository with facts in the form of the collector of `library-vetting`, and a source with one signal not measured
+- [x] T033 [US4] Write `tests/sota-research/test_vet.py`: `score` gives the expected gate result and score for each source and uses no network (the test replaces `urllib.request.urlopen` with a function that fails); a signal that is not measured is shown as not measured and the run continues; `--write` fills the table "Sources" and never the cell "Confirmed by"; result code 1 while a source is not confirmed; the parsing of a saved page (`tests/sota-research/fixture/pages/*.html`) gives the date, the author and the number of links to other hosts; `collect` with a failing network writes a signal file with the error and has no exception
+
+Done differently than T032, T036 and T037 say: the tests change the two signal files at run time
+to make the gate cases. The age limit is an option of `score`, not of `collect`, so that a new
+limit needs no new collection. The collector of `library-vetting` runs without `--lite`,
+because only its full mode gives the history of the repository. A date in section 2 is used
+when the page gives none.
 
 ### Implementation for User Story 4
 
-- [ ] T034 [US4] Write `factory/sota-research/scripts/rubric-sources.txt`: the version; the gates (no author or issuer, no date, older than the limit, not reachable); the signals and the two recorded answers with their weights; the score at which a source passes to the owner
-- [ ] T035 [US4] Implement `vet.py score` in `factory/sota-research/scripts/vet.py` as in `contracts/programs.md`: read the signal files and the answers of the table "Sources", apply the gates, compute the score, print and with `--write` fill the table
-- [ ] T036 [US4] Implement `vet.py collect` in `factory/sota-research/scripts/vet.py` for a page, as in R9 of `research.md`: `http` and `https` only, a timeout, a limit of 2 MB, no cookies, no credentials; read the header fields and the meta fields for the date and the author; count the links to other hosts; the age from `--today`; each error becomes a signal that was not measured
-- [ ] T037 [US4] Implement `vet.py collect` for a repository: run `skills/library-vetting/scripts/collect.py --lite` with the interpreter of the current process and take the facts that the rubric names; when the collector is absent or fails, record that and continue
-- [ ] T038 [US4] Fill the section for `vet.py` in `docs/sota-research.md`, and add the two steps and the confirmation of the owner to `factory/sota-research/references/procedure.md`
+- [x] T034 [US4] Write `factory/sota-research/scripts/rubric-sources.txt`: the version; the gates (no author or issuer, no date, older than the limit, not reachable); the signals and the two recorded answers with their weights; the score at which a source passes to the owner
+- [x] T035 [US4] Implement `vet.py score` in `factory/sota-research/scripts/vet.py` as in `contracts/programs.md`: read the signal files and the answers of the table "Sources", apply the gates, compute the score, print and with `--write` fill the table
+- [x] T036 [US4] Implement `vet.py collect` in `factory/sota-research/scripts/vet.py` for a page, as in R9 of `research.md`: `http` and `https` only, a timeout, a limit of 2 MB, no cookies, no credentials; read the header fields and the meta fields for the date and the author; count the links to other hosts; the age from `--today`; each error becomes a signal that was not measured
+- [x] T037 [US4] Implement `vet.py collect` for a repository: run `skills/library-vetting/scripts/collect.py --lite` with the interpreter of the current process and take the facts that the rubric names; when the collector is absent or fails, record that and continue
+- [x] T038 [US4] Fill the section for `vet.py` in `docs/sota-research.md`, and add the two steps and the confirmation of the owner to `factory/sota-research/references/procedure.md`
 
 **Checkpoint**: commit the phase. After the delivery to `main`, on the branch
 `001-sota-research`, apply `vet.py` and `place.py` to that specification in a pull request

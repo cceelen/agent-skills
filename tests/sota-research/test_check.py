@@ -93,8 +93,8 @@ DEFECTS = {
     "only-unread-source": ("spec.md", "| CC BY 4.0 | full |", "| CC BY 4.0 | no |", "C-02"),
     "only-rejected-source": (
         "vetting.md",
-        "fast-lane references: 1 (S-02) | | | A. Person, 2026-01-15 |",
-        "fast-lane references: 1 (S-02) | | | rejected |",
+        "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |",
+        "| 9 of 10 | 2026-01-10 | rejected |",
         "C-04",
     ),
 }
@@ -167,9 +167,7 @@ def test_remains_do_not_fail_the_check(tmp_path):
     vetting = (
         (target / "vetting.md")
         .read_text()
-        .replace(
-            "fast-lane references: 0 | | | A. Person, 2026-01-15", "fast-lane references: 0 | | | pending"
-        )
+        .replace("| 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |", "| 8 of 10 | 2026-01-10 | pending |")
     )
     (target / "vetting.md").write_text(vetting)
     code, result = findings(target)
@@ -246,8 +244,8 @@ def test_no_argument_prints_the_usage():
 
 
 def test_an_item_that_waits_for_a_vetting_remains(tmp_path):
-    old = "fast-lane references: 1 (S-02) | | | A. Person, 2026-01-15 |"
-    target = copy_with(tmp_path, "vetting.md", old, "fast-lane references: 1 (S-02) | | | pending |")
+    old = "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
+    target = copy_with(tmp_path, "vetting.md", old, "| 9 of 10 | 2026-01-10 | pending |")
     code, result = findings(target)
     assert code == 0
     assert result["remains"]["waiting"] == ["C-04"] and result["remains"]["vettings"] == ["S-03"]

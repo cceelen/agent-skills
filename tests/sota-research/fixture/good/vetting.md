@@ -6,8 +6,8 @@ Rubric for sources: version 1. Rubric for items: version 1.
 
 | Source | Kind | Gates | Signals | Answers | Score | Date | Confirmed by |
 |---|---|---|---|---|---|---|---|
-| S-03 | page | | | record: yes (https://writer.example/about); fast-lane references: 1 (S-02) | | | A. Person, 2026-01-15 |
-| S-04 | repository | | | record: yes (https://forge.example/example-org); fast-lane references: 0 | | | A. Person, 2026-01-15 |
+| S-03 | page | pass | reachable yes; date 2025-06-01; age 223 d; author yes; links out 6 | record: yes (https://writer.example/about); fast-lane references: 1 (S-02) | 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |
+| S-04 | repository | pass | reachable yes; date 2025-11-02; age 69 d; author yes; commits 12m 30 | record: yes (https://forge.example/example-org); fast-lane references: 0 | 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |
 
 ## Items
 

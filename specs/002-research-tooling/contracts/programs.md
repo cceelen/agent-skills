@@ -57,8 +57,8 @@ place.py SPEC [--write]
 ## scripts/vet.py
 
 ```text
-vet.py collect SPEC --work DIR --today DATE [--max-age DAYS] [SOURCE-ID ...]
-vet.py score   SPEC --work DIR [--write]
+vet.py collect SPEC --work DIR --today DATE [SOURCE-ID ...]
+vet.py score   SPEC --work DIR [--write] [--max-age DAYS] [--rubric FILE]
 ```
 
 - `collect`: for each independent source of section 2 (or the named ones), measures the
@@ -69,7 +69,8 @@ vet.py score   SPEC --work DIR [--write]
 - `score`: reads the signal files, the recorded answers in the table "Sources" of
   `SPEC/vetting.md` and `scripts/rubric-sources.txt`. Applies the gates, computes the score.
   Uses no network. `--write` fills the table "Sources"; it never fills "confirmed by".
-- Result code `1` when a source is not scored or not confirmed.
+- `--max-age DAYS` replaces the age limit of the rubric for one aspect.
+- Result code `1` when a source is not scored, is rejected or is not confirmed.
 - `DIR` is a work folder outside the repository or ignored by git. It is not committed.
 
 ## scripts/models.py
