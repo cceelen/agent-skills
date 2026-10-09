@@ -47,9 +47,17 @@ users, the forge and the stack. The knowledge keeps the two apart.
 
 ### V. The kit recommends, the user selects
 
-Each item sits on one of three cumulative levels. The exposure of a project, that is who
-depends on it, decides which level the project aims for. The user picks the target and declines
-single items with a reason. The selection is a plain checklist that is committed in the project
+A practice of the state of the art answers a specific result of a risk analysis. Thus a recipe
+leads the user through an educated and opinionated risk analysis of their software, their
+market, their context, their users and their data. Each item names the risk that it answers.
+
+Each item sits on one of three cumulative levels. Level 1 holds the basic practices: a good
+return at a low cost in each context. How far a project goes past them follows from its risk.
+Risk has more than one dimension, for example the operative, the regulatory and the commercial
+one, and the dimensions change with the aspect, the use case and the stack. A recipe names the
+risk dimensions of its aspect and gives its opinion for each. The skill does the analysis
+together with the owner of the project, to find where the more costly practices are necessary.
+The user picks the target and declines single items with a reason. The selection is a plain checklist that is committed in the project
 and simple to revisit.
 
 ### VI. Point, do not copy
@@ -105,6 +113,9 @@ one meaning, an instruction is a command, and the condition comes before the ins
    its recipe. Layer two is one specification per set of implementation skills, with the helper
    software, built through the product flow of Spec Kit. The layers iterate.
 
+The main branch holds the machinery and the delivered skills only. Each specification, with its
+evidence and its research records, stays on its own branch.
+
 A specification keeps a short evidence record: for each source a summary of what it contributes,
 where in the source that is, and the date read. A quote is kept only where the wording itself is
 the point. Nothing else that was read is stored. The owner starts a refresh and accepts a recipe;
@@ -121,4 +132,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.1.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
+**Version**: 3.2.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
