@@ -70,9 +70,12 @@ factory is improved with.
 
 ### 3.2 Order of the work
 
-1. **What to build.** Settle with the owner, in dialogue, the aspect, its contexts and its
-   boundaries. A scope that is fixed first reduces the bias of what the search finds.
-2. **Research.** List what exists: the SOTA of most aspects is already written down. Search
+1. **What to build.** Settle with the owner, in dialogue, the field and the thing to build, and
+   nothing narrower. Do not settle a use case, a first user, contexts or risk dimensions: a
+   scope that is narrowed before the research steers the recipe to one use case.
+2. **Research.** List what exists: the SOTA of most aspects is already written down. Find in
+   the sources the contexts that change the strategy, the dimensions of risk and the
+   boundaries to the neighbouring aspects: these are findings, as the checklist items are. Search
    and fetch openly, with isolated readers. Give each source its class. Vet each independent
    source. Distil: a statement that holds across contexts becomes a checklist item, one that
    depends on context becomes a decision of the strategy, one about a single product goes to an
@@ -101,7 +104,7 @@ factory is improved with.
 |---|---|---|---|
 | Which level "state of the art" names | The consolidated stage (ISO: consolidated findings; SWEBOK: generally accepted knowledge). Or the stage ahead of the accepted rules: at the front of development (Kalkar), between research and the generally accepted rules, and proven in practice (TeleTrusT). | This kit aims at the global state of the art: the best practices that the industry has produced so far, which can be ahead of what is generally accepted and of what one organization does today. An item enters on two questions: is it recognized by experts, and is it proven in practice. Spread and newness do not count. | S-08, S-09, S-10, S-11 |
 | Whether "best practice" exists outside simple contexts | Best practice is past practice and is often appropriate in simple contexts; in complicated contexts good practice is more appropriate, and complex and chaotic contexts need other approaches. Or a framework states outcome practices and adds examples that are not required. | Checklist items are generic and say what, not how. Everything that depends on context is a decision of the strategy. | S-23, S-07 |
-| Protocol first, or search that follows the sources | A protocol before the search reduces researcher bias, and its stages iterate. Protocol-driven database search alone is not necessarily the most efficient way to find sources. | Scope first. Changes of the scope during the work are allowed and recorded with their reason. | S-01 section 5.4; S-25 section 1; S-02 item 24c |
+| Protocol first, or search that follows the sources | A protocol before the search reduces researcher bias, and its stages iterate. Protocol-driven database search alone is not necessarily the most efficient way to find sources. | Only the field and the thing to build are fixed first. The contexts, the risk dimensions and the boundaries follow from the sources and are reviewed by the owner after the research. The kit aims at the global state of the art; a protocol that fixes a population and a context first would narrow it to one use case. | S-01 section 5.4; S-25 section 1; S-02 item 24c |
 | Update in place, or a new version | A living review shows its status and last search date in a status table and publishes a new version when new information is likely to change the result or on a fixed schedule. A reversed decision record is kept and marked superseded. | A refresh without change updates the research date. A changed item or decision gets a row in section 7, and the earlier one is marked superseded. | S-12, S-19 |
 | Whether instruction files help agents | No general gain in task success, and over 20 % more cost. Useful for practices that are not standard. | Keep only what the agent cannot learn elsewhere, and test a recipe on a real case before it is relied on. | S-17 |
 
@@ -111,7 +114,7 @@ For this aspect, the thing that is checked is an aspect specification made with 
 
 | Id | Item | Why | Level | Admitted by | Check | Source |
 |---|---|---|---|---|---|---|
-| C-01 | The aspect, its contexts and its boundaries are written and confirmed before the search. | Risk: the search steers the scope. A scope that is fixed first reduces the bias of what the search finds. | pending | authority (1) | section 1 is filled and names the date of the agreement | S-01 sections 5.3, 5.4 |
+| C-01 | The aspect, its contexts and its boundaries are written and confirmed before the search. | Risk: the search steers the scope. A scope that is fixed first reduces the bias of what the search finds. | retired | authority (1) | section 1 is filled and names the date of the agreement | S-01 sections 5.3, 5.4 |
 | C-02 | The existing descriptions of the aspect are listed with issuer, version or date, class, license and how much was read. | Risk: the recipe invents again what exists, or misses it. The SOTA of most aspects is already written down; the work is to distil it. The search record names each source and its date; the other cells are this kit's addition. | pending | authority (2) | every row of section 2 has every cell | S-03 items 1, 13 (source and date); S-04 guideline 11 |
 | C-03 | Each source has a class, and each item names the sources that support it; no single source gates the recipe. | A recipe that follows one description inherits its limits. A mapping holds only for the use it was made for. | pending | own rule (I) | every row of section 2 has a class; every Source cell names an S-id of section 2 or a principle of the constitution | constitution I; S-06 section 4 |
 | C-04 | Each checklist item is one short sentence that holds across contexts. | Risk: an item that holds in one context only misleads in the others. The outcome holds across contexts; the way to reach it must be adapted. | pending | authority (2) | no item names a technology, a tool or a vendor from the word list of the aspect | S-07 sections 1, 2; S-23 |
@@ -133,6 +136,7 @@ For this aspect, the thing that is checked is an aspect specification made with 
 | C-20 | A source from a smaller independent issuer is vetted with measured signals before it supports an item, and the owner confirms the result. | A blog or a small repository can be outdated, poisoned or an attack; the trust in a source must be measured as the trust in a library is. | pending | own rule (II) | `vetting.md` has an entry for each source of class independent | constitution II |
 | C-21 | A reader of sources works without a shell, without credentials and without access to the repository. | The moment a model reads a page is the moment hostile content can act. | pending | own rule (III) | the reader role lists no such tool | constitution III; S-15 |
 | C-22 | A person settles what to build before the research and reviews the findings and the strategies before anything is built. | Risk: the factory builds the wrong thing, or builds on wrong findings. Automation in evidence work is used with human oversight. | pending | authority (1) | section 7 names the person and both dates | S-13 key messages |
+| C-23 | Before the search, only the field and the thing to build are settled. The contexts, the risk dimensions and the boundaries of the aspect are findings of the research. | Risk: a scope that is narrowed before the research steers the recipe to one use case and misses the global state of the art. | pending | own rule (I) | the field "Agreed with the owner on" has a date; each context, each risk dimension and each boundary of section 1 names its source or says "judgement" | constitution I, IV |
 
 **Selection.** For this aspect the user is the owner of the kit, who adopts or declines the
 items above for the kit as a whole. Section 7 records it when the review is done.
@@ -144,7 +148,7 @@ items above for the kit as a whole. Section 7 records it when the review is done
 Tooling of this repository, not a plugin of the marketplace.
 
 - **Goal**: one reviewed aspect specification, made with this recipe.
-- **Reads first**: the contexts of section 1 for the aspect; what the owner already trusts;
+- **Reads first**: the field and the thing to build; what the owner already trusts;
   whether an earlier revision exists; whether the sources can be reached.
 - **Applies**: the strategy of section 3; it judges C-08, C-13 and C-17.
 - **Delegates**: the reading and quoting of each source, the vetting of sources, the calculation
@@ -156,7 +160,7 @@ Tooling of this repository, not a plugin of the marketplace.
 
 | Product or tool | Capability | Checklist items it implements | Helper software it needs |
 |---|---|---|---|
-| Spec Kit | the layer-one command and template beside the unchanged product flow | C-01, C-22 | none: Spec Kit resolves a project-local template first (S-24) |
+| Spec Kit | the layer-one command and template beside the unchanged product flow | C-22, C-23 | none: Spec Kit resolves a project-local template first (S-24) |
 | The collector of `library-vetting` | measured signals for an independent source | C-20 | a rubric for sources and a program that scores it |
 | This repository | the calculation of risk and reward | C-18 | a rubric and a program that computes admission, order and level |
 | This repository | the check of an aspect specification and its evidence record | C-02 to C-07, C-09, C-10, C-14 to C-16 | a program that reports each failing check and what remains |
@@ -198,6 +202,7 @@ Tooling of this repository, not a plugin of the marketplace.
 | 2026-10-09 | Level 1 holds the basic practices. How far a project goes past them follows from its risk on the risk dimensions of the aspect (for example operative, regulatory, commercial). Each aspect names its dimensions, and the recipe skill assesses them with the owner of the project. An item above level 1 names its dimension. This refines the decision on the three levels: exposure is one dimension of several. | Owner: the assessment differs by use case, project, stack and aspect; data safety has an operative side (reversible operations, backups), a regulatory side (personal data) and a commercial side (patent or other value). | the first aspect with real dimensions is distilled |
 | 2026-10-09 | A practice of the state of the art answers a specific result of a risk analysis. A recipe skill leads the user through an educated and opinionated risk analysis of their software, their market, their context, their users and their data. Each item names the risk that it answers. | Owner. |  |
 | 2026-10-09 | The main branch holds the machinery and the delivered skills only. Each specification stays on its own branch, with its evidence and its research records. A Spec Kit step is a pull request into that branch, and a delivery is a pull request into the main branch. The tooling of the factory is in the folder `factory/`. | Owner: a clean separation of research and delivered skills. | a recipe needs the specification of a different aspect |
+| 2026-10-09 | Before the research, the owner and the agent settle only the field and the thing to build. The contexts, the risk dimensions and the boundaries of an aspect are findings of the research, and the owner reviews them with the other findings. A use case is chosen only when a recipe is applied to a project. C-01 is retired and C-23 takes its place. | Owner, after the first trial of phase 1: the scoping narrowed too early, to one use case, two steps before the place where a use case belongs. The trial was not valid. | the research of one aspect has no direction without more scope |
 | 2026-10-09 | Each skill that the factory makes writes to the person in the loop in ASD-STE100 Simplified Technical English. | Owner. |  |
 | 2026-10-09 | The research skill is tooling of this repository, not a plugin. It gets its own product specification with user stories; the requirements that an earlier revision listed here move there. | Owner. | others ask to add aspects |
 | 2026-10-09 | A recipe is proven by review, helper software by its tests. Measured proof on the reference case is not possible: its first commit already held most of its pipeline. | Owner; fact from the history of the reference project. |  |
