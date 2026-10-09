@@ -98,13 +98,17 @@ def field(data, name):
     return data["skill"].get(name, {}).get("value", "")
 
 
-def level_order(row):
-    level, _ = aspect.level_of(row.get("level"))
-    return (level if isinstance(level, int) else 9, row.get("id", ""))
-
-
 def rendered_items(data):
-    """The items of the recipe: admitted and not retired, by level and identifier."""
+    """The items of the recipe: admitted and not retired, by level, score and identifier."""
+    scores = {}
+    for row in data["vetting_items"]:
+        if re.fullmatch(r"-?\d+", row.get("score", "")):
+            scores[row.get("item")] = int(row["score"])
+
+    def level_order(row):
+        level, _ = aspect.level_of(row.get("level"))
+        return (level if isinstance(level, int) else 9, -scores.get(row.get("id"), 0), row.get("id", ""))
+
     keep = [
         r for r in data["checklist"] if aspect.level_of(r.get("level"))[0] not in ("not admitted", "retired")
     ]

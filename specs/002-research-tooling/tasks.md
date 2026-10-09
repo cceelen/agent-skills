@@ -132,15 +132,19 @@ copies it into the skill.
 
 ### Tests for User Story 3
 
-- [ ] T026 [P] [US3] Fill the table "Items" in `tests/sota-research/fixture/good/vetting.md` with answers that give: one item on level 1, one on `2, <dimension>`, one on `3, <dimension>`, one not admitted; create `tests/sota-research/fixture/missing-answer/` (one answer empty) and `tests/sota-research/fixture/level-without-dimension/` (an item above level 1 whose Level cell names no dimension)
-- [ ] T027 [US3] Write `tests/sota-research/test_place.py`: the return, cost, score, admission, level and position of each item of `good` are the expected values; `missing-answer` leaves that item `pending`, names the answer and has result code 1; an answer out of its scale is reported; without `--write` no file changes; with `--write` only the computed cells of "Items" and the Level cells of the checklist change; a corrected answer changes only its item; the record carries the version of the rubric; two runs give the same bytes
+- [x] T026 [P] [US3] Fill the table "Items" in `tests/sota-research/fixture/good/vetting.md` with answers that give: one item on level 1, one on `2, <dimension>`, one on `3, <dimension>`, one not admitted; create `tests/sota-research/fixture/missing-answer/` (one answer empty) and `tests/sota-research/fixture/level-without-dimension/` (an item above level 1 whose Level cell names no dimension)
+- [x] T027 [US3] Write `tests/sota-research/test_place.py`: the return, cost, score, admission, level and position of each item of `good` are the expected values; `missing-answer` leaves that item `pending`, names the answer and has result code 1; an answer out of its scale is reported; without `--write` no file changes; with `--write` only the computed cells of "Items" and the Level cells of the checklist change; a corrected answer changes only its item; the record carries the version of the rubric; two runs give the same bytes
+
+Done differently than T026 and T029 say: the tests make the defect copies at run time. The risk
+dimension of an item is recorded in a new cell Dimension of the table "Items", not in the Level
+cell: the program then writes the Level cell as a whole.
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] Write `factory/sota-research/scripts/rubric-items.txt`: the version; the six questions with stable identifiers and scales (severity 1 to 3, probability 1 to 3, breadth 1 to 3, adopt 1 to 3, keep 1 to 3, own risk 0 to 2), each with the meaning of each value in one line; the admission threshold; the level 1 threshold; the cost limit 4 between level 2 and level 3
-- [ ] T029 [US3] Implement `factory/sota-research/scripts/place.py` as in `contracts/programs.md` and R7 of `research.md`, in whole numbers: `return = severity x probability x breadth`, `cost = adopt + keep`, `score = (return x 10) // cost - 5 x own risk`; admitted when the score is at or above the admission threshold; level 1 when breadth is 3 and the score is at or above the level 1 threshold; else level 2 when the cost is 4 or less, level 3 when it is more, with the dimension that the Level cell already names; order by level, then score from high to low, then identifier
-- [ ] T030 [P] [US3] Write `factory/sota-research/prompts/risk-answers.md`: the task to record the six answers for one item, each with its source or `(judgement)`, and to name the risk dimension for an item whose return depends on the risk of a project; the task says that a program computes the level
-- [ ] T031 [US3] Fill the section for `place.py` in `docs/sota-research.md`, and add the step to `factory/sota-research/references/procedure.md`
+- [x] T028 [US3] Write `factory/sota-research/scripts/rubric-items.txt`: the version; the six questions with stable identifiers and scales (severity 1 to 3, probability 1 to 3, breadth 1 to 3, adopt 1 to 3, keep 1 to 3, own risk 0 to 2), each with the meaning of each value in one line; the admission threshold; the level 1 threshold; the cost limit 4 between level 2 and level 3
+- [x] T029 [US3] Implement `factory/sota-research/scripts/place.py` as in `contracts/programs.md` and R7 of `research.md`, in whole numbers: `return = severity x probability x breadth`, `cost = adopt + keep`, `score = (return x 10) // cost - 5 x own risk`; admitted when the score is at or above the admission threshold; level 1 when breadth is 3 and the score is at or above the level 1 threshold; else level 2 when the cost is 4 or less, level 3 when it is more, with the dimension that the Level cell already names; order by level, then score from high to low, then identifier
+- [x] T030 [P] [US3] Write `factory/sota-research/prompts/risk-answers.md`: the task to record the six answers for one item, each with its source or `(judgement)`, and to name the risk dimension for an item whose return depends on the risk of a project; the task says that a program computes the level
+- [x] T031 [US3] Fill the section for `place.py` in `docs/sota-research.md`, and add the step to `factory/sota-research/references/procedure.md`
 
 **Checkpoint**: commit the phase.
 

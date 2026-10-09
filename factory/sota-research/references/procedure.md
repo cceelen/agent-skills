@@ -30,3 +30,14 @@ Render only after the owner wrote the acceptance into the head line of `spec.md`
    specification with `git checkout <branch> -- <paths>`. Open a pull request into `main`.
 
 Do not edit a rendered file. If `render.py --check` reports a difference, render again.
+
+## The calculation of risk and reward
+
+Do this after the checklist is distilled and before the stop for the owner.
+
+1. Read `prompts/risk-answers.md` and do its steps: record the six answers for each item in
+   the table "Items" of `vetting.md`.
+2. Run `uv run scripts/place.py <folder of the specification>`.
+3. Correct each item that is pending. Do not write a level by hand.
+4. Run the program with `--write`. It fills the Level cells of the checklist.
+5. Give the table "Items" to the owner with the findings. The owner can correct each answer.

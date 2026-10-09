@@ -81,3 +81,35 @@ To deliver a rendered skill, do these steps:
 3. Get only the rendered files from the branch of the specification:
    `git checkout <branch of the specification> -- skills/<name> docs/<name>.md`
 4. Open a pull request into `main`.
+
+## Place the items with the calculation of risk and reward
+
+Use `place.py` to get the admission, the order and the level of each item. A model does not
+assign a level.
+
+1. Record six answers for each item in the table "Items" of `vetting.md`. The questions and
+   the scales are in `factory/sota-research/scripts/rubric-items.txt`.
+2. Write each answer as a number with its source: `3 (S-02 section 4)`.
+3. If the return of an item depends on the risk of a project, write its risk dimension in the
+   cell Dimension.
+4. Run the program:
+
+   ```text
+   uv run factory/sota-research/scripts/place.py specs/<number>-<name>
+   ```
+
+5. Correct each item that the program reports as pending. Then run the program with `--write`.
+
+The program computes `return = severity x probability x breadth`, `cost = adopt + keep`, and
+`score = (return x 10) // cost - 5 x own risk`.
+
+| Result | Condition |
+|---|---|
+| admitted | The score is at or above the admission threshold. |
+| level 1 | The breadth is 3, and the score is at or above the level 1 threshold. |
+| level 2 | The item is not on level 1, and the cost is at or below the cost limit. |
+| level 3 | The item is not on level 1, and the cost is above the cost limit. |
+
+The thresholds and the cost limit are in the rubric file. If you change the rubric, increase
+its version. As the owner, you can correct each answer in `vetting.md`. Then run the program
+again.

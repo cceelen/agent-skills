@@ -50,8 +50,9 @@ place.py SPEC [--write]
   checklist in `SPEC/spec.md`. Without it, the program changes no file.
 - An item with a missing answer stays `pending`, and the report names the answer. Result
   code `1` when an item is pending.
-- An item above level 1 without a risk dimension in its Level cell is reported; the program
-  does not choose a dimension.
+- An item above level 1 without a risk dimension in the cell Dimension of the table "Items"
+  stays `pending` and is reported; the program does not choose a dimension.
+- `--rubric FILE`: a different rubric file, for tests.
 
 ## scripts/vet.py
 
