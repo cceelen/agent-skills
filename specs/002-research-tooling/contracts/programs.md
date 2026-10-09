@@ -76,9 +76,11 @@ vet.py score   SPEC --work DIR [--write] [--max-age DAYS] [--rubric FILE]
 ## scripts/models.py
 
 ```text
-models.py detect | apply [--scope user|project] | show
+models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M]
 ```
 
-The same contract as `skills/library-vetting/scripts/models.py`, for the roles
+`apply` writes the two agent files into the project folder of the agent product in this
+repository. `show` prints them and writes nothing. The names of the tools and the detection of
+the agent product come from `skills/library-vetting/scripts/models.py`. The roles are
 `source-reader` (smallest capable model; web search and web fetch) and `second-reader`
 (mid-size model; web fetch).

@@ -91,7 +91,8 @@ uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <c
   `Target folder` in section 5 of the specification.
 - Each rendered file starts with a stamp: the branch, the commit and the digest of the
   specification. Do not edit a rendered file. Change the specification and render it again.
-- The program renders nothing if a check fails or if the acceptance is missing.
+- The program renders nothing if a check fails, if an item has no level, or if the acceptance
+  is missing. The acceptance needs a person and a date.
 
 To find out if a rendered skill is current, use `--check`. The program then writes nothing and
 compares the files with a fresh rendering.
@@ -170,6 +171,13 @@ The program rejects a source without a question to you in these cases:
   use `--max-age <days>`.
 - The address of the source answers "not found".
 - The score is below the pass score of the rubric.
+
+A page gives its own date, its own author and its own links. Thus these signals are weak:
+they show that a page is not careless, not that it is correct. The two answers of the reader
+and your confirmation carry the trust.
+
+The program reads only public addresses with `http` or `https`. It does not follow a redirect
+to a local or private address.
 
 If the program cannot measure a signal, it records the error and continues. Collect the
 signals of that source again. The gates, the weights and the pass score are in

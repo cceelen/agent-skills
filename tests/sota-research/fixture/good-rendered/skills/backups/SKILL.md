@@ -1,6 +1,6 @@
 ---
 name: backups
-description: Applies the state of the art of this aspect to a project: Backups of project data. It does a risk analysis with the owner, proposes the practices to adopt, and reports which checks fail. Use it when a project starts work on this aspect or reviews it.
+description: "Applies the state of the art of this aspect to a project: Backups of project data. It does a risk analysis with the owner, proposes the practices to adopt, and reports which checks fail. Use it when a project starts work on this aspect or reviews it."
 ---
 
 <!-- Rendered from the specification branch `900-backups`, commit `0000000`, spec.md sha256 `bf0811e0ed4dd1f65c7a609600d85b931f343e94a7eda3b2656211bdff6a5388`.
@@ -45,8 +45,9 @@ The kit recommends. The owner of the project decides.
 
 - The selection of the project is the file `.agents/kit/backups.md` in the project. Commit it.
 - If the file does not exist, do the risk analysis and write it.
-- The file holds this recipe and its stamp, the table of the risk analysis (dimension,
-  question, answer, target level), and one line for each item of `references/checklist.md`.
+- The file names this recipe with its stamp. It holds the table of the risk analysis:
+  dimension, question, answer and target level. It holds one line for each item of
+  `references/checklist.md`.
 - Write `- [x] <id> <item>` for an adopted item.
 - Write `- [ ] <id> <item> (declined: <reason>)` for an item that the owner declines. Ask for
   the reason.

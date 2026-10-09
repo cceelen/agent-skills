@@ -23,6 +23,7 @@ code 2: the input cannot be read.
 """
 
 import hashlib
+import json
 import pathlib
 import re
 import sys
@@ -40,6 +41,10 @@ MESSAGES = {
     "no-name": "Nothing was rendered: section 5 gives no name for the recipe skill.",
     "bad-name": "Nothing was rendered: the name '{0}' must use lowercase letters, digits and hyphens.",
     "no-commit": "Give the commit of the specification with --commit.",
+    "bad-commit": "The commit must be 4 to 40 characters of 0 to 9 and a to f.",
+    "bad-branch": "The name of the branch has a character that is not permitted.",
+    "bad-target": "Nothing was rendered: the target folder '{0}' must be a folder inside the repository.",
+    "levels-pending": "Nothing was rendered: these items have no level. Run place.py: {0}.",
     "word": "Nothing was rendered: the file {0} uses the product word '{1}'.",
     "too-long": "Nothing was rendered: SKILL.md has {0} lines. The maximum is 500.",
     "written": "Rendered: {0}",
@@ -66,8 +71,9 @@ The kit recommends. The owner of the project decides.
 
 - The selection of the project is the file `.agents/kit/{name}.md` in the project. Commit it.
 - If the file does not exist, do the risk analysis and write it.
-- The file holds this recipe and its stamp, the table of the risk analysis (dimension,
-  question, answer, target level), and one line for each item of `references/checklist.md`.
+- The file names this recipe with its stamp. It holds the table of the risk analysis:
+  dimension, question, answer and target level. It holds one line for each item of
+  `references/checklist.md`.
 - Write `- [x] <id> <item>` for an adopted item.
 - Write `- [ ] <id> <item> (declined: <reason>)` for an item that the owner declines. Ask for
   the reason.
@@ -109,9 +115,7 @@ def rendered_items(data):
         level, _ = aspect.level_of(row.get("level"))
         return (level if isinstance(level, int) else 9, -scores.get(row.get("id"), 0), row.get("id", ""))
 
-    keep = [
-        r for r in data["checklist"] if aspect.level_of(r.get("level"))[0] not in ("not admitted", "retired")
-    ]
+    keep = [r for r in data["checklist"] if aspect.level_of(r.get("level"))[0] in (1, 2, 3)]
     return sorted(keep, key=level_order)
 
 
@@ -135,7 +139,8 @@ def render_skill(data, name, mark):
         "a project starts work on this aspect or reviews it."
     )
     parts = [
-        f"---\nname: {name}\ndescription: {description}\n---\n",
+        # A string of JSON is a valid YAML string: a colon or a quote in the title cannot break it.
+        f"---\nname: {name}\ndescription: {json.dumps(description, ensure_ascii=False)}\n---\n",
         mark,
         f"# {title}\n",
         "## Goal\n",
@@ -244,7 +249,7 @@ def render_docs(data, name, mark):
 
 
 def target_folder(data, name):
-    given = field(data, "target folder").strip().strip("`").strip("/")
+    given = field(data, "target folder").strip().strip("`").rstrip("/")
     return pathlib.PurePosixPath(given) if given else pathlib.PurePosixPath("skills") / name
 
 
@@ -275,6 +280,12 @@ def refuse(data, words):
         return MESSAGES["no-name"]
     if not re.fullmatch(r"[a-z0-9-]+", name):
         return MESSAGES["bad-name"].format(name)
+    target = target_folder(data, name)
+    if target.is_absolute() or ".." in target.parts or not re.fullmatch(r"[A-Za-z0-9._/-]+", str(target)):
+        return MESSAGES["bad-target"].format(target)
+    pending = [r["id"] for r in check.live_items(data) if aspect.level_of(r.get("level"))[0] == "pending"]
+    if pending:
+        return MESSAGES["levels-pending"].format(", ".join(sorted(pending)))
     return None
 
 
@@ -297,11 +308,10 @@ def main():
     root = pathlib.Path(out or ".")
     try:
         data = aspect.load(folder)
-        digest = hashlib.sha256((pathlib.Path(folder) / "spec.md").read_bytes()).hexdigest()
-        words = []
-        if words_file is not None:
-            text = pathlib.Path(words_file).read_text(encoding="utf-8")
-            words = sorted({w.strip() for w in text.splitlines() if w.strip()})
+        # The digest is the same for a checkout with a different line end.
+        spec_text = aspect.read_text(pathlib.Path(folder) / "spec.md").replace("\r\n", "\n")
+        digest = hashlib.sha256(spec_text.encode("utf-8")).hexdigest()
+        words = check.read_words(words_file)
     except (aspect.Unreadable, OSError) as e:
         print(MESSAGES["unreadable"].format(e), file=sys.stderr)
         sys.exit(2)
@@ -314,10 +324,18 @@ def main():
         m = STAMP.search(on_disk.read_text(encoding="utf-8")) if on_disk.is_file() else None
         if m:
             branch, commit = branch or m.group(1), commit or m.group(2)
+    branch = branch or data["head"].get("branch", "")
+    for value, pattern, key in (
+        (commit, r"[0-9a-f]{4,40}", "bad-commit"),
+        (branch, r"[A-Za-z0-9._/-]+", "bad-branch"),
+    ):
+        if value is not None and not re.fullmatch(pattern, value):
+            print(MESSAGES[key])
+            sys.exit(1)
     if commit is None:
         print(MESSAGES["no-commit"])
         sys.exit(1)
-    files = render(data, branch or data["head"].get("branch", ""), commit, digest)
+    files = render(data, branch, commit, digest)
     skill_lines = next(len(t.splitlines()) for p, t in files.items() if p.endswith("SKILL.md"))
     reason = word_in(files, words) or (
         MESSAGES["too-long"].format(skill_lines) if skill_lines > MAX_LINES else None
@@ -326,14 +344,16 @@ def main():
         print(reason)
         sys.exit(1)
     if only_check:
-        differ = [
-            p for p, t in sorted(files.items()) if not (root / p).is_file() or (root / p).read_text() != t
-        ]
+        differ = []
+        for path, text in sorted(files.items()):
+            on_disk = aspect.read_text(root / path).replace("\r\n", "\n") if (root / path).is_file() else None
+            if on_disk != text:
+                differ.append(path)
         print("\n".join(MESSAGES["differs"].format(p) for p in differ) if differ else MESSAGES["fresh"])
         sys.exit(1 if differ else 0)
     for path, text in sorted(files.items()):
         (root / path).parent.mkdir(parents=True, exist_ok=True)
-        (root / path).write_text(text, encoding="utf-8")
+        aspect.write_text(root / path, text)
         print(MESSAGES["written"].format(path))
 
 

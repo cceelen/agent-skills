@@ -22,7 +22,7 @@ SEPARATOR = re.compile(r"^\|(\s*:?-+:?\s*\|)+\s*$")
 SOURCE_ID = re.compile(r"\bS-\d+\b")
 ITEM_ID = re.compile(r"\bC-\d+\b")
 ITEM_RANGE = re.compile(r"\bC-(\d+) to C-(\d+)\b")
-PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b")
+PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b", re.I)
 
 
 class Unreadable(Exception):
@@ -39,15 +39,30 @@ def split_row(line):
     return [line[a:b].strip().replace("\\|", "|") for a, b in cell_spans(line)]
 
 
+def read_text(path):
+    """The text of a file in UTF-8, with its line ends as they are."""
+    try:
+        with open(path, encoding="utf-8-sig", newline="") as f:
+            return f.read()
+    except OSError as e:
+        raise Unreadable(f"{path}: {e.strerror or e}") from e
+    except UnicodeDecodeError as e:
+        raise Unreadable(f"{path}: the file is not UTF-8") from e
+
+
+def write_text(path, text):
+    """Write a file in UTF-8. The line ends stay as they are in the text."""
+    with open(path, "w", encoding="utf-8", newline="") as f:
+        f.write(text)
+
+
 class Doc:
     """One Markdown file as lines, headings, tables and fields."""
 
     def __init__(self, path):
         self.path = pathlib.Path(path)
-        try:
-            self.lines = self.path.read_text(encoding="utf-8").splitlines()
-        except OSError as e:
-            raise Unreadable(f"{self.path}: {e.strerror or e}") from e
+        # Only a line feed ends a line, as in set_cell: the line numbers must agree.
+        self.lines = [line.removesuffix("\r") for line in read_text(self.path).split("\n")]
         self.headings = []  # (line index, level, number or None, title)
         fenced = False
         for i, line in enumerate(self.lines):
@@ -90,7 +105,7 @@ class Doc:
                 rows, i = [], i + 2
                 while i < end and self.lines[i].startswith("|"):
                     row = dict(zip(header, split_row(self.lines[i]), strict=False))
-                    row["_line"], row["_file"] = i + 1, self.path.name
+                    row["_line"], row["_file"], row["_header"] = i + 1, self.path.name, header
                     rows.append(row)
                     i += 1
                 found.append({"header": header, "rows": rows})
@@ -149,7 +164,7 @@ def source_ids(cell):
 
 
 def principles(cell):
-    return sorted(set(PRINCIPLE.findall(cell or "")))
+    return sorted({p.upper() for p in PRINCIPLE.findall(cell or "")})
 
 
 def item_ids(cell):
@@ -219,11 +234,28 @@ def load(folder):
 
 
 def set_cell(path, line_number, column, text):
-    """Replace one cell of one table row. No other byte of the file changes."""
-    path = pathlib.Path(path)
-    raw = path.read_text(encoding="utf-8")
-    lines = raw.split("\n")
+    """Replace one cell of one table row. No other byte of the file changes.
+
+    Returns False, and changes nothing, if the row has no cell in that column.
+    """
+    try:
+        with open(path, encoding="utf-8", newline="") as f:  # a byte order mark stays in the text
+            lines = f.read().split("\n")
+    except (OSError, UnicodeDecodeError) as e:
+        raise Unreadable(f"{path}: {e}") from e
+    if not 0 < line_number <= len(lines):
+        return False
     line = lines[line_number - 1]
-    a, b = cell_spans(line)[column]
+    spans = cell_spans(line)
+    if not 0 <= column < len(spans):
+        return False
+    a, b = spans[column]
     lines[line_number - 1] = line[:a] + " " + text.replace("|", "\\|") + " " + line[b:]
-    path.write_text("\n".join(lines), encoding="utf-8")
+    write_text(path, "\n".join(lines))
+    return True
+
+
+def column_of(row, name):
+    """The position of a column in the table of the row, or -1."""
+    header = row.get("_header", [])
+    return header.index(name) if name in header else -1

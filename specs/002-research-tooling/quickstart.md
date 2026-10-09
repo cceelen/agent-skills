@@ -79,7 +79,7 @@ Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
 
 | Scenario | Result |
 |---|---|
-| All parts | 201 tests pass on Python 3.14. On Python 3.9 the folder `tests/sota-research` is skipped and the other 99 tests pass. Python 3.13 is not installed on this machine; the CI runs it. |
+| All parts | 269 tests pass on Python 3.14, after the review phase. On Python 3.9 the folder `tests/sota-research` is skipped and the other 99 tests pass. Python 3.13 is not installed on this machine; the CI runs it. |
 | 1 to 4 | As expected. |
 | The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
 | 5 | Open. It needs the delivery to `main` and the owner (T044, T045). |

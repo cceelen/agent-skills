@@ -4,7 +4,7 @@ The folder specs/ is only on the branch of a specification. On the main branch t
 only the form of each stamp.
 """
 
-from helpers import ROOT, module, run
+from helpers import FIXTURE, ROOT, module, run
 
 aspect = module("aspect")
 render = module("render")
@@ -36,3 +36,9 @@ def test_each_stamp_has_the_right_form():
             if "Rendered from the specification" in text and not render.STAMP.search(text):
                 wrong.append(str(skill.relative_to(ROOT)))
     assert not wrong
+
+
+def test_the_expected_rendering_of_the_fixture_is_fresh():
+    # This test can fail on each branch: the fixture is always there.
+    code, out, _ = run("render", FIXTURE / "good", "--check", "--out", FIXTURE / "good-rendered")
+    assert code == 0, out

@@ -18,7 +18,6 @@ pending vettings, changed items and a missing acceptance remain; they do not fai
 """
 
 import json
-import pathlib
 import re
 import sys
 
@@ -58,7 +57,9 @@ MESSAGES = {
     "decision-without-date": "The decision has no date.",
     "watch-list-empty": "The watch list has no row.",
     "only-unread-source": "The item rests only on sources that were not read.",
-    "only-rejected-source": "The item rests only on independent sources that were rejected.",
+    "only-rejected-source": "Each source of the item was rejected or was not read.",
+    "sources-empty": "Section 2 lists no source.",
+    "checklist-empty": "The checklist of section 4 has no item.",
     "product-word": "The item uses the product word '{0}'.",
     "id-removed": "The earlier revision has this item. Keep the row and set its level to 'retired'.",
     "id-reused": "The earlier revision retired this identifier. Use a new identifier.",
@@ -94,7 +95,8 @@ def confirmed_sources(data):
     done = set()
     for row in data["vetting_sources"]:
         state = row.get("confirmed by", "").strip().lower()
-        if state not in NOT_CONFIRMED:
+        # A new rejection by a gate is stronger than an earlier confirmation.
+        if state not in NOT_CONFIRMED and not row.get("gates", "").strip().lower().startswith("rejected"):
             done.add(row.get("source", ""))
     return done
 
@@ -130,6 +132,8 @@ def check_head_and_aspect(data):
 
 def check_sources(data):
     out, seen = [], set()
+    if not data["sources"]:
+        out.append(finding("sources-empty", {}))
     for row in data["sources"]:
         ident = row.get("id", "")
         for cell in SOURCE_CELLS:
@@ -161,6 +165,8 @@ def check_references(data):
 
 def check_items(data):
     out, seen = [], set()
+    if not live_items(data):
+        out.append(finding("checklist-empty", {}))
     dimensions = {d["name"] for d in data["risk_dimensions"]}
     for row in data["checklist"]:
         ident = row.get("id", "")
@@ -252,13 +258,16 @@ def check_support(data):
         ids = [i for i in aspect.source_ids(cited) if i in sources]
         if not ids or aspect.principles(cited):
             continue
-        if all(sources[i].get("read") == "no" for i in ids):
+        read = [i for i in ids if sources[i].get("read") != "no"]
+        usable = [i for i in read if sources[i].get("class") != "independent" or i in confirmed]
+        if usable:
+            continue
+        if not read:
             out.append(finding("only-unread-source", row, row["id"]))
-        elif all(sources[i].get("class") == "independent" and i not in confirmed for i in ids):
-            if all(i in rejected for i in ids):
-                out.append(finding("only-rejected-source", row, row["id"]))
-            else:
-                waiting.append(row["id"])
+        elif any(i not in rejected for i in read):
+            waiting.append(row["id"])  # an independent source that was read waits for its vetting
+        else:
+            out.append(finding("only-rejected-source", row, row["id"]))
     return out, sorted(waiting)
 
 
@@ -322,7 +331,16 @@ def run_checks(data, previous_rows=None, words=()):
 
 
 def is_accepted(data):
-    return data["head"].get("accepted", "pending").strip().lower() not in ("", "pending")
+    """The head line names the person and the date of the acceptance."""
+    value = data["head"].get("accepted", "pending").strip()
+    return value.lower() != "pending" and bool(DATE.search(value)) and bool(DATE.sub("", value).strip(" ,;"))
+
+
+def read_words(path):
+    """The words of a word list file, sorted, or [] without a file."""
+    if path is None:
+        return []
+    return sorted({w.strip() for w in aspect.read_text(path).splitlines() if w.strip()})
 
 
 def report(data, found, remains, previous_given):
@@ -364,10 +382,7 @@ def main():
         if previous is not None:
             doc = aspect.Doc(previous)
             previous_rows = doc.table(doc.section("4"), "id")
-        words = []
-        if words_file is not None:
-            text = pathlib.Path(words_file).read_text(encoding="utf-8")
-            words = sorted({w.strip() for w in text.splitlines() if w.strip()})
+        words = read_words(words_file)
     except (aspect.Unreadable, OSError) as e:
         print(MESSAGES["unreadable"].format(e), file=sys.stderr)
         sys.exit(2)

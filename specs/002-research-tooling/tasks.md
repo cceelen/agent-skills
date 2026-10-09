@@ -210,6 +210,21 @@ a specification whose check reports no failure other than "not accepted".
 
 ---
 
+## Phase 9: Review
+
+**Purpose**: an independent review of the code against the specification and the contracts,
+and the correction of its findings
+
+- [x] T051 Let a second model review `factory/sota-research/` for wrong results, input that causes a crash, the security of the collection step, same output for same input, and tests that cannot fail
+- [x] T052 Make `factory/sota-research/scripts/aspect.py` read and write with the same rule for a line (only a line feed ends a line), keep the line ends of a file, accept a byte order mark, and report a file that is not UTF-8 as input that cannot be read
+- [x] T053 In `factory/sota-research/scripts/check.py`: fail on an empty checklist and on no sources; an item needs one usable source (read, and confirmed if it is independent); a rejection by a gate is stronger than an earlier confirmation; the acceptance needs a person and a date
+- [x] T054 In `factory/sota-research/scripts/render.py`: write the description as a quoted string; refuse a target folder outside the repository, a commit or a branch that can break the stamp, and a pending level; make the digest independent of the line end
+- [x] T055 In `factory/sota-research/scripts/place.py` and `factory/sota-research/scripts/vet.py`: report a cell that cannot be written; accept whole numbers only; refuse a rubric that can give a cost of zero
+- [x] T056 In `factory/sota-research/scripts/vet.py`: read only public addresses and refuse a redirect to a local address; give a page a time limit; record each error of a page; ignore a date that does not exist or is after the day of the collection; accept only identifiers of the form `S-<number>`; do not use facts of an earlier run, signals of a different address or a signal file of the wrong form
+- [x] T057 Write `tests/sota-research/test_robust.py` with one test for each finding, and make `tests/sota-research/test_fresh.py` and `tests/sota-research/test_messages.py` able to fail on each branch
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

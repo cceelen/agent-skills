@@ -96,7 +96,8 @@ def main():
     if args[0] == "show":
         result["files"] = files
     if args[0] == "apply" and files:
-        folder = lib.HOSTS[host]["agents"]["project"]
+        # The agent files go into this repository, whatever the current folder is.
+        folder = TOOLING.parents[1] / lib.HOSTS[host]["agents"]["project"]
         folder.mkdir(parents=True, exist_ok=True)
         for name, text in files.items():
             (folder / name).write_text(text, encoding="utf-8")

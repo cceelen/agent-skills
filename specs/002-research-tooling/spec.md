@@ -251,11 +251,12 @@ specification whose check reports no failure other than "not accepted".
   and the confirmation of the owner.
 - **FR-017**: The vetting MUST continue when a signal cannot be measured, and MUST mark that
   signal as not measured.
-- **FR-018**: For a source that is not a repository, the vetting MUST first apply gates. It
-  rejects, without a question to the owner, a source that has no author or issuer that can be
+- **FR-018**: For each independent source, a page or a repository, the vetting MUST first
+  apply gates. It rejects, without a question to the owner, a source that has no author or issuer that can be
   identified, has no date, is older than the limit of the aspect, or cannot be reached. It
-  scores each other source on its age, on an author with a record in the field, on whether it
-  cites its own sources, and on how many fast-lane sources refer to it. The owner confirms
+  scores each other source on its age, on an author with a record in the field, on how many
+  fast-lane sources refer to it, and on one more signal: whether a page cites its own sources,
+  or whether a repository is active. The owner confirms
   each source that passes.
 
 **Research skill (C-01, C-08, C-11, C-12, C-17, C-21, C-22)**

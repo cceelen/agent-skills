@@ -38,3 +38,12 @@ def test_no_model_name_in_the_text_for_agents():
     texts += TOOLING.glob("agent-templates/*.md")
     found = [f"{t.name}: {n}" for t in texts for n in sorted(names) if n in t.read_text()]
     assert not found
+
+
+def test_the_fixed_text_of_a_rendered_skill_has_short_sentences():
+    render = module("render")
+    long = []
+    for text in (render.RISK_ANALYSIS, render.SELECTION):
+        flat = re.sub(r"\s+", " ", re.sub(r"^\s*(?:-|\d+\.)\s+", "", text, flags=re.M))
+        long += [s for s in re.split(r"(?<=[.:])\s+", flat) if len(s.split()) > 25]
+    assert not long

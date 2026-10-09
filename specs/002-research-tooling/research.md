@@ -101,8 +101,9 @@ repository (read on 2026-10-09) unless a source is named.
 
 ## R9. How a program fetches a page
 
-- **Decision**: `urllib` of the standard library, `http` and `https` only, a timeout, a size
-  limit of 2 MB, no cookies, no credentials. The program reads header fields and meta fields
+- **Decision**: `urllib` of the standard library, `http` and `https` only, public addresses
+  only (also after a redirect), a timeout for each operation and a time limit for each page, a
+  size limit of 2 MB, no cookies, no credentials. The program reads header fields and meta fields
   only. An error is recorded as a signal that was not measured, and the run continues.
 - **Reason**: constitution III and the rule of `AGENTS.md` for the network.
 

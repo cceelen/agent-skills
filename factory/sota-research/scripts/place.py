@@ -39,7 +39,7 @@ ANSWERS = ("severity", "probability", "breadth", "adopt", "keep", "own risk")
 COMPUTED = ("return", "cost", "score", "admitted", "level")
 QUESTION = re.compile(r"^question (\S+) (\d+)-(\d+):")
 SETTING = re.compile(r"^(version|threshold \S+|limit \S+):\s*(\d+)\s*$")
-NUMBER = re.compile(r"^\s*(\d+)\b")
+NUMBER = re.compile(r"^\s*(\d+)(?![\d.,/])")  # a whole number only
 
 MESSAGES = {
     "placed": "{0}: return {1}, cost {2}, score {3}, admitted {4}, level {5}, position {6}.",
@@ -51,6 +51,7 @@ MESSAGES = {
     "bad-dimension": "{0}: pending. The risk dimension '{1}' is not in section 1 of spec.md.",
     "summary": "Rubric version {0}. Items placed: {1}. Items pending: {2}.",
     "written": "The program wrote the results to vetting.md and spec.md.",
+    "not-written": "The program cannot write the cell '{0}' in line {1} of {2}. Correct the table.",
     "rubric": "The rubric cannot be read: {0}",
     "unreadable": "The input cannot be read: {0}",
 }
@@ -59,7 +60,7 @@ MESSAGES = {
 def read_rubric(path):
     """The settings and the scale of each question of a rubric file."""
     rubric = {"scales": {}}
-    for line in pathlib.Path(path).read_text(encoding="utf-8").splitlines():
+    for line in aspect.read_text(path).splitlines():
         if m := SETTING.match(line):
             rubric[m.group(1)] = int(m.group(2))
         elif m := QUESTION.match(line):
@@ -68,6 +69,8 @@ def read_rubric(path):
     absent = [k for k in needed if k not in rubric] + [a for a in ANSWERS if a not in rubric["scales"]]
     if absent:
         raise ValueError("missing: " + ", ".join(absent))
+    if min(rubric["scales"]["adopt"][0], rubric["scales"]["keep"][0]) < 1:
+        raise ValueError("the scales of adopt and keep must start at 1 or above")
     return rubric
 
 
@@ -129,14 +132,22 @@ def line_of(result):
 
 
 def write(data, results, rubric):
-    """Fill the computed cells of vetting.md and the Level cells of spec.md."""
+    """Fill the computed cells of vetting.md and the Level cells of spec.md.
+
+    Returns a message for each cell that the table does not have.
+    """
     folder = pathlib.Path(data["folder"])
     by_id = {r["id"]: r for r in results}
+    failed = []
+
+    def put(file, row, name, text):
+        if not aspect.set_cell(folder / file, row["_line"], aspect.column_of(row, name), text):
+            failed.append(MESSAGES["not-written"].format(name, row["_line"], file))
+
     for row in data["vetting_items"]:
         result = by_id.get(row.get("item"))
         if result is None:
             continue
-        header = [k for k in row if not k.startswith("_")]
         cells = {
             "return": str(result.get("return", "")),
             "cost": str(result.get("cost", "")),
@@ -145,16 +156,14 @@ def write(data, results, rubric):
             "level": result.get("level", "pending"),
         }
         for name in COMPUTED:
-            if name in header:
-                aspect.set_cell(folder / "vetting.md", row["_line"], header.index(name), cells[name])
+            put("vetting.md", row, name, cells[name])
     for row in check.live_items(data):
-        header = [k for k in row if not k.startswith("_")]
-        level = by_id[row["id"]].get("level", "pending")
-        aspect.set_cell(folder / "spec.md", row["_line"], header.index("level"), level)
+        put("spec.md", row, "level", by_id[row["id"]].get("level", "pending"))
     path = folder / "vetting.md"
-    text = path.read_text(encoding="utf-8")
+    text = aspect.read_text(path)
     text = re.sub(r"(Rubric for items: version )\d+", rf"\g<1>{rubric['version']}", text)
-    path.write_text(text, encoding="utf-8")
+    aspect.write_text(path, text)
+    return failed
 
 
 def main():
@@ -170,7 +179,7 @@ def main():
         sys.exit(2)
     try:
         rubric = read_rubric(rubric_file)
-    except (OSError, ValueError) as e:
+    except (aspect.Unreadable, OSError, ValueError) as e:
         print(MESSAGES["rubric"].format(e), file=sys.stderr)
         sys.exit(2)
     results = place(data, rubric)
@@ -178,8 +187,10 @@ def main():
     print("\n".join(line_of(r) for r in results))
     print(MESSAGES["summary"].format(rubric["version"], len(results) - len(pending), len(pending)))
     if "--write" in args:
-        write(data, results, rubric)
-        print(MESSAGES["written"])
+        failed = write(data, results, rubric)
+        print("\n".join([*failed, MESSAGES["written"]]))
+        if failed:
+            sys.exit(1)
     sys.exit(1 if pending else 0)
 
 
