@@ -94,7 +94,8 @@ a project is the list of adopted items whose check fails.
 ## 5. Skill set to define
 
 What the recipe skill and its agent wrapper do, and which implementation skills layer two must
-work out.
+work out. Each skill of the set holds the rules of the kit, `rules/evidence-before-action.md`,
+and reads a source in the turn in which it uses a value from it.
 
 ### Recipe skill and agent: [name]
 
@@ -112,7 +113,8 @@ copy of what the product's own catalog maintains: how and what to query in the c
 identify trustworthy entries; lighthouse projects, chosen by measurable criteria and dated; how the product works and how to get the work
 done; settings as a file from the current documentation; common traps and points to review;
 which review tools work with it and how to apply their corrections. A skill that cannot reach
-its sources says what it could not verify.
+its sources says what it could not verify. A skill writes a setting only from the documentation
+that it read in the same turn, not from memory.
 
 | Product or tool | Capability | Checklist items it implements | Helper software it needs |
 |---|---|---|---|
