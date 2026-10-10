@@ -44,20 +44,20 @@ value below shows the effect of one change.
 
 | Metric | I-0, trial 1 (not registered) | I-1, trial 2 (not registered) | I-2 | I-3 |
 |---|---|---|---|---|
-| M-01 sources read in full | 3 of 23 | 11 of 20 | 4 of 14 | not run |
-| M-02 sources not read | 5 of 23 | 0 of 20, and 3 not reached | 1 of 14; one guide read in part by one reader | not run |
-| M-03 answers with a source | 37 of 156 | 14 of 180 | 25 of 180 | not run |
-| M-04 each view has a level 1 item | no views | yes, 6 of 6 views | yes, 4 of 4 views | not run |
-| M-05 stakeholders | 0 | 0 | 10, each in a view | not run |
-| M-06 items on level 3 | 0 of 26 | 0 of 30 | 1 of 30 | not run |
-| M-07 searches by known title or one concern only | 8 of 8 (not judged blind) | 10 of 10 (not judged blind) | not judged | not run |
-| M-08 basics of the owner on level 1 | not measured: no key | not measured: no key | 2 of 4 (blind judge) | not run |
-| M-09 stakeholders and viewpoints of the owner found | not measured: no key | not measured: no key | 4 of 5 (blind judge); architecture not found | not run |
-| M-10 target levels of the plan | Build 2, Source 1, Dependency 1 (the workflows did not run); reference project: 2, 1, 3 | no plan | no plan yet | not run |
-| M-11 maintained components in the plan | 5 maintained, 4 own construction (not judged blind) | no plan | no plan yet | not run |
-| M-12 rows corrected by the second reading | "most rows"; not counted | not counted | 9 of 13 | not run |
-| M-13 cost | 3 sessions, 56 reader agents, 28 minutes of research | 2 sessions, 51 reader agents | 2 sessions, 20 reader agents | not run |
-| M-14 the skill works alone | not examined | not examined | not examined | not run |
+| M-01 sources read in full | 3 of 23 | 11 of 20 | 4 of 14 | 4 of 15 |
+| M-02 sources not read | 5 of 23 | 0 of 20, and 3 not reached | 1 of 14; one guide read in part by one reader | 2 of 15; one guide given to one reader |
+| M-03 answers with a source | 37 of 156 | 14 of 180 | 25 of 180 | 20 of 234 |
+| M-04 each view has a level 1 item | no views | yes, 6 of 6 views | yes, 4 of 4 views | yes, 4 of 4 views |
+| M-05 stakeholders | 0 | 0 | 10, each in a view | 8, each in a view |
+| M-06 items on level 3 | 0 of 26 | 0 of 30 | 1 of 30 | 1 of 39 |
+| M-07 searches by known title or one concern only | 8 of 8 (not judged blind) | 10 of 10 (not judged blind) | not judged | not judged |
+| M-08 basics of the owner on level 1 | not measured: no key | not measured: no key | 2 of 4 (blind judge) | 2 of 4 (blind judge) |
+| M-09 stakeholders and viewpoints of the owner found | not measured: no key | not measured: no key | 4 of 5 (blind judge); architecture not found | 4 of 5 (blind judge); architecture is a boundary |
+| M-10 target levels of the plan | Build 2, Source 1, Dependency 1 (the workflows did not run); reference project: 2, 1, 3 | no plan | no plan yet | no plan yet |
+| M-11 maintained components in the plan | 5 maintained, 4 own construction (not judged blind) | no plan | no plan yet | no plan yet |
+| M-12 rows corrected by the second reading | "most rows"; not counted | not counted | 9 of 13 | 7 of 13 |
+| M-13 cost | 3 sessions, 56 reader agents, 28 minutes of research | 2 sessions, 51 reader agents | 2 sessions, 20 reader agents | 2 sessions, 21 reader agents |
+| M-14 the skill works alone | not examined | not examined | not examined | not examined |
 
 ## What the values show
 
