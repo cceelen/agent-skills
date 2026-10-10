@@ -53,6 +53,8 @@ reports are not comparable with new reports.
 - The research finds the pages of a concern with `index.py search`, and the references of a
   view with `index.py refs` and `index.py cited`.
 - `index.py build` reads the file `synonyms.txt` of the work folder, if the file is there.
+- The repository gets the tooling `factory/experiment-rigor/`. It makes a trial of an agent, a
+  skill, a prompt or an instruction a registered experiment. Users of the kit do not install it.
 
 ## 1.0.3
 

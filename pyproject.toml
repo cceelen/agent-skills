@@ -55,3 +55,6 @@ known-first-party = ["aspect", "check", "export", "guard", "index", "models", "p
 [tool.ruff.lint.per-file-ignores]
 # The sample holds Markdown tables. A table row cannot continue on a second line.
 "factory/sota-research/scripts/sample.py" = ["E501"]
+# The examples hold findings and table rows. A finding and a table row cannot continue on a
+# second line.
+"factory/experiment-rigor/scripts/*.py" = ["E501"]

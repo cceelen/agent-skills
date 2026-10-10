@@ -27,6 +27,14 @@
     rule into the file. State its measured effect in the pull request: the number of runs and
     the result. If there is no test, write "not tested".
 
+## Experiments
+
+1. A run of an agent, a skill, a prompt or an instruction is an experiment, if you report its
+   result or use it for a decision.
+2. Before such a run, read `factory/experiment-rigor/SKILL.md` and do its steps.
+3. Start such a run only with the command `run` of `factory/experiment-rigor/scripts/experiment.py`.
+4. Report a result only with its registration and its counts.
+
 ## Evidence before action
 
 1. Obey this rule before each change: "Take the instruction as an input and reformulate as a

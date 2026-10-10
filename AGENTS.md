@@ -20,7 +20,9 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 | `hooks/` | The hooks of the plugin. A hook puts the rules into the context of a session. |
 | `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
 
-To distil an aspect, read `factory/sota-research/SKILL.md` and do its steps.
+To distil an aspect, read `factory/sota-research/SKILL.md` and do its steps. To do a trial of an
+agent, a skill, a prompt or an instruction, read `factory/experiment-rigor/SKILL.md` and do its
+steps.
 
 Each skill has its documentation in `docs/<name>.md`. Its tests are examples in its programs, or
 files in `tests/<name>/`. The agent
@@ -50,6 +52,14 @@ Run the two commands before each commit. The two commands must pass.
 
 - Run all checks: `uv run pre-commit run --all-files`
 - Run the checks automatically before each commit: `uv run pre-commit install` (one time)
+
+## Experiments
+
+1. A run of an agent, a skill, a prompt or an instruction is an experiment, if you report its
+   result or use it for a decision.
+2. Before such a run, read `factory/experiment-rigor/SKILL.md` and do its steps.
+3. Start such a run only with the command `run` of `factory/experiment-rigor/scripts/experiment.py`.
+4. Report a result only with its registration and its counts.
 
 ## Evidence before action
 
