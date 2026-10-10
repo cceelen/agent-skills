@@ -15,16 +15,19 @@ data store. The parts are built and delivered in the order of the user stories.
 
 ## Technical Context
 
-**Language/Version**: Python 3.9 or later (the rule of `AGENTS.md` today; the change to 3.11 is
-a different pull request and needs no change here)
+**Language/Version**: the latest stable Python, today 3.14 (decision of the owner,
+2026-10-09). Each program declares `requires-python = ">=3.14"` in its script header and runs
+with `uv run`. The skills that users install keep their own rule.
 
-**Primary Dependencies**: the standard library only; the collector of `library-vetting` for
-sources that are repositories
+**Primary Dependencies**: `uv` to run the programs and `uvx` to run a tool; the standard
+library only; the collector of `library-vetting` for sources that are repositories
 
 **Storage**: Markdown files on the branch of a specification (`spec.md`, `evidence.md`,
 `vetting.md`); two rubric text files in the tooling; no database, no index
 
-**Testing**: pytest, with fixtures in `tests/sota-research/fixture/`, without the network
+**Testing**: examples (doctests) in each program, run with `--selftest`, without the network
+and without test files. `tests/test_repo.py` runs them under coverage on Python 3.14; the
+minimum is 95 percent. See R16 in `research.md`.
 
 **Target Platform**: the workstation of the owner and the CI of the repository (Linux, macOS,
 Windows); no shell scripts
@@ -101,18 +104,11 @@ factory/sota-research/
     ├── place.py                # user story 3
     ├── vet.py                  # user story 4
     ├── models.py               # the table of models and tool names for the agent templates
+    ├── sample.py               # the sample data that the examples of the programs use
     ├── rubric-items.txt        # questions, scales and thresholds of risk and reward
     └── rubric-sources.txt      # gates, signals and weights for independent sources
 
-tests/sota-research/
-├── fixture/                    # a good specification, defect copies, signals, answers,
-│                               # the expected rendered skill
-├── test_aspect.py
-├── test_check.py
-├── test_render.py
-├── test_place.py
-├── test_vet.py
-└── test_messages.py            # sentence length of the messages; no model name in prompts
+tests/test_repo.py              # runs each program with --selftest, under coverage (R16)
 
 docs/sota-research.md           # the documentation for the owner
 ```
@@ -126,9 +122,11 @@ skill folder of one agent product is necessary.
 ## Branches and delivery
 
 Decision of the owner, 2026-10-09: `main` holds the machinery and the delivered skills only.
-This specification stays on the branch `002-research-tooling`. Each Spec Kit step is a pull
-request into that branch. Each user story is delivered as one pull request into `main` that
-carries only `factory/`, `tests/`, `docs/` and the rule files.
+This specification stays on the branch `002-research-tooling`.
+
+The implementation is done on the working branch `002-research-tooling-tasks`, with one commit
+for each phase of `tasks.md`. That branch is merged as a whole into `002-research-tooling`.
+After that, one delivery carries `factory/`, `tests/`, `docs/` and the rule files to `main`.
 
 The tests of the tooling use fixtures and do not need a `specs/` folder, so they pass on
 `main`. On the branch of an aspect specification, one more test renders that specification
@@ -136,7 +134,7 @@ and compares the result with the committed skill.
 
 ## Order of the work
 
-| Step | Delivers | Requirements | Proves |
+| Phase | Delivers | Requirements | Proves |
 |---|---|---|---|
 | 1 | `aspect.py`, `check.py`, fixtures, `docs/` | FR-001 to FR-005, FR-028 to FR-030 | SC-001, SC-002, SC-006 |
 | 2 | `render.py`, the stamp, the freshness test | FR-006 to FR-010 | SC-002, SC-004 |

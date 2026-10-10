@@ -35,12 +35,14 @@ Rubric for sources: version <n>. Rubric for items: version <n>.
 
 ## Items
 
-| Item | Severity | Probability | Breadth | Adopt | Keep | Own risk | Return | Cost | Score | Admitted | Level |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| C-07 | 3 (S-14 abstract) | 3 (S-14 finding 1) | 3 | 2 | 2 | 0 | 27 | 4 | 67 | yes | 1 |
+| Item | Severity | Probability | Breadth | Adopt | Keep | Own risk | Dimension | Return | Cost | Score | Admitted | Level |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| C-07 | 3 (S-14 abstract) | 3 (S-14 finding 1) | 3 (judgement) | 2 (judgement) | 2 (judgement) | 0 (judgement) | | 27 | 4 | 67 | yes | 1 |
 ```
 
-- A person or the session writes the cells Answers, Severity to Own risk, and Confirmed by.
+- A person or the session writes the cells Answers, Severity to Own risk, Dimension, and
+  Confirmed by. The cell Dimension names the risk dimension of an item whose return depends on
+  the risk of a project; `place.py` puts it into the Level cell of an item above level 1.
   The programs write the other cells.
 - An answer names its source in parentheses. An answer of the session without a source is
   written `2 (judgement)`.

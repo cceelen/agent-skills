@@ -84,8 +84,8 @@ repository (read on 2026-10-09) unless a source is named.
 - **Decision**: two steps, as in `library-vetting`. `vet.py collect` uses the network and
   writes the signals to a work folder that is not committed. `vet.py score` uses no network: it
   reads the signals and the recorded answers and writes the table in `vetting.md`.
-  - A repository: `collect` calls `skills/library-vetting/scripts/collect.py --lite` and takes
-    its facts.
+  - A repository: `collect` calls `skills/library-vetting/scripts/collect.py` and takes the
+    date of the last commit and the number of commits and authors from its facts.
   - A page: `collect` measures: the page can be reached; a date is present; the age in days
     against a date that the caller gives; an author or issuer is named; the number of links to
     other hosts.
@@ -101,8 +101,9 @@ repository (read on 2026-10-09) unless a source is named.
 
 ## R9. How a program fetches a page
 
-- **Decision**: `urllib` of the standard library, `http` and `https` only, a timeout, a size
-  limit of 2 MB, no cookies, no credentials. The program reads header fields and meta fields
+- **Decision**: `urllib` of the standard library, `http` and `https` only, public addresses
+  only (also after a redirect), a timeout for each operation and a time limit for each page, a
+  size limit of 2 MB, no cookies, no credentials. The program reads header fields and meta fields
   only. An error is recorded as a signal that was not measured, and the run continues.
 - **Reason**: constitution III and the rule of `AGENTS.md` for the network.
 
@@ -140,6 +141,76 @@ repository (read on 2026-10-09) unless a source is named.
   `.agents/` is the folder that most agent products read.
 - **Open for the review**: the path. It is the first file that the kit puts into a project of
   a user.
+
+## R14. Python version and how the programs run
+
+- **Decision**: the latest stable Python, today 3.14, for the tooling of the factory. Each
+  program has a script header with `requires-python = ">=3.14"` and no dependencies, and runs
+  with `uv run <program>`. Tools run with `uvx` or through `uv run`. The tests of the tooling
+  run on Python 3.14; a `conftest.py` in `tests/sota-research/` skips the folder on an older
+  version, and the CI gets a job for 3.14.
+- **Reason**: decision of the owner, 2026-10-09. Fact: `uv` 0.12.19 offers 3.14 as the newest
+  stable version; 3.15 is a release candidate. The tooling runs only on the workstation of the
+  owner and in the CI, so it does not need an old version.
+- **This supersedes** the decision of the same day to require Python 3.11 for helpers.
+- **One version**: direction of the owner, 2026-10-09: the repository must not use more than
+  one Python version. On this branch the CI job for 3.13 is replaced by the job for 3.14. The
+  job for 3.9 and the rule for the skill `library-vetting` stay until a migration, which is a
+  different pull request for everything that is not on this branch. After the migration the
+  workaround of R14 for ruff (the target one version lower) is no longer necessary.
+
+## R15. One working branch, one commit for each phase
+
+- **Decision**: the implementation is done on the branch of the tasks pull request, with one
+  commit for each phase. The branch is merged as a whole into `002-research-tooling`. One
+  delivery to `main` follows.
+- **Reason**: decision of the owner, 2026-10-09.
+- **This supersedes** one pull request into `main` for each user story.
+
+## R16. Tests inside the programs
+
+- **Decision**: each program holds its tests as examples (doctests) and runs them with
+  `--selftest`. Each example is in the docstring of the function or the class that it tests;
+  there is no `__test__` table. The sample data is a Python file, `sample.py`. There is no
+  test folder for the tooling. `tests/test_repo.py` runs each program with `--selftest` under
+  coverage; the minimum is 95 percent with branches. Ruff examines all files; only the sample
+  data is free of the rule for the line length, because a table row cannot be split.
+- **Reason**: direction of the owner, 2026-10-09: a program then validates itself, and a user
+  installs the Python files without test files.
+- **Result**: 671 examples in 7 files; each line has an example, and the coverage with branches
+  is 99 percent. The network read has examples also: they read from a server on the same
+  computer.
+- **This supersedes** the folder `tests/sota-research/` of the plan.
+
+## R17. Coverage tracking with Codecov
+
+- **Decision**: the job for Python 3.14 writes `coverage.xml` and sends it to Codecov with the
+  action `codecov/codecov-action`, pinned by its commit. The upload uses OIDC; no token is
+  stored. The workflow runs on each push and each pull request, thus on `main`, on each
+  specification branch and on each working branch. `codecov.yml` sets two checks for a pull
+  request: the project must not lose more than one point, and the added lines need 90 percent.
+- **Reason**: direction of the owner, 2026-10-09: track the coverage on the long-lived branches
+  and during pull requests. Facts: the repository is public; Codecov knows it but it is not
+  active there yet; the action v7.1.1 supports OIDC.
+- **Result**: the first upload worked without a token and without a setup step: Codecov shows
+  92.8 percent for 7 files. Thus the CI now fails when an upload fails.
+- **Part of the owner**: install the Codecov app for the repository one time. Codecov needs it
+  to write its checks and its comment into a pull request.
+
+## R18. No narrowing before the research
+
+- **Decision**: phase 1 settles only the field and the thing to build. The contexts, the risk
+  dimensions and the boundaries of an aspect are findings of the research: each names its
+  source, and the owner sees them in the review. `check.py --scope` examines only what is
+  settled before the research.
+- **Reason**: direction of the owner, 2026-10-09, after a first trial of phase 1: the scoping
+  narrowed the aspect to one use case, two steps before the place where a use case belongs.
+  The kit aims at the global state of the art; a use case is chosen when a recipe is applied
+  to a project.
+- **What was wrong**: the specification 001 asked to confirm the aspect, its contexts and its
+  boundaries before the search (C-01), after the guidelines for systematic reviews. The
+  procedure and the template followed it, and the trial added a first user.
+- **This supersedes** the scope of phase 1 in R-rows above and the first trial.
 
 ## R13. Simplified Technical English in the programs
 

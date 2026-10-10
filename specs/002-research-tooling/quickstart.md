@@ -6,69 +6,65 @@ Run the commands from the root of the repository. The contracts are in
 ## All parts
 
 ```text
-uv run pytest tests/sota-research
+uv run pytest
 uv run ruff check
 ```
 
-Expected: all tests pass, without the network.
+Expected: all tests pass, without the network. On Python 3.14, `tests/test_repo.py` runs each
+program of `factory/` with `--selftest` under coverage and fails below 95 percent.
 
-## 1. The check (user story 1)
+## One program
+
+Each program holds its tests as examples and validates itself:
 
 ```text
-python factory/sota-research/scripts/check.py tests/sota-research/fixture/good
-python factory/sota-research/scripts/check.py tests/sota-research/fixture/defect-unknown-source
+uv run factory/sota-research/scripts/check.py --selftest
+uv run factory/sota-research/scripts/render.py --selftest
+uv run factory/sota-research/scripts/place.py --selftest
+uv run factory/sota-research/scripts/vet.py --selftest
+uv run factory/sota-research/scripts/models.py --selftest
+uv run factory/sota-research/scripts/aspect.py --selftest
 ```
 
-Expected: the first command reports no failing check and has result code 0. The second names
-the item and the unknown source and has result code 1. Two runs print the same bytes.
+Expected for each: the number of examples, "0 failed", and result code 0. The examples use the
+sample specification in `factory/sota-research/scripts/sample.py`.
+
+| User story | Program | What its examples prove |
+|---|---|---|
+| 1 | `check.py` | The sample passes. Each rule has an example with a planted defect, in the function of that rule. What remains does not fail the check. |
+| 2 | `render.py` | The sample gives four files with the stamp. Nothing is rendered without the acceptance, with a failing check or with a pending level. |
+| 3 | `place.py` | The limits of the calculation: admission at 20, level 1 at 40 with a breadth of 3, level 3 above a cost of 4. A write changes only its cells. |
+| 4 | `vet.py` | The scores of the sample, each gate, and a collection that records each error and continues. |
+| 5 | `models.py` | The two readers get web tools only. |
+
+## On a real specification
 
 On the branch `001-sota-research`:
 
 ```text
-python factory/sota-research/scripts/check.py specs/001-sota-research
+uv run factory/sota-research/scripts/check.py specs/001-sota-research
 ```
 
-Expected: no failing check; the levels and four vettings are listed as "remains".
-
-## 2. The renderer (user story 2)
-
-```text
-python factory/sota-research/scripts/render.py tests/sota-research/fixture/good --commit 0000000 --out <empty folder>
-```
-
-Expected: the folder holds the same files as `tests/sota-research/fixture/good-rendered`.
-With the fixture `not-accepted`, the program writes nothing and names the missing acceptance.
-
-## 3. The calculation (user story 3)
-
-```text
-python factory/sota-research/scripts/place.py tests/sota-research/fixture/good
-```
-
-Expected: each item has a return, a cost, a score, an admission result and a level that are
-the same as the expected values of the fixture. With the fixture `missing-answer`, one item
-stays `pending` and the result code is 1.
-
-## 4. The vetting (user story 4)
-
-```text
-python factory/sota-research/scripts/vet.py score tests/sota-research/fixture/good --work tests/sota-research/fixture/signals
-```
-
-Expected: three sources with the expected scores; one is rejected by a gate; none is
-confirmed. Then `check.py` on the same fixture lists the item that rests on an unconfirmed
-source.
-
-## 5. The research skill (user story 5)
+## The research skill (user story 5)
 
 One trial run with the owner on a small aspect, on a new specification branch:
 
 1. The session reads `factory/sota-research/SKILL.md`.
-2. The owner is asked for the aspect, its contexts, its risk dimensions and its boundaries
-   before the first search.
+2. The owner is asked only for the field and the thing to build before the first search. The
+   contexts, the risk dimensions and the boundaries come from the research.
 3. The readers run with web tools only.
 4. The run stops for the review. `check.py` reports no failing check, and "not accepted"
    remains.
 
 Expected: the owner was asked for decisions only (SC-005), and a reviewer finds no line in the
 evidence record that says more than its source (SC-007).
+
+## Results
+
+Recorded on 2026-10-09, on the working branch, before the delivery to `main`.
+
+| Scenario | Result |
+|---|---|
+| All parts | 671 examples in 7 programs, 0 failed. Each line has an example; the coverage with branches is 99 percent. On Python 3.9 the examples are skipped and the other tests pass; that job stays until the migration to one Python version. |
+| The check on the specification 001 | 0.03 seconds (SC-006: less than 10 seconds). It reports five failures: the field `Accepted` is missing, section 1 names no risk dimension in the new form, and three fields of the recipe skill refer to a section. It lists 22 pending levels and 4 pending vettings. |
+| The research skill | Open. A first trial of phase 1 on 2026-10-09 was not valid: the scoping narrowed the aspect to one use case before the research, and the simulated owner added a use case. The specification, the procedure and the check were corrected. The research itself was not tried yet. |

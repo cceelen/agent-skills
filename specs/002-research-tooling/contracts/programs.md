@@ -9,6 +9,7 @@ cannot be read. The output is sorted and holds no current time.
 
 ```text
 check.py SPEC [--previous FILE] [--words FILE] [--json]
+check.py SPEC --scope
 ```
 
 - Reads `SPEC/spec.md`, `SPEC/evidence.md` and, when present, `SPEC/vetting.md`.
@@ -19,6 +20,7 @@ check.py SPEC [--previous FILE] [--words FILE] [--json]
   wrong. Then the summary: failing checks, pending levels, pending vettings, items that need
   judgement, and whether the specification is accepted.
 - `--json`: the same content as one JSON object with sorted keys.
+- `--scope`: examines only the head line and section 1, for phase 1. The report says so.
 - Result code `1` when a check fails. Pending levels, pending vettings and a missing
   acceptance are listed as "remains" and do not fail the check.
 
@@ -50,14 +52,15 @@ place.py SPEC [--write]
   checklist in `SPEC/spec.md`. Without it, the program changes no file.
 - An item with a missing answer stays `pending`, and the report names the answer. Result
   code `1` when an item is pending.
-- An item above level 1 without a risk dimension in its Level cell is reported; the program
-  does not choose a dimension.
+- An item above level 1 without a risk dimension in the cell Dimension of the table "Items"
+  stays `pending` and is reported; the program does not choose a dimension.
+- `--rubric FILE`: a different rubric file, for tests.
 
 ## scripts/vet.py
 
 ```text
-vet.py collect SPEC --work DIR --today DATE [--max-age DAYS] [SOURCE-ID ...]
-vet.py score   SPEC --work DIR [--write]
+vet.py collect SPEC --work DIR --today DATE [SOURCE-ID ...]
+vet.py score   SPEC --work DIR [--write] [--max-age DAYS] [--rubric FILE]
 ```
 
 - `collect`: for each independent source of section 2 (or the named ones), measures the
@@ -68,15 +71,18 @@ vet.py score   SPEC --work DIR [--write]
 - `score`: reads the signal files, the recorded answers in the table "Sources" of
   `SPEC/vetting.md` and `scripts/rubric-sources.txt`. Applies the gates, computes the score.
   Uses no network. `--write` fills the table "Sources"; it never fills "confirmed by".
-- Result code `1` when a source is not scored or not confirmed.
+- `--max-age DAYS` replaces the age limit of the rubric for one aspect.
+- Result code `1` when a source is not scored, is rejected or is not confirmed.
 - `DIR` is a work folder outside the repository or ignored by git. It is not committed.
 
 ## scripts/models.py
 
 ```text
-models.py detect | apply [--scope user|project] | show
+models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M] [--root DIR]
 ```
 
-The same contract as `skills/library-vetting/scripts/models.py`, for the roles
+`apply` writes the two agent files into the project folder of the agent product in this
+repository. `show` prints them and writes nothing. The names of the tools and the detection of
+the agent product come from `skills/library-vetting/scripts/models.py`. The roles are
 `source-reader` (smallest capable model; web search and web fetch) and `second-reader`
 (mid-size model; web fetch).
