@@ -1,9 +1,9 @@
 """Sample data for the examples of the research tooling. Standard library only.
 
 A small and correct aspect specification with its evidence record, its vetting record with the
-register of the requirements, its
-record of the trials and the signal files of its two independent sources. The examples (doctests) of the programs in this
-folder use it: each program validates itself with the option --selftest, and needs no test
+register of the requirements and the table of the pages that the readers got, its record of the
+trials and the signal files of its two independent sources. The examples (doctests) of the
+programs in this folder use it: each program validates itself with the option --selftest, and needs no test
 file. The sources of the sample are invented.
 
   folder(edits)    writes the sample into a new temporary folder and returns the path
@@ -178,6 +178,15 @@ Rubric for sources: version 1. Rubric for items: version 1.
 | R-06 | Start the backup program by a schedule. | operators | operation | S-04 README | duplicate: R-05 |
 | R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | 3.3: How frequently to make a backup |
 | R-08 | Keep the schedule in the settings file of the backup tool. | operators | operation | S-04 README | 5 |
+
+## Reading
+
+The program `index.py unread --write` writes this table. Do not change it by hand.
+
+| Source | Document | Pages | Given to readers | Not read |
+|---|---|---|---|---|
+| S-01 | S-01 | 6 | 1-6 | none |
+| S-02 | S-02 | 2 | 1-2 | none |
 """
 
 TRIAL = """\
@@ -283,6 +292,7 @@ TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in eac
 REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |"
 REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a backup |"
 BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
+READING_S01 = "| S-01 | S-01 | 6 | 1-6 | none |"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 
 # The pages of two converted documents, for the examples of index.py. The document S-01 has a

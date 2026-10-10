@@ -7,8 +7,10 @@
 
   load(folder)  reads spec.md, evidence.md, vetting.md and trial.md into plain dictionaries and lists
 
-The file vetting.md has three tables: "Sources", "Items" and "Requirements". The table
-"Requirements" has one row for each requirement that a source states for a stakeholder.
+The file vetting.md has four tables: "Sources", "Items", "Requirements" and "Reading". The
+table "Requirements" has one row for each requirement that a source states for a stakeholder.
+The table "Reading" has one row for each converted document of a source, with the pages that
+the readers got and the pages that no reader got. The program index.py writes it.
 
 A module for the programs in this folder; it needs Python 3.14.
 
@@ -35,6 +37,7 @@ ITEM_RANGE = re.compile(r"\bC-(\d+) to C-(\d+)\b")
 PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b", re.I)
 INTENT = "intent of the owner"
 STAKEHOLDERS = re.compile(r"\s*\(stakeholders:([^)]*)\)", re.I)
+PAGE_SPAN = re.compile(r"(\d+)(?:\s*[-\u2013]\s*(\d+))?")
 # The forms of the cell "Goes to" of a requirement. A requirement has no other exit.
 EXITS = (
     ("item", re.compile(r"(C-\d+)")),
@@ -360,6 +363,16 @@ def names_of(cell):
     return [name for name in names if name]
 
 
+def pages_of(cell):
+    """The pages in a cell that holds pages and ranges of pages, sorted. "none" gives no page.
+
+    >>> pages_of("3, 7-9; 8"), pages_of("none"), pages_of(""), pages_of(None)
+    ([3, 7, 8, 9], [], [], [])
+    """
+    found = PAGE_SPAN.findall(cell or "")
+    return sorted({page for a, b in found for page in range(int(a), int(b or a) + 1)})
+
+
 def exit_of(cell):
     """(kind, name) of the cell "Goes to" of a requirement. The kind is None for a different text.
 
@@ -479,6 +492,15 @@ def load(folder):
     >>> data["requirements"][0]["_file"], [names_of(s["views"]) for s in data["sources"]][1:3]
     ('vetting.md', [['storage', 'operation'], ['operation']])
 
+    The table "Reading" of vetting.md has one row for each converted document of a source.
+
+    >>> data["has_reading"], [(r["source"], r["document"], r["pages"]) for r in data["reading"]]
+    (True, [('S-01', 'S-01', '6'), ('S-02', 'S-02', '2')])
+    >>> [(r["given to readers"], r["not read"]) for r in data["reading"]]
+    [('1-6', 'none'), ('1-2', 'none')]
+    >>> load(sample.folder(("vetting.md", "## Reading", "## Other")))["has_reading"]
+    False
+
     The record of the trials has the table of the trials and the table of their findings.
 
     >>> [t["id"] for t in data["trials"]], data["trials"][0]["plan"]
@@ -496,8 +518,8 @@ def load(folder):
     >>> data = load(folder)
     >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
     ([], [], False, [], [])
-    >>> data["requirements"]
-    []
+    >>> data["requirements"], data["reading"], data["has_reading"]
+    ([], [], False)
     >>> (folder / "spec.md").unlink()
     >>> load(folder)
     Traceback (most recent call last):
@@ -541,6 +563,8 @@ def load(folder):
         "vetting_sources": [],
         "vetting_items": [],
         "requirements": [],
+        "reading": [],
+        "has_reading": False,
         "has_vetting": False,
         "trials": [],
         "trial_findings": [],
@@ -562,6 +586,7 @@ def load(folder):
             ("Sources", "vetting_sources"),
             ("Items", "vetting_items"),
             ("Requirements", "requirements"),
+            ("Reading", "reading"),
         ),
         "trial.md": (("Trials", "trials"), ("Findings", "trial_findings")),
     }
@@ -571,6 +596,7 @@ def load(folder):
             for title_, key in parts:
                 found = record.titled(title_)
                 data[key] = record.table(found[1]) if found else []
+                data["has_reading"] = data["has_reading"] or bool(found and key == "reading")
     return data
 
 

@@ -51,6 +51,13 @@ The cell "Views" of a source in section 2 names the views that the source was re
 for a body of knowledge. A specification of an earlier revision has no such cell: this fails
 nothing. A view with fewer than two sources that were read for it remains.
 
+The table "Reading" of vetting.md names, for each converted document of a source, the pages
+that the readers got and the pages that no reader got. The program index.py writes it with
+"unread --write". A source with "full" in the cell Read and with pages that no reader got fails.
+A source with "all" in the cell Views needs a row in the table. Each source with pages that no
+reader got remains. A specification without the table remains also. --scope does not examine
+the table.
+
 The file trial.md records each trial of the recipe on a project, and each finding of the review of
 the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
 The names of the viewpoints are in the file references/viewpoints.txt, one in each line. A kit
@@ -143,6 +150,13 @@ MESSAGES = {
     "only-unread-source": "The item rests only on sources that were not read.",
     "only-rejected-source": "Each source of the item was rejected or was not read.",
     "sources-empty": "Section 2 lists no source.",
+    "full-with-unread-pages": (
+        "The source says 'full'. The table Reading names pages that no reader got: {0}."
+    ),
+    "body-without-reading": (
+        "The cell Views of the source is 'all'. The table Reading has no row for the source. "
+        "Run index.py unread with --write."
+    ),
     "requirements-missing": "The table Requirements of vetting.md is absent or empty.",
     "requirement-cell-empty": "The cell '{0}' of the requirement is empty.",
     "requirement-id-twice": "The identifier of the requirement is used two times.",
@@ -211,6 +225,9 @@ MESSAGES = {
     "remains-stakeholders": "Stakeholders that are in no view: {0}.",
     "remains-boundaries": "More than half of the requirements of the view '{0}' go to a boundary.",
     "remains-own-sources": "Views with fewer than two sources of their own field that were read: {0}.",
+    "remains-unread": "Sources with pages that no reader got: {0}.",
+    "remains-no-reading": "The table Reading is absent. Run index.py unread with --write.",
+    "pages-left": "{0} ({1} pages)",
     "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
     "accepted": "Accepted: {0}.",
@@ -894,6 +911,112 @@ def views_with_few_sources(data):
     return sorted({v["name"] for v in data["views"] if len(own_sources(data, v["name"])) < OWN_SOURCES})
 
 
+def reading_of(data):
+    """The rows of the table "Reading" for the sources of section 2, with numbers. Sorted.
+
+    Each row is a dictionary: the source, the document, the number of pages, and the number of
+    pages that no reader got.
+
+    >>> import sample
+    >>> reading_of(sample.load())
+    [{'source': 'S-01', 'document': 'S-01', 'pages': 6, 'not read': 0},
+     {'source': 'S-02', 'document': 'S-02', 'pages': 2, 'not read': 0}]
+    >>> other = "| S-01 | S-01 | many | 1-2 | 3, 5-6 |" + chr(10) + "| S-09 | a | 1 | 1 | none |"
+    >>> short = ("vetting.md", sample.READING_S01, other)
+    >>> reading_of(sample.load(short))[0]
+    {'source': 'S-01', 'document': 'S-01', 'pages': 0, 'not read': 3}
+    >>> unread_sources(sample.load(short)), unread_sources(sample.load())
+    (['S-01 (3 pages)'], [])
+    """
+    known = {row.get("id", "") for row in data["sources"]}
+    out = []
+    for row in data["reading"]:
+        if row.get("source", "") in known:
+            pages = row.get("pages", "")
+            left = len(aspect.pages_of(row.get("not read")))
+            out.append(
+                {
+                    "source": row["source"],
+                    "document": row.get("document", ""),
+                    "pages": int(pages) if pages.isdigit() else 0,
+                    "not read": left,
+                }
+            )
+    return sorted(out, key=lambda row: (row["source"], row["document"]))
+
+
+def unread_sources(data):
+    """The sources with pages that no reader got, each with the number of the pages. Sorted."""
+    left = {}
+    for row in reading_of(data):
+        left[row["source"]] = left.get(row["source"], 0) + row["not read"]
+    return [MESSAGES["pages-left"].format(ident, count) for ident, count in sorted(left.items()) if count]
+
+
+def reading_absent(data):
+    """True if the specification has sources and its vetting record has no table "Reading".
+
+    >>> import sample
+    >>> reading_absent(sample.load()), reading_absent(sample.load(("vetting.md", "## Reading", "## Other")))
+    (False, True)
+    >>> reading_absent({"has_reading": False, "sources": []})
+    False
+    """
+    return bool(data["sources"]) and not data["has_reading"]
+
+
+def check_reading(data):
+    """The table "Reading" of vetting.md agrees with section 2.
+
+    >>> import sample
+    >>> check_reading(sample.load())
+    []
+
+    A source with "full" in the cell Read and with pages that no reader got fails. A source with
+    "part" does not fail: it remains.
+
+    >>> left = ("vetting.md", sample.READING_S01, "| S-01 | S-01 | 6 | 1-2, 6 | 3-5 |")
+    >>> [(f["rule"], f["id"], f["file"], f["text"]) for f in check_reading(sample.load(left))]
+    [('full-with-unread-pages', 'S-01', 'spec.md',
+      "The source says 'full'. The table Reading names pages that no reader got: 3-5.")]
+    >>> part = ("spec.md", "| public | full | storage, operation |", "| public | part | storage, operation |")
+    >>> check_reading(sample.load(left, part)), run_checks(sample.load(left, part))[1]["unread"]
+    ([], ['S-01 (3 pages)'])
+
+    A source with "all" in the cell Views needs a row in the table. A row with the document
+    "none" says that the source has no converted document. Without the table, nothing fails:
+    the absent table remains.
+
+    >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
+    >>> gone = ("vetting.md", sample.READING_S01 + chr(10), "")
+    >>> [(f["rule"], f["id"]) for f in check_reading(sample.load(whole))]
+    []
+    >>> [(f["rule"], f["id"], f["text"]) for f in check_reading(sample.load(whole, gone))]
+    [('body-without-reading', 'S-01', "The cell Views of the source is 'all'. The table Reading has no row for
+      the source. Run index.py unread with --write.")]
+    >>> none = ("vetting.md", sample.READING_S01, "| S-01 | none | 0 | none | none |")
+    >>> check_reading(sample.load(whole, none))
+    []
+    >>> check_reading(sample.load(whole, gone, ("vetting.md", "## Reading", "## Other")))
+    []
+    """
+    out = []
+    rows = {}
+    for row in data["reading"]:
+        rows.setdefault(row.get("source", ""), []).append(row)
+    for source in data["sources"]:
+        ident = source.get("id", "")
+        cells = [
+            row.get("not read", "") for row in rows.get(ident, []) if aspect.pages_of(row.get("not read"))
+        ]
+        if source.get("read") == "full" and cells:
+            out.append(finding("full-with-unread-pages", source, ident, "; ".join(cells)))
+        whole = ALL_VIEWS in aspect.names_of(source.get("views"))
+        if whole and data["has_reading"] and ident not in rows:
+            out.append(finding("body-without-reading", source, ident))
+    return out
+
+
 def boundary_names(data):
     r"""The names of the boundaries of section 1.
 
@@ -1503,7 +1626,8 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
-          'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'own-sources': []})
+          'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'own-sources': [],
+          'unread': []})
 
     A view that the boundaries emptied remains. A view with fewer than two sources of its own
     field remains also.
@@ -1569,6 +1693,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         + check_views(data)
         + check_stakeholders(data)
         + check_requirements(data)
+        + check_reading(data)
         + basics
         + check_evidence(data)
         + check_other_sections(data)
@@ -1598,6 +1723,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         "stakeholders": stakeholders_without_view(data),
         "boundaries": views_emptied_by_boundaries(data),
         "own-sources": views_with_few_sources(data),
+        "unread": unread_sources(data),
     }
     return found, remains
 
@@ -1752,6 +1878,25 @@ def report(data, found, remains, previous_given):
     - Items that need judgement: C-04.
     - Trial findings with a viewpoint that was not checked: F-01, F-02. The list is absent.
 
+    A source with pages that no reader got remains. A source that says "full" fails also. A
+    specification without the table "Reading" remains.
+
+    >>> left = ("vetting.md", sample.READING_S01, "| S-01 | S-01 | 6 | 1-2, 6 | 3-5 |")
+    >>> data = sample.load(left)
+    >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
+    >>> print("\n".join([*lines[:2], *lines[9:12]]))
+    FAIL full-with-unread-pages spec.md:35 S-01: The source says 'full'. The table Reading names pages that
+    no reader got: 3-5.
+    Failing checks: 1.
+    What remains:
+    - Items that need judgement: C-04.
+    - Sources with pages that no reader got: S-01 (3 pages).
+    >>> data = sample.load(("vetting.md", "## Reading", "## Other"))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:11]))
+    What remains:
+    - Items that need judgement: C-04.
+    - The table Reading is absent. Run index.py unread with --write.
+
     A view that waits for the levels is in the list of what remains.
 
     >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| storage | pending | authority (2) |")
@@ -1787,6 +1932,8 @@ def report(data, found, remains, previous_given):
         # The key "boundaries" gives one line for each view.
         groups = [[name] for name in ids] if key == "boundaries" else [ids]
         rest += [MESSAGES[f"remains-{key}"].format(", ".join(group)) for group in groups if group]
+    if reading_absent(data):
+        rest.append(MESSAGES["remains-no-reading"])
     if not data["trials"]:
         rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):
@@ -1897,8 +2044,10 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'remains', 'requirements', 'trials',
-      'views'], [('unknown-source', 'C-02')], True)
+    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'reading', 'remains', 'requirements',
+      'trials', 'views'], [('unknown-source', 'C-02')], True)
+    >>> result["reading"]["table"], result["reading"]["sources"][1], result["remains"]["unread"]
+    (True, {'document': 'S-02', 'not read': 0, 'pages': 2, 'source': 'S-02'}, [])
     >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
     ({'judgement': 22, 'other': 0, 'source': 8}, True, [])
     >>> result["trials"], result["remains"]["trial"]
@@ -2009,6 +2158,7 @@ def main(argv=None):
             "findings": found,
             "intent_asked": intent_asked(data),
             "previous": previous is not None,
+            "reading": {"table": data["has_reading"], "sources": reading_of(data)},
             "remains": remains,
             "requirements": requirement_counts(data),
             "trials": sorted(t.get("id", "") for t in data["trials"]),

@@ -41,6 +41,14 @@ reports are not comparable with new reports.
   pointers only, not the text of a document.
 - `seed.py get` and `init.py` build this index at their end. The file `references/synonyms.txt`
   holds the synonyms of the factory.
+- The research reads each converted source in the page ranges of the index. One reader gets one
+  range. `index.py given` records each range, and `index.py unread` gives the pages that no
+  reader got.
+- `index.py unread --write` writes the table `Reading` into `vetting.md`. The check fails for
+  a source that says `full` and has pages that no reader got. It lists each such source.
+- The research finds the pages of a concern with `index.py search`, and the references of a
+  view with `index.py refs` and `index.py cited`.
+- `index.py build` reads the file `synonyms.txt` of the work folder, if the file is there.
 
 ## 1.0.3
 

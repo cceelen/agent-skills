@@ -44,6 +44,7 @@ Rules for all phases:
      add `--file <id>=<path>`.
    - If a seed has the state `changed` or `failed`, tell the owner. Do not use that seed
      before the owner decides.
+   - Then build the index: do step 1 of "The reading of a converted document".
 3. Run `uv run factory/sota-research/scripts/models.py apply`. It writes the agent files of
    the three readers for your agent product. Two readers have web tools only. The third
    reader, `sota-file-reader`, has the read tool only. The program also installs the hook
@@ -126,9 +127,8 @@ its reason and its date in section 7.
      to add a row" of `references/seeds.md`.
    - If the file `<work folder>/converted/<seed id>.md` is absent, run
      `uv run factory/sota-research/scripts/seed.py get <work folder>`.
-   - Do not read a file of `<work folder>/converted/` yourself. Give the path of each body
-     of knowledge to one agent of the type `sota-file-reader`, with the task
-     `prompts/reader.md`.
+   - Do not read a file of `<work folder>/converted/` yourself. For each body of knowledge,
+     do the steps of "The reading of a converted document".
    - If a body of knowledge has the kind `page`, give its address to a web reader, as in
      step 5.
    - If the owner cannot give the file of a body of knowledge, do what `references/seeds.md`
@@ -148,6 +148,10 @@ its reason and its date in section 7.
    result or carries a duty for it.
    - Find the stakeholders of the aspect in the body of knowledge of the field and in the
      sources. Do not take the list from the name of the aspect. Do not ask the owner for it.
+   - To find the pages of one stakeholder in the converted documents, do the steps of "The
+     search in the converted documents".
+   - If the sources have two names for one stakeholder, do the steps of "The synonyms of the
+     search".
    - Write each stakeholder into the field "Stakeholders" of section 1: a short name, its
      concerns for this aspect, and the source or `(judgement)`.
    - Aggregate the concerns into the views. In the line of each view, name the stakeholders
@@ -187,21 +191,33 @@ its reason and its date in section 7.
      `converted`.
    - If section 2 has the sources already, retrieve and convert each PDF source in one step:
      `uv run factory/sota-research/scripts/seed.py get <work folder> --from <folder of the specification>`.
-   - Do not read the converted file yourself. Give its path to one agent of the type
-     `sota-file-reader`, with the task `prompts/reader.md`.
+   - After each conversion, build the index: do step 1 of "The reading of a converted
+     document".
+   - Do not read the converted file yourself. Do the steps of "The reading of a converted
+     document".
    - If the conversion gives no text, record the source under "not verified".
 6. **Record the sources** in section 2, each with its class. The classes of the fast lane are
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
    `independent`. Mark a paid source that was read from its preview as `part`. Write the
    views that the source was read for into the cell `Views`, with a comma between two names.
-   Write `all` for a body of knowledge.
+   Write `all` for a body of knowledge. For a converted source, write `full` into the cell
+   `Read` only if `index.py unread <work folder> <document id>` gives the result code 0.
 7. **Vet** each independent source. See "The vetting of independent sources".
 8. **Name the views.** A view is a set of concerns that the aspect brings together.
    - Settle the views of the aspect from the sources. Keep, change or remove each candidate.
      Write each view into the field "Views" of section 1, with its stakeholders and its
      source, or with `(judgement)`.
    - For each view, find the references of the field of that view. Take the standards and
-     the references that the body of knowledge names for the knowledge areas of the view.
+     the references that the body of knowledge names for the knowledge areas of the view:
+     1. Find the pages of the sections that belong to the view. Use the titles in the output
+        of `index.py ranges`, and "The search in the converted documents".
+     2. For each such page, run
+        `uv run factory/sota-research/scripts/index.py refs <work folder> <document id> <page>`.
+     3. Each external reference of the output is a candidate. To find each place that cites
+        one candidate, run
+        `uv run factory/sota-research/scripts/index.py cited <work folder> "<identifier>"`.
+     4. Retrieve and read each candidate, as in steps 4 to 7.
+     5. If a candidate cannot be retrieved, record it in section 7 as not verified.
    - Search also for references of that field in the words of that view.
    - Read these references for the view, as in steps 4 to 7.
    - A source supports a view only if a reader read it for the concerns of that view. One
@@ -260,14 +276,22 @@ its reason and its date in section 7.
 12. **Let a second reader check it.** Give the rows to an agent of the type
    `sota-second-reader`, with the task `prompts/second-reader.md`. Give the rows of a
    converted source, with the path of its file, to a new agent of the type `sota-file-reader`,
-   with the same task. Do not use the agent that read the source. Correct each finding in
+   with the same task. Give that reader the pages of each row: the page numbers in the cell
+   "Where" of the row. Do not use the agent that read the source. Correct each finding in
    `evidence.md`, in each row of `spec.md` and in each row of the table "Requirements" that
    says the same.
 13. **Place the items.** See "The calculation of risk and reward".
 14. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
-   suggested a judgement. Do not write a model name into the specification.
-15. **Run the check.** See "The check". Correct each failure.
-16. If a source cannot be reached, write what was not verified into section 7.
+   suggested a judgement. Do not write a model name into the specification. If the glossary
+   of section 8 has two names for one term, do the steps of "The synonyms of the search".
+15. **Write the table "Reading".** Run
+   `uv run factory/sota-research/scripts/index.py unread <work folder> --write <folder of the specification>`.
+   - The program writes the table into `vetting.md`. Do not write the table by hand, and do
+     not change it.
+   - If the result code is 1, a reader did not get each page. Do steps 5 and 6 of "The
+     reading of a converted document". Then run the program again.
+16. **Run the check.** See "The check". Correct each failure.
+17. If a source cannot be reached, write what was not verified into section 7.
 
 The format of the table "Requirements" in `vetting.md`:
 
@@ -294,8 +318,10 @@ Stop. A model does not accept a recipe. Give the owner, in this order:
    Give the line "Answers of risk and reward" of the check, as it is.
 5. The points where the sources disagree, and how the recipe handles each.
 6. The independent sources with their signals and scores, for the confirmation.
-7. The list "What remains" of the check, as it is.
-8. What was not verified.
+7. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
+   give it, do step 15 of phase 2 again.
+8. The list "What remains" of the check, as it is.
+9. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
 change an item, change a view, change a stakeholder.
@@ -406,18 +432,21 @@ The owner starts a refresh. Nothing runs on a schedule.
    - A seed or a source with the state `changed` moved. The program converted its new file.
    - For a seed of `references/seeds.md` that changed, do the steps of "How to add a row" of
      that file for its row.
-2. Read only those sources again, with the readers. For a finding of a trial with the route
+   - Then build the index: do step 1 of "The reading of a converted document".
+2. Read only those sources again, with the readers. For a converted source, do the steps of
+   "The reading of a converted document". For a finding of a trial with the route
    `recipe`, search and read for the view or the question of the finding, as in steps 4 to 7
    of phase 2. Record each requirement that a reader reports, as in steps 9 and 10 of phase 2.
 3. Save the current `spec.md` to a file outside the repository:
    `git show HEAD:specs/<number>-<name>/spec.md`.
 4. Change the rows that the new text touches. Keep the row of an item that is no longer
    valid, and set its level to `retired`. Do not use its identifier again.
-5. Run the check with `--previous <file>`.
-6. Show the owner each changed item. Show also each item that a project can have declined:
+5. Write the table "Reading" again: do step 15 of phase 2.
+6. Run the check with `--previous <file>`.
+7. Show the owner each changed item. Show also each item that a project can have declined:
    the selection of a project keeps a declined item with its reason.
-7. Continue with phase 3. A refresh without a change updates the research date only.
-8. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
+8. Continue with phase 3. A refresh without a change updates the research date only.
+9. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
    again. The new trial shows if the correction changes the plan.
 
 ## The check
@@ -450,10 +479,74 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
   as in steps 4 to 7 of phase 2. Then do steps 9 and 10 of phase 2 for the new requirements.
 - If an item holds no requirement, find its requirement in the reports of the readers. Do
   not write a requirement that no reader reported.
+- If a source says `full` and the table "Reading" names pages that no reader got, do steps
+  5 and 6 of "The reading of a converted document" for those pages. If the pages cannot be
+  read, write `part` into the cell `Read`. Then do step 15 of phase 2 again.
+- If a source has `all` in the cell `Views` and no row in the table "Reading", do step 15 of
+  phase 2 again.
+- If the list says that the table "Reading" is absent, do step 15 of phase 2.
+- The list names each source with pages that no reader got. Give it to the owner as it is.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.
 - To find product names in the checklist, write the names into a file, one in each line, and
   add `--words <file>`.
+
+## The reading of a converted document
+
+Do these steps for each file of `<work folder>/converted/` that a reader must read. The
+document id is the name of the file without `.md`. Do not read a page yourself.
+
+1. Build the index: `uv run factory/sota-research/scripts/index.py build <work folder>`.
+   - If the specification has sources in section 2, add `--from <folder of the specification>`.
+   - Do this step after the seeds are retrieved and after each conversion of a source.
+2. Get the page ranges of the document:
+   `uv run factory/sota-research/scripts/index.py ranges <work folder> <document id>`.
+3. Give each range to one new agent of the type `sota-file-reader`, with the task
+   `prompts/reader.md`.
+   - Give the reader the path of the file, the first and the last page of the range, and the
+     questions.
+   - Give one range to one reader. Start the readers in parallel.
+   - If a document has more than one range, do not give the whole document to one reader.
+4. At the moment a reader starts, record its range:
+   `uv run factory/sota-research/scripts/index.py given <work folder> <document id> <first>-<last> --task "<task>"`.
+5. After the readers return, compare the point "Read" of each report with the range of the
+   reader. If the pages differ, record the pages that the reader read:
+   - Run the command of step 4 for the range of the reader again, with `--remove`.
+   - Run the command of step 4 for the first and the last page that the reader read.
+6. Run `uv run factory/sota-research/scripts/index.py unread <work folder>`.
+   - Each line without the words `given to readers` is a range that no reader got. Give each
+     such range to a new reader, as in steps 3 to 5.
+   - Do this step again until the result code is 0.
+   - If a range cannot be read, do not record it. Write its pages into section 7 as not
+     verified.
+
+## The search in the converted documents
+
+Do these steps to find the pages of one stakeholder, one concern or one view in the converted
+documents.
+
+1. Run `uv run factory/sota-research/scripts/index.py search <work folder> "<words>"`. Use the
+   words of that stakeholder, that concern or that view. To search in one document, add
+   `--doc <document id>`.
+2. The result is pages. It is not text. Do not read a page yourself.
+3. Give the pages to a new agent of the type `sota-file-reader`, with the task
+   `prompts/reader.md` and with the question. Record each run of pages, as in step 4 of "The
+   reading of a converted document".
+4. If the result is partial or empty, search again with different words of the sources. Do
+   not conclude that the documents do not have the concern.
+
+## The synonyms of the search
+
+Do these steps when the research finds two names for one thing: two names of one term of the
+glossary of section 8, or two names of one stakeholder.
+
+1. Add one line to the file `<work folder>/synonyms.txt`: the names of the one thing, with
+   ` = ` between two names. If the file is absent, make it.
+2. Write a name only when a source uses it. Do not write a name from your memory.
+3. Do not write a group that joins two different things.
+4. Build the index again: `uv run factory/sota-research/scripts/index.py build <work folder>`.
+   The program reads the file `<work folder>/synonyms.txt`. For a file in a different place,
+   add `--synonyms <file>`.
 
 ## The vetting of independent sources
 

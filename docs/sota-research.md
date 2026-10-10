@@ -227,7 +227,8 @@ The report has two parts.
   sources, items that need judgement, items with a changed text, findings of a trial that are
   open, findings with a viewpoint that was not checked, stakeholders that are in no view, a recipe without a trial, and a missing acceptance.
   A view that the boundaries emptied and a view with few sources of its own field are in this
-  list also.
+  list also. A source with pages that no reader got and an absent table "Reading" are in this
+  list also: see "The pages that the readers got".
 
 Between the two parts, the report gives one line for the answers of risk and reward:
 
@@ -618,6 +619,9 @@ uv run factory/sota-research/scripts/index.py refs <work folder> <id> <page> [--
 uv run factory/sota-research/scripts/index.py cited <work folder> "<identifier>" [--json]
 uv run factory/sota-research/scripts/index.py ranges <work folder> <id> [--max-pages <n>]
 uv run factory/sota-research/scripts/index.py recall <work folder> <answers file> [--limit <n>] [--no-synonyms] [--exact]
+uv run factory/sota-research/scripts/index.py given <work folder> <id> <first>-<last> [--task "<task>"] [--remove]
+uv run factory/sota-research/scripts/index.py unread <work folder> [<id>] [--max-pages <n>] [--json]
+uv run factory/sota-research/scripts/index.py unread <work folder> --write <folder of a specification>
 ```
 
 - The index is the file `<work folder>/index.sqlite`. Do not commit it.
@@ -638,10 +642,55 @@ uv run factory/sota-research/scripts/index.py recall <work folder> <answers file
 | `cited` | Each place of the index that cites one standard, one address or one document. |
 | `ranges` | The page ranges of one document for the readers. Each page of the document is in exactly one range. |
 | `recall` | A measure of the search: how many answers of a table the search finds. |
+| `given` | A record that the pages of one range were given to a reader. |
+| `unread` | For each document, the pages that are in no recorded range, as ranges for new readers. |
 
-The result code is 0 when the command is done. It is 1 when nothing was found, or when a file
-was not indexed. It is 2 when the input cannot be read. For `recall`, it is 0 when the input
-can be read.
+The result code is 0 when the command is done. It is 1 when nothing was found, when a file was
+not indexed, or when a page is in no recorded range. It is 2 when the input cannot be read.
+For `recall`, it is 0 when the input can be read.
+
+### The pages that the readers got
+
+One reader gets one range of a document, not a full document of many pages. The index records
+each range. Thus you can see the pages that no reader got.
+
+1. Get the ranges of a document with `ranges`.
+2. Give each range to one reader. Record the range with `given` when the reader starts.
+3. If a reader did not read its range, remove the record with `given` and `--remove`. Then
+   record the pages that the reader read.
+4. Run `unread`. Give each range of the output to a new reader.
+5. Before the review of the owner, run `unread` with `--write`.
+
+- A range that you record two times is one record.
+- A new build keeps the record of a document whose converted file did not change. It removes
+  the record of a converted file that changed.
+- `unread` with `--write` writes the table "Reading" into `vetting.md` of the specification.
+  A second run replaces the table. Do not change the table by hand.
+
+```markdown
+## Reading
+
+| Source | Document | Pages | Given to readers | Not read |
+|---|---|---|---|---|
+| S-01 | <document id> | 40 | 1-25, 26-40 | none |
+```
+
+- The table has one row for each converted document that is a source of section 2.
+- The program finds the document of a source by the identifier of the source. It uses also
+  the name and the address of the source.
+- A source with `all` in the cell `Views` and without a converted document gets a row with
+  the document `none`.
+
+The check reads the table:
+
+- A source with `full` in the cell `Read` and with pages that no reader got fails the check.
+- A source with `all` in the cell `Views` and without a row in the table fails the check.
+- The list "What remains" names each source with pages that no reader got:
+  `Sources with pages that no reader got: S-01 (25 pages).`
+- For a specification without the table, the list says:
+  `The table Reading is absent. Run index.py unread with --write.`
+- With `--json`, the key `reading` has the rows, and the key `unread` in `remains` has the
+  sources.
 
 ### The query of a search
 
@@ -658,7 +707,7 @@ can be read.
 | Origin | Where the synonyms come from |
 |---|---|
 | `acronym` | The documents: a long form with its short form in parentheses, and the lines of a list of acronyms. |
-| `file` | The file `factory/sota-research/references/synonyms.txt`, and each file that you give with `--synonyms`. |
+| `file` | The file `factory/sota-research/references/synonyms.txt`, the file `<work folder>/synonyms.txt`, and each file that you give with `--synonyms`. |
 | `glossary` | Section 8 of the aspect specification that you give with `--from`. |
 
 - In a file of synonyms, write one group in each line. Separate the terms with ` = `.

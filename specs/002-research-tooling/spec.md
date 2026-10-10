@@ -525,6 +525,32 @@ synonyms. The references in a document and to other documents stay connected.
   command MUST measure the search with a table of queries, documents and pages. It counts a
   row as found when one of its pages, or a page next to it, is in the first results. It MUST
   print the number found, the total, the share and each row that was not found.
+- **FR-055**: The index MUST record each range of pages of a document that was given to a
+  reader, with the task of the reader. A range that is recorded two times MUST be one record.
+  A command MUST remove one record. A new build MUST keep the records of a document whose
+  converted file did not change, and MUST remove the records of each other document. A command
+  MUST give, for each document, the pages that are in no recorded range, as ranges for new
+  readers with the titles of their sections. Its result code MUST be 1 when a page is in no
+  recorded range. The same command MUST write or replace the table "Reading" in the vetting
+  record of an aspect specification: one row for each converted document that is a source of
+  section 2, with the number of pages, the ranges that were given and the ranges that were
+  not. A source with `all` in the cell `Views` and without a converted document MUST get a row
+  that says so. A program writes this table; a person or a session does not. The check MUST
+  fail for a source with `full` in the cell `Read` and with pages that no reader got, and for
+  a source with `all` in the cell `Views` and without a row in a table that exists. It MUST
+  list each source with pages that no reader got, and a specification without the table,
+  under what remains. `--scope` MUST NOT examine the table.
+- **FR-056**: The procedure of the research MUST use the index. A session builds the index
+  after the seeds are retrieved and after each conversion. It gives one range of a converted
+  document to one reader, records the range when the reader starts, and gives each range that
+  no reader got to a new reader. It finds the pages of one stakeholder, one concern or one
+  view with the search, and gives the pages to a reader; it does not read a page. It takes
+  the candidates for the sources of the own field of a view from the references that the body
+  of knowledge cites. It records two names of one thing in the file `synonyms.txt` of the work
+  folder, and the build MUST read this file when it is there. The second reader gets the pages
+  of the evidence row. The owner gets the table "Reading" in the review. The reader of a
+  converted file MUST report the first and the last page that it read, and each page of its
+  range that it did not read, with the reason.
 
 ### Key Entities
 
@@ -549,7 +575,10 @@ synonyms. The references in a document and to other documents stay connected.
   stakeholder, its view, its source and its one exit.
 
 - **Index**: the database of the converted documents of a work folder, with their pages,
-  sections, references, acronyms, other names and synonyms. It is not committed.
+  sections, references, acronyms, other names and synonyms, and with the page ranges that were
+  given to readers. It is not committed.
+- **Reading**: the table of the vetting record that names, for each converted document of a
+  source, the pages that the readers got and the pages that no reader got.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
 - **Target**: one measurable result that a project reaches when it applies the recipe, with

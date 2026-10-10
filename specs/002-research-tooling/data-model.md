@@ -43,19 +43,26 @@ check reads the id, the supports cell and the date. It does not judge the summar
 ## Vetting record (`vetting.md`)
 
 Written by `vet.py score` and `place.py`, corrected by the owner. The session writes the
-table "Requirements". Three tables, formats in `contracts/files.md`.
+table "Requirements". `index.py unread --write` writes the table "Reading". Four tables,
+formats in `contracts/files.md`.
 
 | Table | Row | Fields |
 |---|---|---|
 | Sources | one independent source | source id, kind (`repository` or `page`), gate result, signals, answers with their URL, score, rubric version, date, confirmed by |
 | Items | one checklist item | item id, the six answers with their source, return, cost, score, admitted, level, rubric version |
 | Requirements | one requirement that a source states for a stakeholder | id `R-<nn>`, requirement, stakeholder, view, source with its location, goes to |
+| Reading | one converted document of one source of section 2 | source id, document id or `none`, pages, given to readers (ranges or `none`), not read (ranges or `none`) |
 
 The cell "Goes to" of a requirement is `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
 `duplicate: R-<nn>`. The check fails for each other text, for an exit that names a row that
 does not exist, for an item without a requirement that is not admitted by `own rule`, and for
 a stakeholder without a requirement. A view with more than half of its requirements at a
 boundary is listed under "what remains".
+
+The check fails for a source with `full` in the cell Read whose row in "Reading" has pages in
+the cell "Not read", and for a source with `all` in the cell Views that has no row in a table
+"Reading" that exists. A source with pages that no reader got and an absent table "Reading"
+are listed under "what remains".
 
 State of a source: `not vetted` → `rejected by a gate` or `scored` → `confirmed` or `rejected`
 (by the owner). Only `confirmed` lets the source carry an item alone.
@@ -101,6 +108,7 @@ committed.
 | `converted/<id>.md` | the text of that file with one heading for each page, and the marker `.reader-may-read` beside it |
 | `seeds.json` | the date of `--today` or `null`, and for each seed: id, kind, file, converted, sha256, pages, state |
 | `index.sqlite` | the index of the converted files: see "Index" |
+| `synonyms.txt` | the synonyms that the research of this work folder found, in the form of `references/synonyms.txt`; written by the session, read by `index.py build` when it is there |
 
 State of a seed: `retrieved`, `recorded` (kind `page`), `owner must give the file`, `changed`
 (the digest is not the digest of the manifest or, without one, of the last run),
@@ -122,10 +130,14 @@ same content. No table holds a current time.
 | aliases | one other name of a document of the index | key, document, origin (`head`, `manifest` or `specification`) |
 | synonyms | one term of one group | grp, term, origin (`acronym`, `file` or `glossary`) |
 | meta | the version of the patterns | key, value |
+| given | one range of pages that was given to a reader | document, first_page, last_page, task; the key is the document with the two pages |
 
 A converted file with a different digest is read again. A different version of the patterns
 makes the index again. The tables aliases and synonyms, the references of the family
 `document` and the target document of each external reference are written again in each build.
+The table given is written by `index.py given`. A build keeps the rows of a document whose
+converted file did not change, also when the version of the patterns changed. It removes the
+rows of each other document.
 
 Families of a reference: `section`, `chapter`, `page`, `table`, `figure`, `name` (internal);
 the families of the table `STANDARDS` of the program, `address`, `doi`, `citation`, `document`

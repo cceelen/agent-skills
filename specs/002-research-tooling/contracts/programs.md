@@ -47,6 +47,15 @@ check.py SPEC --scope
   `--json`: the key `viewpoints` in `remains`.
 - Outside `--scope`, the field `Targets` of section 1 fails the check when it has no target
   and not `(none found)`, and when a target names no source and no `judgement`.
+- Outside `--scope`, the table "Reading" of `SPEC/vetting.md` is examined. Rule
+  `full-with-unread-pages`: a source with `full` in the cell `Read` whose row has pages in the
+  cell `Not read`: `The source says 'full'. The table Reading names pages that no reader got:
+  <ranges>.` Rule `body-without-reading`: the table exists, and a source with `all` in the
+  cell `Views` has no row. Under "remains": `Sources with pages that no reader got: <id>
+  (<n> pages).` and, for a specification with sources and without the table, `The table
+  Reading is absent. Run index.py unread with --write.` With `--json`: the key `reading` with
+  `table` (true or false) and `sources` (source, document, pages, not read), and the key
+  `unread` in `remains`.
 - Outside `--scope`, the table "Requirements" of `SPEC/vetting.md` fails the check when it is
   absent or empty; when a cell is empty; when an identifier is used two times; when the cell
   "Goes to" is not `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
@@ -172,6 +181,9 @@ index.py refs WORK DOC PAGE [--json]
 index.py cited WORK IDENTIFIER [--json]
 index.py ranges WORK DOC [--max-pages N]
 index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
+index.py given WORK DOC FIRST-LAST [--task TEXT] [--remove]
+index.py unread WORK [DOC] [--max-pages N] [--json]
+index.py unread WORK --write SPEC
 ```
 
 - `WORK` must be outside each git repository. The database is `WORK/index.sqlite`.
@@ -181,7 +193,10 @@ index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
   and the text below each heading `## Page N`. Writes the tables of "Index" in
   `data-model.md`.
   - Reads only a file whose digest changed. Removes a document whose file is gone.
-  - Reads `references/synonyms.txt` and each file of `--synonyms FILE`.
+  - Reads `references/synonyms.txt`, the file `WORK/synonyms.txt` when it is there, and each
+    file of `--synonyms FILE`.
+  - Keeps the rows of the table `given` of a document whose converted file did not change.
+    Removes the rows of each other document.
   - Reads `references/seeds.md` for the names of the documents. `--manifest FILE` gives a
     different manifest, for tests.
   - `--from SPEC`: reads section 2 (the id and the title of each source) for the names of the
@@ -213,9 +228,25 @@ index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
   number of rows found, the total, the share, the number of rows found with a partial result
   only, and each row that was not found. `--limit N`: the number of results for each query,
   default 10. `--exact`: the page before and the page after an answer are not accepted.
-- Result code `0`: done. `1`: nothing was found, or a file was not indexed. `2`: the input
-  cannot be read, an argument is wrong, or the folder has no index. `recall` gives `0` when
-  the input can be read.
+- `given`: records that the pages `FIRST` to `LAST` of `DOC` were given to a reader. One page
+  is `FIRST` only. A range that is recorded two times is one row; `--task TEXT` replaces the
+  task of the row. `--remove` removes the row of the range; result code `1` when the record
+  has no such range. A range outside the pages of the document gives the result code `2`.
+- `unread`: for each document, or for `DOC`, one line for each range that is in no recorded
+  range, in the form of `ranges`, and one line with the number of pages, the recorded ranges
+  and the pages that no reader got. A range of the output has no more pages than
+  `--max-pages N` (default 25). `--json`: a list with, for each document, `document`, `pages`,
+  `given` (first, last, task) and `not_read` (first, last, sections).
+  - `--write SPEC`: writes or replaces the part "Reading" of `SPEC/vetting.md`, in the form
+    of `files.md`. No other byte of the file changes, and the line ends stay. A folder without
+    the file gets the file. The document of a source is the document with the id of the
+    source, or a document that the table `aliases` knows by the address or by a name of the
+    source. Prints one line with the number of rows and the sources with pages that no reader
+    got.
+  - Result code `1` when a page is in no recorded range.
+- Result code `0`: done. `1`: nothing was found, a file was not indexed, or a page is in no
+  recorded range. `2`: the input cannot be read, an argument is wrong, or the folder has no
+  index. `recall` gives `0` when the input can be read.
 
 ## scripts/place.py
 

@@ -44,11 +44,25 @@ Rubric for sources: version <n>. Rubric for items: version <n>.
 | Id | Requirement | Stakeholder | View | Source | Goes to |
 |---|---|---|---|---|---|
 | R-01 | <one sentence> | <stakeholder> | <view> | S-14 finding 1 | C-07 |
+
+## Reading
+
+The program `index.py unread --write` writes this table. Do not change it by hand.
+
+| Source | Document | Pages | Given to readers | Not read |
+|---|---|---|---|---|
+| S-01 | <document id> | 40 | 1-25, 26-40 | none |
 ```
 
 - The session writes the table "Requirements": one row for each requirement that a source
   states for a stakeholder. The cell "Goes to" is `C-<nn>`, `3.3: <decision>`, `5`,
   `boundary: <name>` or `duplicate: R-<nn>`. No program writes this table.
+- `index.py unread --write SPEC` writes the part "Reading" and replaces it in a later run. No
+  person and no session writes it. It has one row for each converted document of the work
+  folder that is a source of section 2. `Pages` is the number of pages. `Given to readers`
+  holds each recorded range, and `Not read` the pages in no recorded range; each is `none`
+  when it is empty. A source with `all` in the cell `Views` and without a converted document
+  has `none` in the cell `Document` and `0` in the cell `Pages`.
 - The table of section 2 of `spec.md` gets the cell `Views` after the cell `Read`: the views
   that the source was read for, with a comma between two names, or `all`.
 
@@ -171,6 +185,8 @@ first term = second term = third term
 - One group in each line. The terms are separated by ` = `.
 - A line that starts with `#` is a comment. An empty line is ignored.
 - `index.py build` reads the file. A file of `--synonyms FILE` has the same form.
+- The file `synonyms.txt` of a work folder has the same form. `index.py build` reads it when
+  it is there.
 
 ## Table of answers for `index.py recall`
 

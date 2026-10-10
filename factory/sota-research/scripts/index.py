@@ -11,6 +11,9 @@
   index.py cited WORK IDENTIFIER [--json]
   index.py ranges WORK DOC [--max-pages N]
   index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
+  index.py given WORK DOC FIRST-LAST [--task TEXT] [--remove]
+  index.py unread WORK [DOC] [--max-pages N] [--json]
+  index.py unread WORK --write SPEC
 
   build            reads each file WORK/converted/*.md and writes the database WORK/index.sqlite.
                    A second run reads only a file that changed, and removes a file that is gone.
@@ -19,9 +22,12 @@
   cited            gives each place that cites a standard, an address or a document.
   ranges           gives the page ranges of one document, to give to the readers.
   recall           measures the search with a table of queries and the pages of their answers.
+  given            records that the pages FIRST to LAST of one document were given to a reader.
+  unread           gives the pages of each document that are in no recorded range.
   WORK             the work folder. It must be outside each git repository.
   --synonyms FILE  a file of synonyms: one group in each line, the terms separated by " = ".
-                   The file references/synonyms.txt is read also.
+                   The file references/synonyms.txt is read also, and the file
+                   WORK/synonyms.txt if it is there.
   --from SPEC      the folder of an aspect specification. Section 2 gives names of documents,
                    and section 8 gives synonyms.
   --manifest FILE  a different manifest of the seeds, for tests.
@@ -30,6 +36,11 @@
   --no-synonyms    do not add the synonyms of a term to the query.
   --max-pages N    the largest number of pages of a range. The default is 25.
   --exact          recall: do not accept the page before and the page after an answer.
+  --task TEXT      given: the task of the reader, in one line.
+  --remove         given: remove the record of the range. Use it when a reader did not read the
+                   range. Then record the pages that the reader read.
+  --write SPEC     unread: write or replace the table "Reading" in vetting.md of the aspect
+                   specification in the folder SPEC.
   --json           print the result as JSON.
 
 The rule of the design: no command prints the text of a document. The commands give pointers
@@ -48,6 +59,17 @@ The tables of the database:
   aliases    key, document, origin
   synonyms   grp, term, origin
   meta       key, value: the version of the patterns
+  given      document, first_page, last_page, task: the page ranges that were given to readers
+
+A range that is recorded two times is one row. A new build keeps the rows of a document whose
+converted file did not change. It removes the rows of each other document.
+
+The table "Reading" has one row for each converted document that is a source of section 2 of
+the specification: the source, the document, the number of pages, the ranges that were given
+and the ranges that no reader got. The document of a source is the document with the
+identifier of the source, or a document that the index knows by the name or the address of the
+source. A source with "all" in the cell Views that has no converted document gets a row with
+the document "none". A program writes this table. A person does not change it.
 
 The search uses the stemmer "porter" on the tokenizer "unicode61" without diacritics. Thus a
 word finds its plural and its other forms. A wrong hit costs a reader one page. A page that is
@@ -81,9 +103,9 @@ An acronym is recorded only when each letter of the short form is the first lett
 word of the long form, in the same sequence. Small words such as "of" and "and" are ignored
 in the long form.
 
-Result code 0: done. Result code 1: nothing was found, or a file was not indexed. Result code
-2: the input cannot be read, or the arguments are wrong. For recall, the result code is 0 when
-the input can be read.
+Result code 0: done. Result code 1: nothing was found, a file was not indexed, or a page is in
+no recorded range. Result code 2: the input cannot be read, or the arguments are wrong. For
+recall, the result code is 0 when the input can be read.
 """
 
 import collections
@@ -104,6 +126,8 @@ import seed
 VERSION = "1"
 DATABASE = "index.sqlite"
 SYNONYMS = pathlib.Path(__file__).resolve().parents[1] / "references/synonyms.txt"
+# The file of the synonyms that the research of one work folder found.
+WORK_SYNONYMS = "synonyms.txt"
 LIMIT, RECALL_LIMIT, MAX_PAGES = 20, 10, 25
 
 SCHEMA = """
@@ -125,8 +149,17 @@ CREATE TABLE IF NOT EXISTS aliases (
   key TEXT, document TEXT, origin TEXT, PRIMARY KEY (key, document, origin)) WITHOUT ROWID;
 CREATE TABLE IF NOT EXISTS synonyms (
   grp INTEGER, term TEXT, origin TEXT, PRIMARY KEY (grp, term, origin)) WITHOUT ROWID;
+CREATE TABLE IF NOT EXISTS given (
+  document TEXT, first_page INTEGER, last_page INTEGER, task TEXT,
+  PRIMARY KEY (document, first_page, last_page)) WITHOUT ROWID;
 """
 TABLES = ("documents", "pages", "sections", "refs", "acronyms", "aliases", "synonyms")
+# The table of the vetting record that names the pages that the readers got.
+READING = "Reading"
+READING_CELLS = ("Source", "Document", "Pages", "Given to readers", "Not read")
+READING_NOTE = "The program `index.py unread --write` writes this table. Do not change it by hand."
+NONE = "none"
+RANGE = re.compile(r"(\d+)(?:-(\d+))?")
 
 HEAD = re.compile(r"^- (Source|sha256|Pages): (.*)$", re.M)
 PAGE = re.compile(r"^## Page \d+$", re.M)
@@ -225,6 +258,13 @@ MESSAGES = {
     "recall": "Found: {0} of {1} ({2} %). Found with a partial result only: {3}.",
     "missing": "Not found: {0} | {1} | {2}",
     "no-answers": "the file has no table with the cells Query, Document and Pages",
+    "wrong-range": "the range '{0}' is not in the pages 1-{1} of the document",
+    "recorded": "Recorded: {0} | {1}",
+    "removed": "Removed: {0} | {1}",
+    "not-recorded": "The record has no range {1} of the document '{0}'.",
+    "reading": "{0} | number of pages: {1} | given to readers: {2} | not read: {3}",
+    "written": "The table Reading of {0} is written. Rows: {1}. Sources with pages that no reader got: {2}.",
+    "pages-left": "{0} ({1} pages)",
 }
 
 
@@ -927,7 +967,7 @@ def connect(work):
 def dump(work):
     """The content of each table, sorted. Two builds from the same files give the same content."""
     with contextlib.closing(connect(work)) as db:
-        return {table: sorted(db.execute(f"SELECT * FROM {table}"), key=repr) for table in TABLES}
+        return {table: sorted(db.execute(f"SELECT * FROM {table}"), key=repr) for table in (*TABLES, "given")}
 
 
 def build(work, synonyms=(), spec=None, seeds=()):
@@ -985,7 +1025,7 @@ def build(work, synonyms=(), spec=None, seeds=()):
     of the manifest and from section 2 of the specification. A place in a different document
     that names a document of the index gets a reference of the family "document".
 
-    >>> extra = work / "synonyms.txt"
+    >>> extra = work / "more.txt"
     >>> _ = extra.write_text("backup = safety copy\n", encoding="utf-8")
     >>> spec = sample.folder(("spec.md", "| backup |", "| backup; reserve copy |"))
     >>> seeds = [{"id": "S-02", "document": "A study of restore failures (the study)", "address": "https://j.example"}]
@@ -1000,6 +1040,31 @@ def build(work, synonyms=(), spec=None, seeds=()):
     >>> [row[:2] + row[3:7] for row in full["refs"] if row[3] == "document"]
     [('S-02', 1, 'document', 'Guide to backups', 'guide to backups', 'S-01')]
 
+    The file synonyms.txt of the work folder is read without an option.
+
+    >>> _ = (work / WORK_SYNONYMS).write_text("drill = exercise\n", encoding="utf-8")
+    >>> build(work)["groups"], [row[1:] for row in dump(work)["synonyms"] if row[1] == "exercise"]
+    (6, [('exercise', 'file')])
+    >>> (work / WORK_SYNONYMS).unlink()
+
+    The record of the ranges that were given to the readers stays when the converted file of
+    its document did not change, also after a change of the version of the patterns. A file
+    that changed has new pages: its record is removed.
+
+    >>> with contextlib.closing(connect(work)) as db, db:
+    ...     record_given(db, "S-01", 1, 3)
+    ...     record_given(db, "S-02", 1, 2)
+    ...     _ = db.execute("UPDATE meta SET value = '0'")
+    >>> build(work)["updated"], dump(work)["given"]
+    (['S-01', 'S-02'], [('S-01', 1, 3, ''), ('S-02', 1, 2, '')])
+    >>> _ = path.write_text(text.replace("restores.", "restores. See RFC 2119."), encoding="utf-8")
+    >>> build(work)["updated"], dump(work)["given"]
+    (['S-02'], [('S-01', 1, 3, '')])
+    >>> _ = path.write_text(text, encoding="utf-8")
+    >>> with contextlib.closing(connect(work)) as db, db:
+    ...     _ = db.execute("DELETE FROM given")
+    >>> _ = build(work)
+
     A file that cannot be read, or that has no page heading, is not indexed. The program records
     it and continues. A work folder without converted files gives an empty index.
 
@@ -1013,12 +1078,13 @@ def build(work, synonyms=(), spec=None, seeds=()):
     """
     work = pathlib.Path(work)
     files = {path.stem: path for path in sorted((work / "converted").glob("*.md"))}
-    given = [path for path in [SYNONYMS] if path.is_file()] + list(synonyms)
+    given = [path for path in (SYNONYMS, work / WORK_SYNONYMS) if path.is_file()] + list(synonyms)
     groups = [("file", terms) for path in given for terms in read_synonyms(path)]
     data = aspect.load(spec) if spec is not None else {"sources": [], "glossary": []}
     groups += [("glossary", terms) for terms in glossary_groups(data["glossary"])]
     updated, problems = [], []
     with contextlib.closing(connect(work)) as db, db:
+        before = dict(db.execute("SELECT id, converted FROM documents"))
         if db.execute("SELECT value FROM meta WHERE key = 'version'").fetchone() != (VERSION,):
             for table in TABLES:
                 db.execute(f"DELETE FROM {table}")
@@ -1040,6 +1106,8 @@ def build(work, synonyms=(), spec=None, seeds=()):
             if known.get(ident) == converted:
                 continue
             forget(ident)
+            if before.get(ident) != converted:
+                db.execute("DELETE FROM given WHERE document = ?", (ident,))
             found = analyse(text)
             if not found["texts"]:
                 problems.append(MESSAGES["not-indexed"].format(ident, reason))
@@ -1065,6 +1133,7 @@ def build(work, synonyms=(), spec=None, seeds=()):
         removed = sorted(set(known) - set(files))
         for ident in removed:
             forget(ident)
+        db.execute("DELETE FROM given WHERE document NOT IN (SELECT id FROM documents)")
 
         # The names of the documents and the synonyms depend on all documents: write them again.
         documents = dict(db.execute("SELECT id, source FROM documents"))
@@ -1462,9 +1531,7 @@ def read_answers(path):
         raise ValueError(MESSAGES["no-answers"])
     rows = []
     for row in tables[0]["rows"]:
-        spans = re.findall(r"(\d+)(?:\s*[-\u2013]\s*(\d+))?", row.get("pages", ""))
-        pages = sorted({page for a, b in spans for page in range(int(a), int(b or a) + 1)})
-        rows.append((row["query"], row["document"], pages))
+        rows.append((row["query"], row["document"], aspect.pages_of(row.get("pages"))))
     return rows
 
 
@@ -1501,6 +1568,254 @@ def recall(db, answers, limit=RECALL_LIMIT, synonyms=True, exact=False):
     return found, partial, missing
 
 
+def parse_range(text, pages):
+    """The first and the last page of a range "FIRST-LAST" of a document with this number of pages.
+
+    >>> parse_range("3-7", 10), parse_range("4", 4)
+    ((3, 7), (4, 4))
+    >>> for text in ("0-2", "7-3", "3-11", "a-b", "3-"):
+    ...     try:
+    ...         parse_range(text, 10)
+    ...     except ValueError as e:
+    ...         print(e)
+    the range '0-2' is not in the pages 1-10 of the document
+    the range '7-3' is not in the pages 1-10 of the document
+    the range '3-11' is not in the pages 1-10 of the document
+    the range 'a-b' is not in the pages 1-10 of the document
+    the range '3-' is not in the pages 1-10 of the document
+    """
+    found = RANGE.fullmatch(text)
+    first, last = (int(found.group(1)), int(found.group(2) or found.group(1))) if found else (0, 0)
+    if not 1 <= first <= last <= pages:
+        raise ValueError(MESSAGES["wrong-range"].format(text, pages))
+    return first, last
+
+
+def runs(pages):
+    """The runs of pages that follow each other: (first page, last page), sorted.
+
+    >>> runs([9, 1, 2, 3, 7, 10, 2]), runs([])
+    ([(1, 3), (7, 7), (9, 10)], [])
+    """
+    out = []
+    for page in sorted(set(pages)):
+        if out and page == out[-1][1] + 1:
+            out[-1] = (out[-1][0], page)
+        else:
+            out.append((page, page))
+    return out
+
+
+def spans(pairs):
+    """Ranges of pages as the text of one cell: "1-3, 7", or "none".
+
+    >>> spans([(1, 3), (7, 7)]), spans([])
+    ('1-3, 7', 'none')
+    """
+    return ", ".join(str(a) if a == b else f"{a}-{b}" for a, b in pairs) or NONE
+
+
+def record_given(db, document, first, last, task=""):
+    """Record that the pages first to last of a document were given to a reader.
+
+    A range that is recorded two times is one row. A second record without a task keeps the task.
+
+    >>> import sample
+    >>> work = sample.converted()
+    >>> _ = build(work)
+    >>> db = contextlib.closing(connect(work)).__enter__()
+    >>> for task in ("the first task", "", "a new  task"):
+    ...     record_given(db, "S-01", 2, 3, task)
+    ...     print(db.execute("SELECT * FROM given").fetchall())
+    [('S-01', 2, 3, 'the first task')]
+    [('S-01', 2, 3, 'the first task')]
+    [('S-01', 2, 3, 'a new task')]
+    >>> db.close()
+    """
+    db.execute(
+        "INSERT INTO given VALUES (?, ?, ?, ?) ON CONFLICT DO UPDATE SET task ="
+        " CASE WHEN excluded.task != '' THEN excluded.task ELSE task END",
+        (document, first, last, " ".join(task.split())),
+    )
+
+
+def unread(db, document, limit=MAX_PAGES):
+    """The pages of one document that are in no recorded range. Returns a dictionary.
+
+    "given" holds each recorded range with its task. "not_read" holds the pages that no reader
+    got, as ranges for new readers: each one is a range of page_ranges(), or a part of one, with
+    the titles of the sections of that range. The result holds no text of a document.
+
+    >>> import sample
+    >>> work = sample.converted()
+    >>> _ = build(work)
+    >>> db = contextlib.closing(connect(work)).__enter__()
+    >>> unread(db, "S-02") == {"document": "S-02", "pages": 2, "given": [],
+    ...                        "not_read": [{"first": 1, "last": 2, "sections": ["(all pages)"]}]}
+    True
+    >>> record_given(db, "S-01", 1, 2, "a task")
+    >>> record_given(db, "S-01", 2, 4)
+    >>> found = unread(db, "S-01", 2)
+    >>> found["given"], found["not_read"]
+    ([{'first': 1, 'last': 2, 'task': 'a task'}, {'first': 2, 'last': 4, 'task': ''}],
+     [{'first': 5, 'last': 5, 'sections': ['The Restore Drill']},
+      {'first': 6, 'last': 6, 'sections': ['Forms']}])
+    >>> record_given(db, "S-01", 5, 6)
+    >>> unread(db, "S-01")["not_read"]
+    []
+    >>> db.close()
+    """
+    pages = db.execute("SELECT pages FROM documents WHERE id = ?", (document,)).fetchone()[0]
+    sql = "SELECT first_page, last_page, task FROM given WHERE document = ? ORDER BY 1, 2"
+    given = [dict(zip(("first", "last", "task"), row, strict=True)) for row in db.execute(sql, (document,))]
+    read = {page for row in given for page in range(row["first"], row["last"] + 1)}
+    sql = "SELECT title, first_page, level FROM sections WHERE document = ? ORDER BY seq"
+    parts = []
+    for first, last, titles in page_ranges(db.execute(sql, (document,)).fetchall(), pages, limit):
+        for a, b in runs(page for page in range(first, last + 1) if page not in read):
+            parts.append({"first": a, "last": b, "sections": titles})
+    return {"document": document, "pages": pages, "given": given, "not_read": parts}
+
+
+def range_line(document, first, last, titles):
+    """One line for a range of pages of a document, with the titles of its sections.
+
+    >>> range_line("a", 3, 3, []), range_line("a", 4, 9, ["One", "Two"])
+    ('a | page 3 | number of pages: 1 | (before the first section)',
+     'a | pages 4-9 | number of pages: 6 | One; Two')
+    """
+    place = MESSAGES["page"].format(first) if first == last else MESSAGES["pages"].format(first, last)
+    return MESSAGES["range"].format(document, place, last - first + 1, "; ".join(titles) or MESSAGES["front"])
+
+
+def unread_lines(found):
+    """The lines that the command "unread" prints for one document. See unread().
+
+    >>> part = {"first": 5, "last": 6, "sections": ["Forms"]}
+    >>> given = [{"first": 1, "last": 2, "task": ""}, {"first": 2, "last": 4, "task": ""}]
+    >>> print("\\n".join(unread_lines({"document": "a", "pages": 6, "given": given, "not_read": [part]})))
+    a | pages 5-6 | number of pages: 2 | Forms
+    a | number of pages: 6 | given to readers: 1-2, 2-4 | not read: 5-6
+    """
+    lines = [range_line(found["document"], r["first"], r["last"], r["sections"]) for r in found["not_read"]]
+    given = spans((r["first"], r["last"]) for r in found["given"])
+    left = spans(runs(page for r in found["not_read"] for page in range(r["first"], r["last"] + 1)))
+    return [*lines, MESSAGES["reading"].format(found["document"], found["pages"], given, left)]
+
+
+def reading_rows(db, sources):
+    """The rows of the table "Reading": (source, document, pages, ranges given, ranges not read).
+
+    sources: the rows of section 2 of an aspect specification. The document of a source is the
+    document with the identifier of the source, or a document that the index knows by the name
+    or the address of the source. A source without a document gives no row. A source with "all"
+    in the cell Views and without a document gives a row with the document "none".
+
+    >>> import sample
+    >>> work = sample.converted({"guide": ["one", "two", "three"], "S-02": ["one"]})
+    >>> seeds = [{"id": "guide", "document": "A Guide to Things (AGT)", "address": "https://a.example/form"}]
+    >>> _ = build(work, seeds=seeds)
+    >>> db = contextlib.closing(connect(work)).__enter__()
+    >>> record_given(db, "guide", 2, 2)
+    >>> sources = [{"id": "S-01", "source": "AGT", "views": "all"}, {"id": "S-02", "source": "A study"},
+    ...            {"id": "S-03", "source": "A page", "views": "all", "url": "https://b.example"},
+    ...            {"id": "S-04", "source": "A second page", "views": "storage"},
+    ...            {"id": "S-05", "source": "The form", "url": "<https://a.example/form>"}]
+    >>> reading_rows(db, sources)
+    [('S-01', 'guide', 3, '2', '1, 3'), ('S-02', 'S-02', 1, 'none', '1'), ('S-03', 'none', 0, 'none', 'none'),
+     ('S-05', 'guide', 3, '2', '1, 3')]
+    >>> db.close()
+    """
+    documents = {ident for (ident,) in db.execute("SELECT id FROM documents")}
+    known = collections.defaultdict(set)
+    for key, document in db.execute("SELECT key, document FROM aliases"):
+        known[key].add(document)
+    rows = []
+    for source in sources:
+        ident = source.get("id", "")
+        texts = (source.get("url", "").strip("<>`"), *names_of(source.get("source", "")))
+        found = {ident} & documents
+        found |= {document for text in texts if text for document in known[key_of(text)]}
+        for document in sorted(found):
+            state = unread(db, document)
+            given = spans((r["first"], r["last"]) for r in state["given"])
+            left = runs(page for r in state["not_read"] for page in range(r["first"], r["last"] + 1))
+            rows.append((ident, document, state["pages"], given, spans(left)))
+        if not found and check.ALL_VIEWS in aspect.names_of(source.get("views")):
+            rows.append((ident, NONE, 0, NONE, NONE))
+    return rows
+
+
+def write_reading(spec, rows):
+    r"""Write or replace the table "Reading" in vetting.md of an aspect specification.
+
+    Only the part "Reading" changes. The same rows give the same file. A file with the line end
+    of Windows keeps it. Returns the sources with pages that no reader got, each with the number.
+
+    >>> import sample
+    >>> spec = sample.folder()
+    >>> rows = [("S-01", "S-01", 6, "1-6", "none"), ("S-02", "S-02", 2, "1-2", "none")]
+    >>> write_reading(spec, rows), aspect.read_text(spec / "vetting.md") == sample.VETTING
+    ([], True)
+    >>> write_reading(spec, [("S-01", "a|b", 6, "1-2", "3-6"), ("S-01", "c", 2, "none", "1-2")])
+    ['S-01 (6 pages)']
+    >>> print(aspect.read_text(spec / "vetting.md")[len(sample.VETTING.split("## Reading")[0]) :])
+    ## Reading
+    <BLANKLINE>
+    The program `index.py unread --write` writes this table. Do not change it by hand.
+    <BLANKLINE>
+    | Source | Document | Pages | Given to readers | Not read |
+    |---|---|---|---|---|
+    | S-01 | a\|b | 6 | 1-2 | 3-6 |
+    | S-01 | c | 2 | none | 1-2 |
+    <BLANKLINE>
+
+    A part "Reading" in the middle of the file is replaced there. A file without the part gets it
+    at its end. A folder without the file gets the file.
+
+    >>> head, tail = sample.VETTING.split("## Requirements")
+    >>> tail = tail.split("## Reading")[0].rstrip()
+    >>> middle = head + "## Reading\n\nold text\n\n## Requirements" + tail + "\n"
+    >>> _ = (spec / "vetting.md").write_bytes(middle.replace("\n", "\r\n").encode("utf-8"))
+    >>> _ = write_reading(spec, rows)
+    >>> text = (spec / "vetting.md").read_bytes().decode("utf-8")
+    >>> text.count("\r\n") == text.count("\n"), "old text" in text
+    (True, False)
+    >>> text.index("## Reading") < text.index("## Requirements")
+    True
+    >>> [(row["source"], row["not read"]) for row in aspect.load(spec)["reading"]]
+    [('S-01', 'none'), ('S-02', 'none')]
+    >>> _ = (spec / "vetting.md").write_text(sample.VETTING.split("## Reading")[0], encoding="utf-8")
+    >>> write_reading(spec, rows), aspect.read_text(spec / "vetting.md") == sample.VETTING
+    ([], True)
+    >>> (spec / "vetting.md").unlink()
+    >>> _ = write_reading(spec, rows[:1])
+    >>> aspect.read_text(spec / "vetting.md").splitlines()[:3], len(aspect.load(spec)["reading"])
+    (['# Vetting record: Backups of project data', '', '## Reading'], 1)
+    """
+    path = pathlib.Path(spec) / "vetting.md"
+    if not path.is_file():
+        aspect.write_text(path, f"# Vetting record: {aspect.load(spec)['title']}\n")
+    text = aspect.read_text(path)
+    lines = [line.removesuffix("\r") for line in text.split("\n")]
+    block = [f"## {READING}", "", READING_NOTE, "", "| " + " | ".join(READING_CELLS) + " |"]
+    block.append("|" + "---|" * len(READING_CELLS))
+    block += ["| " + " | ".join(str(cell).replace("|", "\\|") for cell in row) + " |" for row in rows]
+    found = aspect.Doc(path).titled(READING)
+    if found:
+        first, last = found[1]
+        lines[first - 1 :] = [*block, "", *lines[last:]]
+    else:
+        while lines and not lines[-1]:
+            lines.pop()
+        lines += ["", *block, ""]
+    aspect.write_text(path, ("\r\n" if "\r\n" in text else "\n").join(lines))
+    left = collections.Counter()
+    for row in rows:
+        left[row[0]] += len(aspect.pages_of(row[4]))
+    return [MESSAGES["pages-left"].format(ident, count) for ident, count in sorted(left.items()) if count]
+
+
 def command(name, db, values, options):
     """Do one command that reads the index. Returns (the result code, the lines to print)."""
     as_json = "--json" in options["flags"]
@@ -1522,6 +1837,19 @@ def command(name, db, values, options):
         share = round(100 * found / len(answers)) if answers else 0
         rows = [MESSAGES["missing"].format(q, d, ", ".join(map(str, pages))) for q, d, pages in missing]
         return 0, [MESSAGES["recall"].format(found, len(answers), share, partial), *rows]
+    if name == "unread" and options["write"] is not None:
+        rows = reading_rows(db, aspect.load(options["write"])["sources"])
+        left = write_reading(options["write"], rows)
+        path = pathlib.Path(options["write"]) / "vetting.md"
+        return int(bool(left)), [MESSAGES["written"].format(path, len(rows), ", ".join(left) or NONE)]
+    if name == "unread" and not values:
+        found = [
+            unread(db, ident, options["max_pages"] or MAX_PAGES)
+            for (ident,) in db.execute("SELECT id FROM documents ORDER BY id").fetchall()
+        ]
+        lines = [line for state in found for line in unread_lines(state)]
+        lines = [json.dumps(found, indent=2, sort_keys=True)] if as_json else lines
+        return int(any(state["not_read"] for state in found)), lines
     pages = db.execute("SELECT pages FROM documents WHERE id = ?", (values[0],)).fetchone()
     if pages is None:
         return 1, [MESSAGES["no-document"].format(values[0])]
@@ -1530,21 +1858,39 @@ def command(name, db, values, options):
         return int(not rows), [json.dumps(rows, indent=2, sort_keys=True)] if as_json else reference_lines(
             rows
         )
+    if name == "unread":
+        found = unread(db, values[0], options["max_pages"] or MAX_PAGES)
+        lines = [json.dumps([found], indent=2, sort_keys=True)] if as_json else unread_lines(found)
+        return int(bool(found["not_read"])), lines
+    if name == "given":
+        first, last = parse_range(values[1], pages[0])
+        place = MESSAGES["page"].format(first) if first == last else MESSAGES["pages"].format(first, last)
+        if "--remove" in options["flags"]:
+            sql = "DELETE FROM given WHERE document = ? AND first_page = ? AND last_page = ?"
+            removed = db.execute(sql, (values[0], first, last)).rowcount
+            db.commit()
+            said = MESSAGES["removed" if removed else "not-recorded"].format(values[0], place)
+            return int(not removed), [said]
+        record_given(db, values[0], first, last, options["task"] or "")
+        db.commit()
+        return 0, [MESSAGES["recorded"].format(values[0], place)]
     sql = "SELECT title, first_page, level FROM sections WHERE document = ? ORDER BY seq"
     found = page_ranges(db.execute(sql, (values[0],)).fetchall(), pages[0], options["max_pages"] or MAX_PAGES)
-    lines = []
-    for first, last, titles in found:
-        place = MESSAGES["page"].format(first) if first == last else MESSAGES["pages"].format(first, last)
-        lines.append(
-            MESSAGES["range"].format(
-                values[0], place, last - first + 1, "; ".join(titles) or MESSAGES["front"]
-            )
-        )
-    return 0, lines
+    return 0, [range_line(values[0], *part) for part in found]
 
 
-COMMANDS = {"build": 0, "search": 1, "refs": 2, "cited": 1, "ranges": 1, "recall": 1}
-FLAGS = {"--no-synonyms", "--json", "--exact"}
+# The numbers of the arguments that each command can have after the work folder.
+COMMANDS = {
+    "build": (0,),
+    "search": (1,),
+    "refs": (2,),
+    "cited": (1,),
+    "ranges": (1,),
+    "recall": (1,),
+    "given": (2,),
+    "unread": (0, 1),
+}
+FLAGS = {"--no-synonyms", "--json", "--exact", "--remove"}
 
 
 def main(argv=None):
@@ -1629,6 +1975,68 @@ def main(argv=None):
     S-02 | pages 1-2 | number of pages: 2 | (all pages)
     0
 
+    The record of the ranges that were given to the readers, and the pages that no reader got.
+    A page that is in no recorded range gives the result code 1.
+
+    >>> run("given", work, "S-01", "1-3", "--task", "the concerns of the operators")
+    Recorded: S-01 | pages 1-3
+    0
+    >>> run("given", work, "S-01", "1-3"), run("given", work, "S-01", "6"), run("given", work, "S-01", "3-5")
+    Recorded: S-01 | pages 1-3
+    Recorded: S-01 | page 6
+    Recorded: S-01 | pages 3-5
+    (0, 0, 0)
+    >>> run("given", work, "S-01", "3-5", "--remove"), run("given", work, "S-01", "3-5", "--remove")
+    Removed: S-01 | pages 3-5
+    The record has no range pages 3-5 of the document 'S-01'.
+    (0, 1)
+    >>> run("unread", work, "--max-pages", "2")
+    S-01 | pages 4-5 | number of pages: 2 | The Restore Drill
+    S-01 | number of pages: 6 | given to readers: 1-3, 6 | not read: 4-5
+    S-02 | pages 1-2 | number of pages: 2 | (all pages)
+    S-02 | number of pages: 2 | given to readers: none | not read: 1-2
+    1
+    >>> run("unread", work, "S-01")
+    S-01 | pages 4-5 | number of pages: 2 | Copies of the Data; The Restore Drill; Forms
+    S-01 | number of pages: 6 | given to readers: 1-3, 6 | not read: 4-5
+    1
+    >>> json.loads(sample.run(main, "unread", work, "S-01", "--json")[1])[0]["given"][0]
+    {'first': 1, 'last': 3, 'task': 'the concerns of the operators'}
+    >>> [state["document"] for state in json.loads(sample.run(main, "unread", work, "--json")[1])]
+    ['S-01', 'S-02']
+
+    --write writes the table "Reading" into vetting.md of an aspect specification. The table
+    has one row for each converted document that is a source of section 2.
+
+    >>> spec = sample.folder()
+    >>> code, out, _ = sample.run(main, "unread", work, "--write", spec)
+    >>> code, out.replace(str(spec), "SPEC").strip()
+    (1, 'The table Reading of SPEC/vetting.md is written. Rows: 2. Sources with pages that no reader got:
+         S-01 (2 pages), S-02 (2 pages).')
+    >>> [(r["source"], r["given to readers"], r["not read"]) for r in aspect.load(spec)["reading"]]
+    [('S-01', '1-3, 6', '4-5'), ('S-02', 'none', '1-2')]
+    >>> run("given", work, "S-01", "4-5"), run("given", work, "S-02", "1-2"), run("unread", work)
+    Recorded: S-01 | pages 4-5
+    Recorded: S-02 | pages 1-2
+    S-01 | number of pages: 6 | given to readers: 1-3, 4-5, 6 | not read: none
+    S-02 | number of pages: 2 | given to readers: 1-2 | not read: none
+    (0, 0, 0)
+    >>> code, out, _ = sample.run(main, "unread", work, "--write", spec)
+    >>> code, out.replace(str(spec), "SPEC").strip()
+    (0, 'The table Reading of SPEC/vetting.md is written. Rows: 2. Sources with pages that no reader got:
+         none.')
+    >>> run("given", work, "S-01", "7"), run("given", work, "S-09", "1"), run("unread", work, "S-09")
+    The input cannot be read: the range '7' is not in the pages 1-6 of the document
+    The index has no document 'S-09'.
+    The index has no document 'S-09'.
+    (2, 1, 1)
+    >>> wrong = [("unread", work, "S-01", "--write", spec), ("search", work, "a", "--write", spec)]
+    >>> wrong += [("unread", work, "--write"), ("given", work, "S-01"), ("unread", work, "a", "b")]
+    >>> [sample.run(main, *args)[0] for args in wrong]
+    [2, 2, 2, 2, 2]
+    >>> sample.run(main, "unread", work, "--write", work / "absent")[0]
+    2
+
     The measure of the search.
 
     >>> answers = work / "answers.md"
@@ -1685,11 +2093,13 @@ def main(argv=None):
     while (value := check.option(args, "--synonyms")) is not None:
         files.append(value)
     spec, manifest, doc = (check.option(args, flag) for flag in ("--from", "--manifest", "--doc"))
+    task, write = check.option(args, "--task"), check.option(args, "--write")
     numbers = [check.option(args, flag) for flag in ("--limit", "--max-pages")]
     flags = {a for a in args if a.startswith("--")}
     names = [a for a in args if not a.startswith("--")]
     wrong = flags - FLAGS or any(n is not None and not (n.isdigit() and int(n)) for n in numbers)
-    if wrong or not names or COMMANDS.get(names[0]) != len(names) - 2:
+    wrong = wrong or (write is not None and (names[:1] != ["unread"] or len(names) != 2 or not write))
+    if wrong or not names or len(names) - 2 not in COMMANDS.get(names[0], ()):
         print(__doc__, file=sys.stderr)
         return 2
     name, work = names[0], pathlib.Path(names[1])
@@ -1697,7 +2107,8 @@ def main(argv=None):
         print(MESSAGES["in-repository"])
         return 2
     limit, max_pages = (int(n) if n else None for n in numbers)
-    options = {"flags": flags, "doc": doc, "limit": limit, "max_pages": max_pages}
+    options = {"flags": flags, "doc": doc, "limit": limit, "max_pages": max_pages, "task": task}
+    options["write"] = write
     try:
         if name == "build":
             seeds, _, problems = seed.read_manifest(manifest or seed.MANIFEST)

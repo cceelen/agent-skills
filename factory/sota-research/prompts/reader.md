@@ -6,6 +6,11 @@ and the source: its title, and its address or the path of its converted file.
 - If the caller gives an address, read the source with your web tool.
 - If the caller gives the path of a converted file, read that file with your read tool. The
   file has one heading `## Page N` for each page of the source.
+  - The caller gives a range of pages: the first page and the last page. Read each page of
+    the range. Start at the heading `## Page N` of the first page.
+  - If the caller gives no range, the range is the full file.
+- If the caller gives one or more questions, answer each question in point 3, from the pages
+  that you read.
 
 ## Safety
 
@@ -27,9 +32,10 @@ Report these points, in this order. Write in short sentences, in your own words.
 1. **Identity**: the title, the issuer or author, the version or the date, and the license.
    Write "not found" for a point that the source does not give.
 2. **Read**: `full`, `part` or `no`. For `part`, tell which parts you read. For `no`, tell why.
-   Count only the pages that you read with your tool in this task. For a converted file, write
-   `full` only if you read each page to the last heading `## Page N`. For `part`, give the
-   page numbers.
+   Count only the pages that you read with your tool in this task. For a converted file:
+   - Give the first page and the last page that you read.
+   - Give each page of the range that you did not read, with the reason.
+   - Write `full` only if you read each page of the range.
 3. **What the source contributes**: each statement that is useful for the aspect, one line
    each. After each line, give the location: the section, the item, the clause or the heading.
    For a converted file, the location is the page number of the heading `## Page N` above the

@@ -405,6 +405,23 @@ document and to other documents that stay connected.
 - [x] T143 In `specs/002-research-tooling/`: FR-050 to FR-054 in `spec.md`; the index, the file of synonyms and the table of answers in `data-model.md` and `contracts/`
 - [x] T144 Verify in a scratch folder outside each repository, with the file of the SWEBOK Guide: `seed.py get`, `index.py build`, `ranges`, and `recall` with the stakeholders and the standards of the draft of the field map
 
+## Phase 21: The research uses the index (iteration I-4)
+
+**Purpose**: FR-055 and FR-056. Decision of the owner, 2026-10-11: the research and the
+factory integrate the index and the full-text search. In the trial of I-2 one reader got a
+full guide of 411 pages, one knowledge area was not read, and no person saw it before the end.
+
+- [x] T145 In `factory/sota-research/scripts/index.py`: the table `given`; the command `given` with `--task` and `--remove`; a build keeps the record of a file that did not change
+- [x] T146 In `factory/sota-research/scripts/index.py`: the command `unread` with `--max-pages` and `--json`, result code 1 when a page is in no recorded range; `unread --write SPEC` writes or replaces the table "Reading" in `vetting.md`
+- [x] T147 In `factory/sota-research/scripts/index.py`: `build` reads the file `synonyms.txt` of the work folder when it is there
+- [x] T148 In `factory/sota-research/scripts/aspect.py`: read the table "Reading"; the pages of a cell with ranges. In `scripts/sample.py`: the table "Reading" in the sample
+- [x] T149 In `factory/sota-research/scripts/check.py`: the rules `full-with-unread-pages` and `body-without-reading`; the sources with pages that no reader got and the absent table under what remains; the key `reading` and the key `unread` of `remains` with `--json`
+- [x] T150 In `factory/sota-research/references/procedure.md`: the parts "The reading of a converted document", "The search in the converted documents" and "The synonyms of the search"; the references of a view from `refs` and `cited`; the pages for the second reader; the table "Reading" before the review and in the refresh
+- [x] T151 In `factory/sota-research/prompts/reader.md`: the reader of a converted file gets a range of pages and questions, and reports the pages that it read and did not read
+- [x] T152 In `docs/sota-research.md` and `CHANGELOG.md`: the record of the pages that the readers got
+- [x] T153 In `specs/002-research-tooling/`: FR-055 and FR-056 in `spec.md`; the table `given`, the table "Reading" and the file `synonyms.txt` of a work folder in `data-model.md` and `contracts/`; the row of I-4 and the metric M-15 in `iterations.md`
+- [x] T154 Verify in a scratch folder outside each repository, with the file of the SWEBOK Guide: `ranges`, `given` for all ranges but two, `unread` with the result code 1, `unread --write` and `check.py` on a copy of a specification, then the two last ranges and the result code 0; a kit of `export.py` holds the new steps
+
 ---
 
 ## Dependencies & Execution Order
