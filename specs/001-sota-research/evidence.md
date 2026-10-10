@@ -7,7 +7,7 @@ on 2026-10-09. A quote stays only where the wording itself is the point.
 
 | Source | What it contributes | Where | Supports | Read |
 |---|---|---|---|---|
-| S-01 | Fix the protocol of a review before the search. This reduces the bias of the researcher. The question names its population and its context. Where feasible, two researchers extract the data. | sections 5.3, 5.4, 6.4.3 | C-01; 3.3 depth; 3.4 protocol | 2026-10-09 |
+| S-01 | Fix the protocol of a review before the search. This reduces the bias of the researcher. The question names its population and its context. Where feasible, two researchers extract the data. | sections 5.3, 5.4, 6.4.3 | 3.3 depth; 3.4 protocol | 2026-10-09 |
 | S-02 | Report the protocol. Explain each amendment to it. The source is a reporting guideline, made primarily for reviews of health interventions. It leaves the content of a protocol to a different guideline. | item 24; introduction | 3.4 protocol | 2026-10-09 |
 | S-03 | Name each database that was searched, with its platform. For each search strategy, give the date of the last search. | items 1, 13 | C-02 | 2026-10-09 |
 | S-04 | Include practice sources when the context is important or when formal evidence is thin. Assess each source on its producer, method, objectivity, date, novelty, impact and outlet. | guideline 3 and table 4 (section 4.2); guideline 11 | C-02; 3.3 practice sources | 2026-10-09 |
