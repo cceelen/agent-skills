@@ -92,17 +92,51 @@ Two tables.
 
 ## Work folder (outside each git repository)
 
-Written by `seed.py get`, and by `pdf.py` and `vet.py` for their files. Not committed.
+Written by `seed.py get`, and by `pdf.py`, `vet.py` and `index.py` for their files. Not
+committed.
 
 | Path | Holds |
 |---|---|
 | `seeds/<id>.pdf` | the file of one seed, or of one PDF source of an aspect specification |
 | `converted/<id>.md` | the text of that file with one heading for each page, and the marker `.reader-may-read` beside it |
 | `seeds.json` | the date of `--today` or `null`, and for each seed: id, kind, file, converted, sha256, pages, state |
+| `index.sqlite` | the index of the converted files: see "Index" |
 
 State of a seed: `retrieved`, `recorded` (kind `page`), `owner must give the file`, `changed`
 (the digest is not the digest of the manifest or, without one, of the last run),
 `failed: <reason>`. Only `retrieved` and `recorded` give the result code 0.
+
+## Index (`index.sqlite` in a work folder)
+
+Written by `index.py build`, and by `seed.py get` and `init.py` at their end. Not committed. It
+holds the text of the documents: only `index.py` reads it. The same converted files give the
+same content. No table holds a current time.
+
+| Table | Row | Fields |
+|---|---|---|
+| documents | one converted file | id (the file name without `.md`), source, digest (of the source), pages, converted (the digest of the converted file) |
+| pages | one page of a document, with a full-text search (FTS5, tokenizer `porter unicode61 remove_diacritics 2`) | document, page, text |
+| sections | one section of a document | document, seq, title, number, first_page, last_page, level, pattern (`chapter`, `numbered`, `capitals` or `none`) |
+| refs | one reference on one page | document, page, kind (`internal` or `external`), family, text, key, target_document, target_first, target_last |
+| acronyms | one short form with its long form | document, page, short, long, pattern (`parentheses` or `list`) |
+| aliases | one other name of a document of the index | key, document, origin (`head`, `manifest` or `specification`) |
+| synonyms | one term of one group | grp, term, origin (`acronym`, `file` or `glossary`) |
+| meta | the version of the patterns | key, value |
+
+A converted file with a different digest is read again. A different version of the patterns
+makes the index again. The tables aliases and synonyms, the references of the family
+`document` and the target document of each external reference are written again in each build.
+
+Families of a reference: `section`, `chapter`, `page`, `table`, `figure`, `name` (internal);
+the families of the table `STANDARDS` of the program, `address`, `doi`, `citation`, `document`
+(external). The key of a reference is its identifier without case, without the year of a
+standard and without the word `Std`.
+
+## Synonyms (`references/synonyms.txt` in the tooling)
+
+Written by a session or by the owner. Read by `index.py build`. One group in each line, the
+terms separated by ` = `. A line that starts with `#` is a comment. A group is symmetric and
+transitive.
 
 ## Kit (outside each git repository)
 

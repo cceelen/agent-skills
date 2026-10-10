@@ -23,7 +23,7 @@ The program does these steps in this order:
 2. It writes the marker file `.factory-kit` into KIT, with the commit of this repository.
 3. It makes KIT a git repository with the branch `main` and one commit. Without the program
    `git`, it says so and continues.
-4. It retrieves the seeds into WORK, as `seed.py get` does.
+4. It retrieves the seeds into WORK and builds the index of their text, as `seed.py get` does.
 5. It prints what a person does next.
 
 The program removes only a folder that holds the marker file. No seed document and no converted
@@ -290,6 +290,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     b: the owner must give the file. Get it from https://a.example/b. Then add --file b=PATH.
     c: recorded: a web reader reads the page https://a.example/c.
     Written: seeds.json
+    Index: documents ...
     Do these steps next:
     - Go into the folder OUTSIDE/kit. Run: uv run factory/sota-research/scripts/models.py apply
     - Get the file of the seed 'b'. Then run: uv run factory/sota-research/scripts/seed.py get OUTSIDE/work
@@ -305,7 +306,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     >>> written == sorted([*export.kit(), MARKER]), (kit / MARKER).read_text().splitlines()[1]
     (True, 'Commit of the repository: abc1234')
     >>> sorted(p.relative_to(work).as_posix() for p in work.rglob("*") if p.is_file())
-    ['converted/.reader-may-read', 'converted/a.md', 'seeds.json', 'seeds/a.pdf']
+    ['converted/.reader-may-read', 'converted/a.md', 'index.sqlite', 'seeds.json', 'seeds/a.pdf']
     >>> json.loads((work / "seeds.json").read_text())["date"]
     '2026-01-05'
 
@@ -329,6 +330,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     b: retrieved: 2 pages, sha256 ...
     c: recorded: a web reader reads the page https://a.example/c.
     Written: seeds.json
+    Index: documents ...
     Do these steps next:
     - Go into the folder OUTSIDE/kit. Run: uv run factory/sota-research/scripts/models.py apply
     - Start the session of the research in the folder OUTSIDE/kit.

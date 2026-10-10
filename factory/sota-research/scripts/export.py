@@ -98,6 +98,11 @@ def kit(root=ROOT):
     >>> "references/seeds.md" in tooling
     True
 
+    The kit holds the program of the index and the file of the synonyms.
+
+    >>> sorted(tooling & {"scripts/index.py", "references/synonyms.txt"})
+    ['references/synonyms.txt', 'scripts/index.py']
+
     No program needs a file that is left out: the examples of the programs load the sample, and
     no line of a program does.
 

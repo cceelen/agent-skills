@@ -161,6 +161,29 @@ stakeholders before the source:
 - `state` is `retrieved`, `recorded`, `owner must give the file`, `changed` or
   `failed: <reason>`.
 
+## references/synonyms.txt
+
+```text
+# A comment.
+first term = second term = third term
+```
+
+- One group in each line. The terms are separated by ` = `.
+- A line that starts with `#` is a comment. An empty line is ignored.
+- `index.py build` reads the file. A file of `--synonyms FILE` has the same form.
+
+## Table of answers for `index.py recall`
+
+```markdown
+| Query | Document | Pages |
+|---|---|---|
+| end user | swebok | 48, 55-57 |
+```
+
+- `Query`: the words and the phrases of one search.
+- `Document`: the id of a document of the index.
+- `Pages`: single pages and ranges, separated by commas.
+
 ## Marker of a kit
 
 The file `.factory-kit` in a kit that `init.py` made:

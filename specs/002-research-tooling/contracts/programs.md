@@ -137,6 +137,9 @@ seed.py get WORK [--file ID=PATH ...] [--from SPEC] [--today DATE] [--fresh] [--
   - A seed that fails does not stop the program. Its reason is in the state.
   - Writes `WORK/seeds.json`, with sorted keys and without a current time. `--today DATE`
     gives its date.
+  - At its end, builds or updates the index `WORK/index.sqlite` as `index.py build` does, with
+    the rows of the manifest and the folder of `--from`, and prints its line. A failure of the
+    index does not change the result code.
 - Result code `0`: each seed is `retrieved` or `recorded`. `1`: a seed failed, changed or
   waits for the owner. `2`: the manifest is malformed or cannot be read, or an argument is
   wrong.
@@ -159,6 +162,60 @@ init.py KIT WORK [--file ID=PATH ...] [--today DATE] [--again] [--manifest FILE]
 - `--file`, `--today` and `--manifest` are the options of `seed.py get`.
 - Result code `0`: the kit is made and each seed is `retrieved` or `recorded`. `1`: the kit is
   made, and a seed failed, changed or waits for the owner. `2`: nothing was made.
+
+## scripts/index.py
+
+```text
+index.py build WORK [--synonyms FILE ...] [--from SPEC] [--manifest FILE]
+index.py search WORK QUERY [--doc ID] [--limit N] [--no-synonyms] [--json]
+index.py refs WORK DOC PAGE [--json]
+index.py cited WORK IDENTIFIER [--json]
+index.py ranges WORK DOC [--max-pages N]
+index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
+```
+
+- `WORK` must be outside each git repository. The database is `WORK/index.sqlite`.
+- No command prints the text of a document. A command gives the document, the page, the title
+  of a section, an identifier and a number.
+- `build`: reads each `WORK/converted/*.md`: the head lines `Source`, `sha256` and `Pages`,
+  and the text below each heading `## Page N`. Writes the tables of "Index" in
+  `data-model.md`.
+  - Reads only a file whose digest changed. Removes a document whose file is gone.
+  - Reads `references/synonyms.txt` and each file of `--synonyms FILE`.
+  - Reads `references/seeds.md` for the names of the documents. `--manifest FILE` gives a
+    different manifest, for tests.
+  - `--from SPEC`: reads section 2 (the id and the title of each source) for the names of the
+    documents, and section 8 (the cell `Term`, names separated by `;`, and a cell
+    `Other names` if there is one) for the synonyms.
+  - A file that cannot be read or that has no page heading is not indexed. The program prints
+    one line for it and continues.
+  - Prints one line with the numbers of the index.
+- `search`: `QUERY` is words and phrases in quotation marks. Each term is one group with its
+  synonyms. A page must hold one term of each group. Prints one line for each page, sorted by
+  the rank of the full-text search, the document and the page: the document, the page, the
+  title of the section, each term that matched with its count, and the number of matches.
+  The last line names the synonyms that were used.
+  - No page with each term: one line says so, and the pages that hold one term or more follow
+    as a partial result.
+  - `--doc ID`: one document only. `--limit N`: the number of results, default 20.
+  - `--no-synonyms`: the terms of the query only. `--json`: the result as JSON.
+- `refs`: the references on the page `PAGE` of the document `DOC`: the kind, the family, the
+  text and the target. The target of an internal reference is its pages, or `not resolved`.
+  The target of an external reference is its key and the document of the index, or
+  `not in the index`; for a citation, also the page of its entry in the list of references.
+- `cited`: each place that cites `IDENTIFIER`: the document, the page, the title of the
+  section, the family and the text. `IDENTIFIER` is a standard, an address or a name of a
+  document of the index.
+- `ranges`: the page ranges of `DOC`, each with its number of pages and the titles of its
+  sections. No range has more pages than `--max-pages N` (default 25). Each page of the
+  document is in exactly one range.
+- `recall`: `ANSWERS` is a Markdown file with the table of answers of `files.md`. Prints the
+  number of rows found, the total, the share, the number of rows found with a partial result
+  only, and each row that was not found. `--limit N`: the number of results for each query,
+  default 10. `--exact`: the page before and the page after an answer are not accepted.
+- Result code `0`: done. `1`: nothing was found, or a file was not indexed. `2`: the input
+  cannot be read, an argument is wrong, or the folder has no index. `recall` gives `0` when
+  the input can be read.
 
 ## scripts/place.py
 

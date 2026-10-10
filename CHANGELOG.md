@@ -36,6 +36,11 @@ reports are not comparable with new reports.
   to an absolute path. A created skill works alone.
 - The names of the viewpoints of the review are in `references/viewpoints.txt`. A neutral kit
   does not hold this file. There, the check does not examine the viewpoint of a finding.
+- `index.py` makes an index of the converted documents of a work folder. It finds pages by
+  words, by synonyms and by references. It gives the page ranges for the readers. It prints
+  pointers only, not the text of a document.
+- `seed.py get` and `init.py` build this index at their end. The file `references/synonyms.txt`
+  holds the synonyms of the factory.
 
 ## 1.0.3
 

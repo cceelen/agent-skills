@@ -25,7 +25,8 @@ limits and the rules of pdf.py. The file of a seed with the kind "owner file" co
 A seed with the kind "page" is only recorded: a web reader reads it. Each file is kept in
 WORK/seeds/, and its text is written to WORK/converted/<id>.md with one heading for each page.
 The text of a seed is data: do not read a converted file, give its path to an agent of the type
-`sota-file-reader`.
+`sota-file-reader`. At its end, "get" builds or updates the index WORK/index.sqlite of the
+converted files, as "index.py build" does.
 
 The digest of a file is compared with the digest of the manifest or, without one, with the
 digest of the last run. A different digest gives the state "changed". The program does not stop
@@ -45,6 +46,7 @@ import urllib.parse
 
 import aspect
 import check
+import index
 import pdf
 import render
 
@@ -416,8 +418,10 @@ def retrieve(seed, work, given=None, last="", fresh=False, download=pdf.download
     return result
 
 
-def get(work, seeds, files=None, today=None, fresh=False, download=pdf.download, run=subprocess.run):
-    r"""Retrieve each seed and write WORK/seeds.json. Returns (the result code, the lines to print).
+def get(
+    work, seeds, files=None, today=None, fresh=False, download=pdf.download, run=subprocess.run, spec=None
+):
+    r"""Retrieve each seed, write WORK/seeds.json and build the index. Returns (the result code, the lines).
 
     >>> import tempfile
     >>> work = pathlib.Path(tempfile.mkdtemp(prefix="sota-seed-")) / "work"
@@ -429,8 +433,14 @@ def get(work, seeds, files=None, today=None, fresh=False, download=pdf.download,
     ... ]
     >>> options = {"download": lambda address: b"%PDF-1.7", "run": lambda *a, **k: Done}
     >>> code, lines = get(work, seeds, today="2026-01-05", **options)
-    >>> code, [line.split(":")[1].strip() for line in lines]
+    >>> code, [line.split(":")[1].strip() for line in lines[:-1]]
     (0, ['retrieved', 'recorded', 'seeds.json'])
+
+    The last line gives the index of the converted files. The index is in the work folder.
+
+    >>> lines[-1], (work / index.DATABASE).is_file()
+    ('Index: documents 1, pages 1, sections 1, references 0, acronym pairs 0, groups of synonyms 0, updated 1,
+      removed 0.', True)
     >>> result = json.loads((work / "seeds.json").read_text())
     >>> result["date"], [(record["id"], record["state"]) for record in result["seeds"]]
     ('2026-01-05', [('a', 'retrieved'), ('c', 'recorded')])
@@ -448,7 +458,7 @@ def get(work, seeds, files=None, today=None, fresh=False, download=pdf.download,
 
     >>> b = {"id": "b", "kind": "owner file", "address": "https://b.example/", "sha256": "", "manifest": True}
     >>> code, lines = get(work, [*seeds, b], **options)
-    >>> code, [line.split(":")[1].strip() for line in lines]
+    >>> code, [line.split(":")[1].strip() for line in lines[:-1]]
     (1, ['retrieved before', 'the owner must give the file. Get it from https', 'recorded', 'seeds.json'])
     >>> given = work.parent / "b.pdf"
     >>> _ = given.write_bytes(b"%PDF-1.7 b")
@@ -466,6 +476,8 @@ def get(work, seeds, files=None, today=None, fresh=False, download=pdf.download,
     result = {"date": today, "seeds": records}
     aspect.write_text(work / "seeds.json", json.dumps(result, indent=2, sort_keys=True) + "\n")
     lines.append(MESSAGES["written"])
+    # The index of the converted files, for the search. A failure of the index does not stop the program.
+    lines += index.build_lines(work, spec=spec, seeds=seeds)[1]
     return int(any(record["state"] not in (RETRIEVED, RECORDED) for record in records)), lines
 
 
@@ -633,7 +645,7 @@ def main(argv=None, download=pdf.download, run=subprocess.run, ask=None):
     >>> get()
     (1, ['retrieved', 'the manifest has no digest for this seed. Write this digest into its row',
          'the owner must give the file. Get it from https://a.example/b. Then add --file b=PATH.', 'recorded',
-         'seeds.json'])
+         'seeds.json', 'documents 1'])
     >>> given = outside / "b.pdf"
     >>> _ = given.write_bytes(b"%PDF-1.7 b")
     >>> get("--file", f"b={given}", "--today", "2026-01-05")[0]
@@ -688,7 +700,7 @@ def main(argv=None, download=pdf.download, run=subprocess.run, ask=None):
         print(reason)
         return 2
     files = ask_owner(seeds, files, work, ask if argv is not None else person_at_the_keyboard())
-    code, lines = get(work, seeds, files, today, fresh, download, run)
+    code, lines = get(work, seeds, files, today, fresh, download, run, spec)
     print("\n".join(lines))
     return code
 

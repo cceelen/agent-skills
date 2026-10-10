@@ -50,7 +50,7 @@ ignore = ["UP015"]
 [tool.ruff.lint.isort]
 # The programs of the tooling import each other by name. Without this list, the order of the
 # imports depends on the folders that are in the working tree.
-known-first-party = ["aspect", "check", "export", "guard", "models", "pdf", "place", "render", "sample", "seed", "vet"]
+known-first-party = ["aspect", "check", "export", "guard", "index", "models", "pdf", "place", "render", "sample", "seed", "vet"]
 
 [tool.ruff.lint.per-file-ignores]
 # The sample holds Markdown tables. A table row cannot continue on a second line.

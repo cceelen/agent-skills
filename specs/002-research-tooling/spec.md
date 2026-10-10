@@ -484,6 +484,48 @@ and standards.
   of a finding, and MUST list under "What remains" the findings whose viewpoint was not
   checked.
 
+**An index of the converted documents**
+
+Decision of the owner, 2026-10-11: the factory does not use embeddings now. It uses a
+full-text search over the converted documents that it downloads and uses. The search uses
+synonyms. The references in a document and to other documents stay connected.
+
+- **FR-048**: A program MUST build an index of the converted files of a work folder, as one
+  database file in that folder. For each document, the index holds the pages with a full-text
+  search, the sections, the references and the acronyms. It holds also the other names of the
+  documents and the synonyms. A second build MUST read only a file that changed, and MUST
+  remove a document whose file is gone. The same files MUST give the same content of the
+  database, without a current time. The work folder MUST be outside each git repository. A
+  file that cannot be indexed MUST NOT stop the program. The program of FR-044 MUST build the
+  index at its end.
+- **FR-049**: A command that reads the index MUST NOT print the text of a document. It gives
+  pointers only: the document, the page, the title of a section, an identifier and a number.
+  The search takes words and phrases. It MUST give the pages that hold each term, sorted by
+  the rank of the full-text search, the document and the page, with the terms that matched and
+  the number of matches. When no page holds each term, it MUST say so and MUST give the pages
+  that hold one term or more, marked as partial.
+- **FR-050**: The search MUST add the synonyms of each term, MUST name the synonyms that it
+  used, and MUST have an option to switch them off. A group of synonyms is symmetric and
+  transitive, and its terms are compared without case. A synonym comes from an acronym of a
+  document, from a file of synonyms, or from the glossary of an aspect specification. An
+  acronym MUST be recorded only when each letter of the short form is the first letter of one
+  word of the long form, in the same sequence.
+- **FR-051**: The index MUST find the sections of a document with fixed patterns, and MUST
+  record the pattern of each section. A document without a found section MUST get one section
+  for all its pages. The index MUST record the internal references to a section, a chapter, a
+  page, a table, a figure and a chapter title, with the target pages when the target is in the
+  document. It MUST record the external references: the identifiers of standards from a table
+  of families, the addresses, and each numbered citation that the list of references of its
+  chapter resolves. An external reference that names a document of the index MUST point at
+  that document. One command MUST give the references of one page. One command MUST give each
+  place that cites one identifier or one document.
+- **FR-052**: A command MUST give the page ranges of one document for the readers, with a
+  largest number of pages. A section that fits is one range, a longer section is divided, and
+  short neighbours are joined. Each page of the document MUST be in exactly one range. A
+  command MUST measure the search with a table of queries, documents and pages. It counts a
+  row as found when one of its pages, or a page next to it, is in the first results. It MUST
+  print the number found, the total, the share and each row that was not found.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -505,6 +547,9 @@ and standards.
   source. Each checklist item belongs to one view.
 - **Requirement**: one thing that a source says a project must or should do, with its
   stakeholder, its view, its source and its one exit.
+
+- **Index**: the database of the converted documents of a work folder, with their pages,
+  sections, references, acronyms, other names and synonyms. It is not committed.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
 - **Target**: one measurable result that a project reaches when it applies the recipe, with

@@ -9,11 +9,13 @@ file. The sources of the sample are invented.
   folder(edits)    writes the sample into a new temporary folder and returns the path
   load(edits)      the same, read by aspect.load
   work(changes)    writes the signal files into a new temporary folder and returns the path
+  converted(pages) writes the converted documents into a new work folder and returns the path
   run(main, args)  runs the function main of a program; returns (result code, output, errors)
 """
 
 import atexit
 import contextlib
+import hashlib
 import io
 import json
 import pathlib
@@ -283,6 +285,36 @@ REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a 
 BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 
+# The pages of two converted documents, for the examples of index.py. The document S-01 has a
+# page of contents, chapters, numbered headings, headings in capital letters, a page with two
+# columns, a list of references and a running head. The document S-02 has no heading.
+PAGES = {
+    "S-01": [
+        "A Guide to Backups\nCONTENTS\nCHAPTER 1  1\n1. Copies of the Data  2\n1.1. Kinds of Copies  2\n2. Places  3\n"
+        "REFERENCES  3\nCHAPTER 2  4\n1. The Restore Drill  4\n2. Records of a Drill  5\nAppendix A  6",
+        "CHAPTER 1\nCopies of the Data\n\nACRONYMS\nRPO  Recovery Point Objective\nRTO  Recovery Time Objective\n"
+        "XYZ  Not a long form\n\nINTRODUCTION\nA full backup (FB) is a copy of all data. See Section 1.1 and Figure 1.\n"
+        "The Recovery Point Objective (RPO) is a target [1]. See page 4.\n\n1. Copies of the Data\n"
+        "A copy is necessary, see ISO/IEC 27040 and RFC 2119.\n\n1.1. Kinds of Copies\n"
+        "See Section 1 in the Restore Drill chapter. Table 2 gives the kinds [2, c3].\nFigure 1. The kinds of copies",
+        "2. Places  A second place is necessary\nA copy in the same room is not a back-  for each copy. See the Restore\n"
+        "up. NIST SP 800-34 gives the rules.  Drill for the test of a copy.\nSee also Section 9.9.  The address of the rules is\n"
+        "REFERENCES  https://rules.example/backups.\n[1] A. Writer, Targets of a backup,  [2] ISO/IEC 27040, Storage security,\n"
+        "doi:10.1000/182.  2015.",
+        "BACKUPS 4\nCHAPTER 2\nThe Restore Drill\n\n1. The Restore Drill\n"
+        "Do a restore drill (RD) each quarter. Table 2 is in Chapter 1. See Appendix A.\nTable 2. The kinds",
+        "BACKUPS 5\n2. Records of a Drill\nKeep a record. The software requirements specification (SRS) names the interval.\n"
+        "3. A drill has three steps.\n5. Not the next heading",
+        "BACKUPS 6\nAppendix A\nForms\n\nA form for the record of a drill. ISO 9001 names records also. See RFC 2119.",
+    ],
+    "S-02": [
+        "A study of restore failures\n\nThe study uses the Guide to backups, ISO/IEC 27040:2015 and IEEE Std 1012-2016 [1].\n"
+        "The recovery time objective was not met in 4 of 10 restores. See https://standards.example/backups.",
+        "",
+    ],
+}
+ADDRESSES = {"S-01": "https://standards.example/backups", "S-02": "https://journal.example/restore"}
+
 _KEEP = []
 
 
@@ -359,6 +391,30 @@ def work(**changes):
         record = json.loads(json.dumps(record))
         record["signals"].update(changes.get(ident.replace("-", "_"), {}))
         (path / f"{ident}.json").write_text(json.dumps(record, indent=2, sort_keys=True), encoding="utf-8")
+    return path
+
+
+def converted(pages=None):
+    """Write the converted documents into a new work folder. pages: {id: the text of each page}.
+
+    >>> path = converted()
+    >>> sorted(p.name for p in (path / "converted").iterdir())
+    ['.reader-may-read', 'S-01.md', 'S-02.md']
+    >>> (path / "converted" / "S-02.md").read_text(encoding="utf-8").splitlines()[2:5:2]
+    ['- Source: https://journal.example/restore', '- Pages: 2']
+    >>> sorted(p.name for p in (converted({"a": ["one"]}) / "converted").iterdir())
+    ['.reader-may-read', 'a.md']
+    """
+    import pdf
+
+    path = _new_folder() / "work"
+    path.mkdir()
+    for ident, parts in (PAGES if pages is None else pages).items():
+        target = path / "converted" / f"{ident}.md"
+        pdf.open_folder(target)
+        digest = hashlib.sha256("\f".join(parts).encode("utf-8")).hexdigest()
+        address = ADDRESSES.get(ident, f"https://a.example/{ident}.pdf")
+        target.write_text(pdf.markdown(parts, address, digest), encoding="utf-8")
     return path
 
 

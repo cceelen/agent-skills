@@ -388,6 +388,23 @@ fixed the next change: how the research finds the basic practices of each view.
 - [x] T133 In `docs/sota-research.md` and `CHANGELOG.md`: the register of the requirements and the sources of the own field of a view
 - [x] T134 Verify: the check on the specification of the trial `trials/I-2` fails for the absent table; a kit of `export.py` holds the new table in the template and in the procedure, and `check.py --scope` passes there as before
 
+## Phase 20: An index of the converted documents
+
+**Purpose**: FR-050 to FR-054. Decision of the owner, 2026-10-11: no embeddings now; a
+full-text search over the converted documents, a search with synonyms, and references in a
+document and to other documents that stay connected.
+
+- [x] T135 Add `factory/sota-research/references/synonyms.txt`: a head comment with the format and no group
+- [x] T136 In `factory/sota-research/scripts/sample.py`: the pages of two converted documents and the function `converted`, for the examples of the index
+- [x] T137 Add `factory/sota-research/scripts/index.py`, command `build`: read each converted file; write the tables documents, pages (FTS5), sections, refs, acronyms, aliases and synonyms; read only a file that changed; remove a document whose file is gone; the same files give the same content
+- [x] T138 In `factory/sota-research/scripts/index.py`: the patterns of the sections (chapter, numbered, capitals), of the internal and external references (with the table of the families of standards) and of the acronyms (parentheses, list), each with examples
+- [x] T139 In `factory/sota-research/scripts/index.py`, commands `search`, `refs` and `cited`: pointers only, the synonyms, the partial result, `--doc`, `--limit`, `--no-synonyms` and `--json`
+- [x] T140 In `factory/sota-research/scripts/index.py`, commands `ranges` and `recall`: each page in exactly one range; the measure of the search with `--limit`, `--no-synonyms` and `--exact`
+- [x] T141 In `factory/sota-research/scripts/seed.py`: `get` builds the index at its end; correct the examples of `seed.py`, `init.py` and `export.py`
+- [x] T142 In `docs/sota-research.md` and `CHANGELOG.md`: the index and its commands
+- [x] T143 In `specs/002-research-tooling/`: FR-050 to FR-054 in `spec.md`; the index, the file of synonyms and the table of answers in `data-model.md` and `contracts/`
+- [x] T144 Verify in a scratch folder outside each repository, with the file of the SWEBOK Guide: `seed.py get`, `index.py build`, `ranges`, and `recall` with the stakeholders and the standards of the draft of the field map
+
 ---
 
 ## Dependencies & Execution Order
