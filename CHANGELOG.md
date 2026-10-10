@@ -3,6 +3,12 @@
 This file shows the changes of each version. A change of the major number means that earlier
 reports are not comparable with new reports.
 
+## Next version
+
+- The kit gives the agent five rules for evidence before action. The rules are in each skill.
+  The plugin puts them into each session. `install.sh` adds them to the instruction file of the
+  user. The section "The rules of the kit" in `README.md` tells you how to prevent this.
+
 ## 1.0.3
 
 The skill did not change.

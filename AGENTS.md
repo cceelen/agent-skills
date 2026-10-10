@@ -16,6 +16,8 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 | `specs/<number>-<name>/` | One specification. An aspect specification is the source of a recipe; a product specification builds implementation skills and helper software. This folder is only on the branch of its specification, not on `main`. |
 | `factory/<name>/` | The tooling of the factory, in the layout of a skill. Users do not install it. |
 | `skills/<name>/` | One skill. A recipe skill is rendered from its aspect specification. An implementation skill carries one product. |
+| `rules/` | The rules that the kit gives to the agent of a user, and the program that puts them into an instruction file. |
+| `hooks/` | The hooks of the plugin. A hook puts the rules into the context of a session. |
 | `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
 
 Each skill has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The agent
@@ -46,6 +48,19 @@ Run the two commands before each commit. The two commands must pass.
 - Run all checks: `uv run pre-commit run --all-files`
 - Run the checks automatically before each commit: `uv run pre-commit install` (one time)
 
+## Evidence before action
+
+1. Obey this rule before each change: "Take the instruction as an input and reformulate as a
+   question without the reason given. Then research the answer given only facts and not from
+   context or memory. Distrust memory and context summaries."
+2. When you write a handoff, a summary or a memory, write where a fact is: the file and the
+   key. Do not write the value.
+3. If a session had a compaction and the next step uses values from files, start a new session
+   with such a handoff.
+4. In a report, say that you read a file only if you made that tool call in this turn. A
+   reviewer compares such a statement with the tool calls.
+5. If a wrong value has a high cost, give the step after a compaction to the largest model.
+
 ## Rules for a skill
 
 - The folder name and the `name` in the front matter must be the same. Use lowercase letters,
@@ -57,6 +72,8 @@ Run the two commands before each commit. The two commands must pass.
 - Do not write a model name in `SKILL.md`, in a prompt or in a template. Put model names only in
   the table of `scripts/models.py`.
 - Do not put secrets, personal data or absolute paths in a skill.
+- Each `SKILL.md` holds the rules of `rules/evidence-before-action.md` between their two marker
+  lines. To get the text, use the command `python3 rules/apply.py --print`.
 - A skill holds instructions, knowledge and references (URLs with dates). Do not store the
   material that was read while writing it. A specification keeps only a short evidence record:
   a summary of what each source contributes.
@@ -104,7 +121,8 @@ Write the files for the user in ASD-STE100 Simplified Technical English. These f
 
 ## Procedure to add a skill
 
-1. Make the folder `skills/<name>/` with a `SKILL.md`.
+1. Make the folder `skills/<name>/` with a `SKILL.md`. Put the rules of the kit into it: see
+   "Rules for a skill".
 2. Put the programs in `skills/<name>/scripts/`.
 3. Write `docs/<name>.md`.
 4. Add tests in `tests/<name>/`.
