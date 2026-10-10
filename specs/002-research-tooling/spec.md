@@ -286,6 +286,12 @@ specification whose check reports no failure other than "not accepted".
 - **FR-026**: On a refresh that the owner starts, the skill MUST read the sources of the watch
   list that moved, and MUST show the items and the declined items that the change touches.
 - **FR-027**: The skill MUST say what it did not verify when a source cannot be reached.
+- **FR-032**: For a source that is a PDF file, the tooling MUST write the text of the file,
+  with one heading for each page, into a work folder outside the repository. The session MUST
+  NOT read that text. A reader that has the read tool only MUST read it and give the page as
+  the location. The agent product MUST enforce that this reader reads only converted files of
+  the work folder: a hook does that, not a written rule. Where the agent product has no such
+  hook, the tooling MUST NOT write this reader, and MUST say that a PDF source cannot be read.
 
 **All parts**
 

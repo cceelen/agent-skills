@@ -78,11 +78,30 @@ vet.py score   SPEC --work DIR [--write] [--max-age DAYS] [--rubric FILE]
 ## scripts/models.py
 
 ```text
-models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M] [--root DIR]
+models.py detect | apply | show   [--host H] [--source-reader M] [--second-reader M]
+                                  [--file-reader M] [--root DIR]
 ```
 
-`apply` writes the two agent files into the project folder of the agent product in this
+`apply` writes the three agent files into the project folder of the agent product in this
 repository. `show` prints them and writes nothing. The names of the tools and the detection of
 the agent product come from `skills/library-vetting/scripts/models.py`. The roles are
-`source-reader` (smallest capable model; web search and web fetch) and `second-reader`
-(mid-size model; web fetch).
+`source-reader` (smallest capable model; web search and web fetch), `second-reader`
+(mid-size model; web fetch) and `file-reader` (smallest capable model; read).
+
+`apply` also merges one hook entry for `scripts/guard.py` into the settings file of the
+project, keeps each other key, and names the file under `written`. The output has
+`reads_converted_files`. If the agent product has no such hook, `apply` does not write the
+agent file of `file-reader`, and the `note` says that a PDF source cannot be read.
+
+## scripts/guard.py
+
+```text
+guard.py < EVENT
+```
+
+The hook of the agent product before a call of the read tool. `EVENT` is JSON with
+`agent_type`, `tool_name` and `tool_input.file_path`. Result code `0`: the call passes. Result
+code `2`: the call is refused, with the reason on the standard error output. A call passes if
+`agent_type` is not `sota-file-reader`. A call of `sota-file-reader` passes only for the read
+tool, on a file whose resolved folder holds the marker `.reader-may-read` and is not in a git
+repository. `scripts/pdf.py` writes the marker.

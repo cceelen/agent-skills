@@ -47,6 +47,11 @@ line-length = 110
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 ignore = ["UP015"]
 
+[tool.ruff.lint.isort]
+# The programs of the tooling import each other by name. Without this list, the order of the
+# imports depends on the folders that are in the working tree.
+known-first-party = ["aspect", "check", "guard", "models", "pdf", "place", "render", "sample", "vet"]
+
 [tool.ruff.lint.per-file-ignores]
 # The sample holds Markdown tables. A table row cannot continue on a second line.
 "factory/sota-research/scripts/sample.py" = ["E501"]

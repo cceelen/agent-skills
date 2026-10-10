@@ -297,6 +297,21 @@ that each view has its basic practices (FR-031).
 - [x] T087 In `factory/sota-research/scripts/place.py`: an example shows that `--write` keeps the column "View"
 - [x] T088 In `factory/sota-research/references/procedure.md` and `docs/sota-research.md`: name the views from the sources in phase 2, read sources for each view, and show the views to the owner first in phase 3
 
+## Phase 15: A reader for converted files
+
+**Purpose**: FR-032. A web reader cannot open a PDF file, and the session must not read the
+text of a source. Measured in the agent product of this repository, 2026-10-10: the web fetch
+tool does not read a local server, a hook in an agent file does not limit the agent, and a
+hook in the settings file of the project does.
+
+- [x] T089 In `factory/sota-research/scripts/pdf.py`: write the empty marker `.reader-may-read` beside the Markdown file; refuse a target in a git repository and a folder that holds other files and no marker
+- [x] T090 Add `factory/sota-research/scripts/guard.py`, the hook: a call of a different agent passes; the agent `sota-file-reader` reads only a file whose resolved folder holds the marker and is not in a git repository
+- [x] T091 In `factory/sota-research/scripts/models.py`: add the role `file-reader` with the read tool only and the template `agent-templates/sota-file-reader.md`; `apply` merges the hook into the settings file of the project; without such a hook, the file reader is not written
+- [x] T092 In `factory/sota-research/prompts/reader.md` and `prompts/second-reader.md`: a source is an address or the path of a converted file; for a file, the location is the page number
+- [x] T093 In `factory/sota-research/references/procedure.md`: the third agent file and the hook before the first run; in phase 2, convert a PDF source and give the path to the file reader; a new file reader does the second reading of its rows
+- [x] T094 In `.specify/memory/constitution.md`, principle III: the agent product enforces the limit of the reader of converted files (version 3.3.2)
+- [x] T095 Verify in a scratch project outside the repository, with the smallest model: the file reader reports the title on page 1 of a converted PDF source, and the hook refuses a file of the project
+
 ---
 
 ## Dependencies & Execution Order

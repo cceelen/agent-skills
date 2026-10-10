@@ -30,10 +30,16 @@ Rules for all phases:
 ## Before the first run
 
 1. Run `uv run factory/sota-research/scripts/models.py apply`. It writes the agent files of
-   the two readers for your agent product. The readers have web tools only.
+   the three readers for your agent product. Two readers have web tools only. The third
+   reader, `sota-file-reader`, has the read tool only. The program also installs the hook
+   `scripts/guard.py` in the settings file of the project. The hook lets the third reader read
+   only a converted file of the work folder.
 2. If the output has `"writes_agent_files": false` and the result code is 1, the agent product
    has no agent files. Stop. Tell the owner that the tools of a reader cannot be limited in
    this agent product. Do not read a source.
+3. If the output has `"reads_converted_files": false`, the agent product has no such hook, and
+   the third reader is not written. Do not convert a PDF source. Record each PDF source under
+   "not verified".
 
 ## Phase 1: what to build
 
@@ -76,28 +82,50 @@ and its date in section 7.
 
 ## Phase 2: research
 
-1. **List what exists.** The state of the art of most aspects is written down. Find the
-   existing descriptions first: standards, frameworks of foundations, the documentation of
-   platform vendors, research, recognized books. Then find the practice sources. Search for
-   the aspect as wide as the owner stated it. Do not search for one use case, one industry or
-   one product only.
-2. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
+1. **Place the aspect in its field.** Do this before you search for the aspect by its name.
+   - Find the bodies of knowledge of the field: the documents that divide the whole field
+     into knowledge areas. `references/bodies-of-knowledge.md` names them and tells how to
+     read each one. If the field has no row there, search for its body of knowledge and add
+     the row.
+   - Let readers read them, as in step 3. Record each one as a source in section 2.
+   - Find the knowledge areas that the aspect touches. Each one is a candidate for a view.
+     Write the candidates into the field "Views" of section 1, each with its source.
+2. **List what exists.** The state of the art of most aspects is written down.
+   - Search for the aspect as wide as the owner stated it. Do not search for one use case,
+     one industry or one product only.
+   - Search for each candidate view in the words of that view. Do not search only for
+     documents that you know by their title, or that carry the name of the aspect.
+   - Find the existing descriptions first: standards, frameworks of foundations, the
+     documentation of platform vendors, research, recognized books. Then find the practice
+     sources.
+   - Record each search query in `vetting.md`, in the list "Searches", with the view that it
+     serves. The owner sees the list in the review.
+3. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
    `prompts/reader.md`. Start the readers in parallel. A reader returns text; you write the
    files. If your agent product shows the tool calls of a reader, compare them with the point
    "Read" of its report. If the report says `full` or `part` and the reader fetched no page,
    do not use the report. Start the reader again.
-3. **Record the sources** in section 2, each with its class. The classes of the fast lane are
+   - If a source is a PDF file, convert it:
+     `uv run factory/sota-research/scripts/pdf.py <file or address> <work folder>/converted/<source id>.md`.
+     The work folder is outside the repository. Keep only converted files in the folder
+     `converted`.
+   - Do not read the converted file yourself. Give its path to one agent of the type
+     `sota-file-reader`, with the task `prompts/reader.md`.
+   - If the conversion gives no text, record the source under "not verified".
+4. **Record the sources** in section 2, each with its class. The classes of the fast lane are
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
    `independent`. Mark a paid source that was read from its preview as `part`.
-4. **Vet** each independent source. See "The vetting of independent sources".
-5. **Name the views.** A view is a set of concerns that the aspect brings together.
-   - Name the views of the aspect from the sources. Write each view into the field "Views" of
-     section 1, with its source, or with `(judgement)`.
-   - For each view, search for sources that hold the state of the art of that view. Do not
-     search only for sources that carry the name of the aspect.
-   - Read these sources, record them and vet them, as in steps 2 to 4.
+5. **Vet** each independent source. See "The vetting of independent sources".
+6. **Name the views.** A view is a set of concerns that the aspect brings together.
+   - Settle the views of the aspect from the sources. Keep, change or remove each candidate.
+     Write each view into the field "Views" of section 1, with its source, or with
+     `(judgement)`.
+   - A source supports a view only if a reader read it for the concerns of that view. One
+     page of a source about a different view does not count.
+   - If a view has too few sources of its own, search and read again for that view, as in
+     steps 2 to 5.
    - If a view has no source of its own, record the view in section 7 as not verified.
-6. **Distil.**
+7. **Distil.**
    - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
      risk dimensions with their question and the opinion of the kit, and the boundaries to
      the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
@@ -113,17 +141,19 @@ and its date in section 7.
    - Write where the sources disagree into section 3.4, with the two positions.
    - A practice from a different field states the problem that it solves there, and what
      shows that it does not work here.
-7. **Write the evidence record** `evidence.md`: one row for each source, with what it
+8. **Write the evidence record** `evidence.md`: one row for each source, with what it
    contributes in the words of this kit, where in the source that is, the rows that it
    supports, and the date. Keep a quote only where the wording itself is the point.
-8. **Let a second reader check it.** Give the rows to an agent of the type
-   `sota-second-reader`, with the task `prompts/second-reader.md`. Correct each finding in
+9. **Let a second reader check it.** Give the rows to an agent of the type
+   `sota-second-reader`, with the task `prompts/second-reader.md`. Give the rows of a
+   converted source, with the path of its file, to a new agent of the type `sota-file-reader`,
+   with the same task. Do not use the agent that read the source. Correct each finding in
    `evidence.md` and in each row of `spec.md` that says the same.
-9. **Place the items.** See "The calculation of risk and reward".
-10. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
+10. **Place the items.** See "The calculation of risk and reward".
+11. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
    suggested a judgement. Do not write a model name into the specification.
-11. **Run the check.** See "The check". Correct each failure.
-12. If a source cannot be reached, write what was not verified into section 7.
+12. **Run the check.** See "The check". Correct each failure.
+13. If a source cannot be reached, write what was not verified into section 7.
 
 ## Phase 3: review of the owner
 
@@ -141,7 +171,7 @@ Stop. A model does not accept a recipe. Give the owner, in this order:
 8. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
-change an item, change a view. If the owner adds a view, do step 5 of phase 2 for that view.
+change an item, change a view. If the owner adds a view, do step 6 of phase 2 for that view.
 If the owner removes or renames a view, change the cell "View" of each item of that view. When the owner accepts, the owner's name and the date go into the field
 `Accepted` of the head line and into section 7. Open the pull request of this step into the
 branch of the specification.
@@ -179,7 +209,7 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - In phase 1, add `--scope`: it examines only what is settled before the research.
 - Give the list "What remains" to the owner as it is.
 - The part "Views" gives, for each view, the number of items on each level and the number of
-  sources that its items cite. If a view has few items or few sources, do step 5 of phase 2
+  sources that its items cite. If a view has few items or few sources, do step 6 of phase 2
   for that view again.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.

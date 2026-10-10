@@ -19,8 +19,15 @@ The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 To start, tell your agent to read `factory/sota-research/SKILL.md` and to distil an aspect.
 The steps of the agent are in `factory/sota-research/references/procedure.md`.
 
-The readers of sources are agents with web tools only. They have no shell, no file tools and
-no credentials. Before the first run, write their agent files:
+Three agents read the sources. No reader has a shell, a tool that writes or credentials.
+
+| Agent | Tools | What it reads |
+|---|---|---|
+| `sota-source-reader` | web search, web fetch | One source at its address. |
+| `sota-second-reader` | web fetch | The sources of the evidence record, for the comparison. |
+| `sota-file-reader` | read | One converted file of the work folder. |
+
+Before the first run, write their agent files:
 
 ```text
 uv run factory/sota-research/scripts/models.py apply
@@ -28,6 +35,29 @@ uv run factory/sota-research/scripts/models.py apply
 
 If your agent product cannot limit the tools of an agent, the program tells you. Do not start
 a research run with that agent product.
+
+### The hook for the file reader
+
+A list of tools cannot limit the read tool to one folder. Thus `models.py apply` also installs
+a hook: the agent product runs `factory/sota-research/scripts/guard.py` before each read.
+
+- The hook lets each other agent and your session read as before.
+- The hook lets `sota-file-reader` read a file only if the folder of the file holds the marker
+  `.reader-may-read`. The converter `pdf.py` writes this marker.
+- The hook refuses each file of a git repository to `sota-file-reader`.
+
+`models.py apply` changes the file `.claude/settings.json` of the project. It adds one entry to
+the list `hooks.PreToolUse` and keeps each other key. The entry has the matcher `Read` and the
+command `python3 <path>/factory/sota-research/scripts/guard.py`. To see the entry before you
+apply it, run `models.py show`.
+
+- The command holds the absolute path of your copy of the repository. Do not commit this entry.
+- If you move the repository, run `models.py apply` again. It replaces the entry.
+- To remove the hook, delete this entry from the list `hooks.PreToolUse` in
+  `.claude/settings.json`. Then delete the file `.claude/agents/sota-file-reader.md`.
+
+If your agent product has no such hook, the program does not write the file reader. It tells
+you that a PDF source cannot be read in that agent product.
 
 ## Before you start
 
@@ -231,10 +261,16 @@ A reader cannot open a PDF file with its web tool. Use `pdf.py` to write the tex
 as Markdown, with one heading for each page.
 
 ```text
-uv run factory/sota-research/scripts/pdf.py <file or address> <work folder>/<source id>.md
+uv run factory/sota-research/scripts/pdf.py <file or address> <work folder>/converted/<source id>.md
 ```
 
-- Put the result into the work folder, outside the repository. Do not commit it.
+- Put the result into a folder of the work folder, outside the repository. Do not commit it.
+- Keep only converted files in that folder. The program writes the empty marker file
+  `.reader-may-read` into it, and the marker opens each file of the folder to the file reader.
+- The program does not write into a git repository. It does not write into a folder that
+  holds other files and no marker.
+- Do not read the result in your session. Give its path to an agent of the type
+  `sota-file-reader`.
 - The program `pdftotext` of the package `poppler-utils` does the conversion. The tooling does
   not install it. If it is not installed, the program tells you.
 - The program reads only public addresses with `http` or `https`.

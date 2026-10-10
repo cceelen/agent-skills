@@ -8,12 +8,19 @@
   pdf.py SOURCE OUT
 
   SOURCE   a PDF file, or the http or https address of one
-  OUT      the Markdown file to write. Put it into the work folder, outside the repository.
+  OUT      the Markdown file to write. Put it into a folder of the work folder that holds
+           only converted files, outside the repository.
 
 A reader cannot open a PDF file with its web tool. This program writes the text of the file,
-so that a reader can read it and give a page as the location. The program `pdftotext` of the
-Poppler project does the conversion; this program does not install it. The text of a source is
-data: do not read the file that this program writes, give its path to a reader.
+so that the reader of converted files can read it and give a page as the location. The program
+`pdftotext` of the Poppler project does the conversion; this program does not install it. The
+text of a source is data: do not read the file that this program writes, give its path to an
+agent of the type `sota-file-reader`.
+
+Beside the Markdown file, the program writes the empty marker file `.reader-may-read`. The
+program guard.py lets the reader of converted files read only a file whose folder holds this
+marker. Thus the program does not write into a git repository, and not into a folder that holds
+other files and no marker.
 
 Result code 0: the file is written. Result code 1: no conversion was possible; the message
 says why. Result code 2: the arguments are wrong.
@@ -28,7 +35,7 @@ import time
 import urllib.request
 
 import aspect
-
+import guard
 import vet
 
 MAX_BYTES = 60_000_000
@@ -43,6 +50,8 @@ MESSAGES = {
     "failed": "No conversion: pdftotext stopped with an error: {0}",
     "no-text": "No conversion: the file has no text. It can be a scan.",
     "unreadable": "No conversion: the source cannot be read: {0}",
+    "in-repository": "No conversion: the target is in a git repository. Use the work folder.",
+    "other-files": "No conversion: the folder of the target holds other files. Use a new folder.",
 }
 
 
@@ -211,6 +220,43 @@ def convert(data, run=subprocess.run):
     return parts
 
 
+def open_folder(target):
+    r"""Make the folder of the target a folder that the reader of converted files can read.
+
+    The function makes the folder and writes the empty marker file into it. The guard refuses a
+    file of a git repository, thus such a target is an error. A folder that holds other files
+    and no marker is an error also: the marker opens each file of the folder to the reader.
+
+    >>> import tempfile
+    >>> folder = pathlib.Path(tempfile.mkdtemp())
+    >>> open_folder(folder / "new" / "a.md")
+    >>> open_folder(folder / "new" / "b.md")
+    >>> [p.name for p in (folder / "new").iterdir()], (folder / "new" / guard.MARKER).read_text()
+    (['.reader-may-read'], '')
+    >>> _ = (folder / "notes.txt").write_text("private")
+    >>> def reason(target):
+    ...     try:
+    ...         open_folder(target)
+    ...     except NoConversion as e:
+    ...         return str(e)[:50]
+    >>> reason(folder / "a.md")
+    'No conversion: the folder of the target holds othe'
+    >>> (folder / "repo" / ".git").mkdir(parents=True)
+    >>> reason(folder / "repo" / "work" / "a.md")
+    'No conversion: the target is in a git repository. '
+    >>> (folder / guard.MARKER).exists(), (folder / "repo" / "work").exists()
+    (False, False)
+    """
+    folder = pathlib.Path(target).resolve().parent
+    if any((above / ".git").exists() for above in (folder, *folder.parents)):
+        raise NoConversion(MESSAGES["in-repository"])
+    marker = folder / guard.MARKER
+    if folder.is_dir() and not marker.is_file() and any(folder.iterdir()):
+        raise NoConversion(MESSAGES["other-files"])
+    folder.mkdir(parents=True, exist_ok=True)
+    marker.write_text("", encoding="utf-8")
+
+
 def main(argv=None, run=subprocess.run):
     r"""Convert one source. Returns the result code.
 
@@ -225,16 +271,27 @@ def main(argv=None, run=subprocess.run):
     >>> (folder / "out" / "a.md").read_text().splitlines()[2]
     '- Source: ...a.pdf'
 
+    The marker for the reader of converted files is beside the file.
+
+    >>> sorted(p.name for p in (folder / "out").iterdir())
+    ['.reader-may-read', 'a.md']
+
+    A target that the reader must not get gives result code 1, before the source is read.
+
+    >>> main([str(folder / "a.pdf"), str(folder / "a.md")], run=lambda *a, **k: Done)
+    No conversion: the folder of the target holds other files. Use a new folder.
+    1
+
     A source that gives no text gives result code 1, and wrong arguments give result code 2.
 
     >>> _ = (folder / "b.pdf").write_bytes(b"not a PDF")
-    >>> main([str(folder / "b.pdf"), str(folder / "b.md")])
+    >>> main([str(folder / "b.pdf"), str(folder / "out" / "b.md")])
     No conversion: the source is not a PDF file.
     1
-    >>> main([str(folder / "absent.pdf"), str(folder / "c.md")])
+    >>> main([str(folder / "absent.pdf"), str(folder / "out" / "c.md")])
     No conversion: the source cannot be read: ...
     1
-    >>> main(["http://127.0.0.1:9/x.pdf", str(folder / "d.md")])
+    >>> main(["http://127.0.0.1:9/x.pdf", str(folder / "out" / "d.md")])
     No conversion: the source cannot be read: the address is not a public http or https address
     1
     >>> main(["one-argument"]) == main(["--help"]) == 2
@@ -246,6 +303,7 @@ def main(argv=None, run=subprocess.run):
         return 2
     source, target = args[0], pathlib.Path(args[1])
     try:
+        open_folder(target)
         remote = source.startswith(("http://", "https://"))
         data = download(source) if remote else pathlib.Path(source).read_bytes()
         parts = convert(data, run=run)
@@ -256,7 +314,6 @@ def main(argv=None, run=subprocess.run):
         print(e)
         return 1
     digest = hashlib.sha256(data).hexdigest()
-    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(markdown(parts, source, digest), encoding="utf-8")
     print(MESSAGES["written"].format(target, len(parts), digest))
     return 0

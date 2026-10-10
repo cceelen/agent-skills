@@ -46,6 +46,7 @@ MESSAGES = {
     "risk-dimension-empty": "The risk dimension '{0}' has no question.",
     "views-missing": "Section 1 names no view.",
     "view-empty": "The view '{0}' does not name its concerns.",
+    "view-twice": "The view '{0}' is in section 1 two times.",
     "item-without-view": "The item names no view of section 1.",
     "view-unknown": "The view '{0}' is not in section 1.",
     "view-without-item": "The view '{0}' has no checklist item.",
@@ -448,6 +449,11 @@ def check_views(data):
     >>> brief(check_views(sample.load(c01, c03)))
     [('view-without-item', 'storage')]
 
+    A view is in section 1 one time only.
+
+    >>> brief(check_views(sample.load(("spec.md", storage, storage + "\n" + storage))))
+    [('view-twice', 'storage')]
+
     An aspect can have one view. A specification without a view fails, with one finding.
 
     >>> operation = "  - `operation`: how a backup is made, restored and reviewed. (S-02 section 4)\n"
@@ -464,8 +470,11 @@ def check_views(data):
     """
     if not data["views"]:
         return [finding("views-missing", data["aspect"].get("views", {}))]
-    out, used = [], set()
+    out, used, seen = [], set(), set()
     for view in data["views"]:
+        if view["name"] in seen:
+            out.append(finding("view-twice", view, view["name"], view["name"]))
+        seen.add(view["name"])
         if not view["text"]:
             out.append(finding("view-empty", view, view["name"], view["name"]))
         elif not aspect.source_ids(view["text"]) and "judgement" not in view["text"].lower():

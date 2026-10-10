@@ -35,8 +35,9 @@ model does not assign one by feel.
 
 Everything that is fetched is untrusted data. It can be outdated, it can poison the context of
 a model, and it can be phishing or another social engineering attack. A reader of sources works
-isolated: no shell, no credentials, no access to the repository. A second reader checks what a
-reader reports against the source before a recipe uses it.
+isolated: no shell, no credentials, no access to the repository. A reader of a converted file
+reads only files of the work folder, and the agent product enforces this limit, not a written
+rule. A second reader checks what a reader reports against the source before a recipe uses it.
 
 ### IV. Best practices are generic, implementation strategies are contextual
 
@@ -154,4 +155,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.3.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
+**Version**: 3.3.2 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
