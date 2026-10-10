@@ -13,15 +13,25 @@
   --words FILE     the product words of the aspect, one in each line; an item must not use one
   --json           print one JSON object in place of the text report
   --scope          check only what is settled before the research: the head line, the aspect,
-                   the field and the date of the agreement. Use this in phase 1.
+                   the field, the intent of the owner and the date of the agreement. Use this in
+                   phase 1.
 
 The report lists each failing rule with its place, then what remains. Result code 0: no rule
 fails. Result code 1: a rule fails. Result code 2: the input cannot be read. Pending levels,
-pending vettings, changed items, open findings of a trial, a recipe without a trial and a missing
-acceptance remain; they do not fail the check.
+pending vettings, changed items, open findings of a trial, a recipe without a trial, an intent of
+the owner that was not asked and a missing acceptance remain; they do not fail the check.
+
+The intent of the owner is a field of section 1. It has one line for each answer of the owner: a
+quote with its date, or "(no answer)".
+
+The report gives one line for the answers of risk and reward in the table "Items" of vetting.md:
+how many name a source and how many say "judgement". This line is for the review. It fails nothing.
 
 Each item names one view of section 1. A view is a set of concerns of the aspect. Each view needs
 an item, and an item on level 1 when no level is pending. The report gives the items of each view.
+
+Section 1 names the stakeholders of the aspect, each with its concerns and its source. Each view
+names its stakeholders in the form "(stakeholders: a, b)". A stakeholder that is in no view remains.
 
 The file trial.md records each trial of the recipe on a project, and each finding of the review of
 the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
@@ -38,6 +48,9 @@ READ = ("full", "part", "no")
 SOURCE_CELLS = ("id", "source", "issuer", "version or date", "class", "license", "read", "url")
 SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
 FINDING_FIELDS = ("contexts", "boundaries")
+NO_ANSWER = "(no answer)"
+# The answers of the calculation of risk and reward: the cells of the table "Items" of vetting.md.
+ANSWERS = ("severity", "probability", "breadth", "adopt", "keep", "own risk")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 NOT_CONFIRMED = ("", "pending", "rejected")
 NONE_FOUND = "none found"
@@ -57,6 +70,10 @@ MESSAGES = {
     "accepted-missing": "The head line has no field Accepted.",
     "aspect-field-empty": "The field '{0}' of section 1 is empty.",
     "agreed-without-date": "The field 'Agreed with the owner on' has no date.",
+    "intent-without-date": (
+        "The line '{0}' of the intent of the owner has no date. "
+        "Write the quote and its date, or '(no answer)'."
+    ),
     "finding-without-source": "This finding of section 1 names no source. Name it, or write 'judgement'.",
     "risk-dimensions-missing": "Section 1 names no risk dimension.",
     "risk-dimension-empty": "The risk dimension '{0}' has no question.",
@@ -64,6 +81,12 @@ MESSAGES = {
     "views-missing": "Section 1 names no view.",
     "view-empty": "The view '{0}' does not name its concerns.",
     "view-twice": "The view '{0}' is in section 1 two times.",
+    "stakeholders-missing": "Section 1 names no stakeholder.",
+    "stakeholder-empty": "The stakeholder '{0}' names no concern.",
+    "stakeholder-unknown": (
+        "The view '{0}' names the stakeholder '{1}'. Section 1 does not have this stakeholder."
+    ),
+    "view-without-stakeholder": "The view '{0}' names no stakeholder. Use the form '(stakeholders: a, b)'.",
     "item-without-view": "The item names no view of section 1.",
     "view-unknown": "The view '{0}' is not in section 1.",
     "view-without-item": "The view '{0}' has no checklist item.",
@@ -107,11 +130,15 @@ MESSAGES = {
     "no-failure": "No check fails.",
     "scope-only": "Only the field and the thing to build were checked. The findings wait for the research.",
     "failures": "Failing checks: {0}.",
-    "views-head": "Views, with the number of items on each level and the number of sources:",
+    "views-head": "Views, with the number of items on each level, of sources and of stakeholders:",
     "view-line": (
-        "{0}: level 1: {1}, level 2: {2}, level 3: {3}, pending: {4}, not admitted: {5}, sources: {6}."
+        "{0}: level 1: {1}, level 2: {2}, level 3: {3}, pending: {4}, not admitted: {5}, sources: {6}, "
+        "stakeholders: {7}."
     ),
+    "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
+    "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
     "remains-head": "What remains:",
+    "remains-intent": "The intent of the owner was not asked.",
     "remains-levels": "Levels that are pending: {0}.",
     "remains-basics": "Views without an item on level 1, while levels are pending: {0}.",
     "remains-vettings": "Vettings that are pending: {0}.",
@@ -119,6 +146,7 @@ MESSAGES = {
     "remains-judgement": "Items that need judgement: {0}.",
     "remains-changed": "Items with a changed text. Make sure that the meaning is the same: {0}.",
     "remains-trial": "Trial findings that are open: {0}.",
+    "remains-stakeholders": "Stakeholders that are in no view: {0}.",
     "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
     "accepted": "Accepted: {0}.",
@@ -205,8 +233,8 @@ def rejected_sources(data):
 def check_scope(data):
     r"""What the owner and the agent settle before the research: the field and the thing to build.
 
-    These are the head line and three fields of section 1: the aspect, the field, and the date
-    of the agreement. Nothing narrower is settled before the research.
+    These are the head line and four fields of section 1: the aspect, the field, the intent of
+    the owner, and the date of the agreement. Nothing narrower is settled before the research.
 
     >>> import sample
     >>> check_scope(sample.load())
@@ -220,11 +248,41 @@ def check_scope(data):
     >>> brief(check_scope(sample.load(date)))
     [('agreed-without-date', '')]
 
-    The views, the contexts, the risk dimensions, the boundaries and the targets are not part of
-    the scope.
+    The intent of the owner has one line for each answer: a quote with its date, or "(no answer)".
+    A specification without the field fails. A line that is empty or has no date fails.
 
-    >>> findings = ("- **Views", "- **Contexts", "  ", "- **Boundaries", "- **Targets")
-    >>> lines = [x for x in sample.SPEC.splitlines() if not x.startswith(findings)]
+    >>> lines = "\n".join(sample.INTENT) + "\n"
+    >>> head = sample.INTENT_HEAD + "\n"
+    >>> found = check_scope(sample.load(("spec.md", head + lines, "")))
+    >>> brief(found), found[0]["text"]
+    ([('aspect-field-empty', '')], "The field 'intent of the owner' of section 1 is empty.")
+    >>> brief(check_scope(sample.load(("spec.md", head + lines, "- **Intent of the owner**:\n"))))
+    [('aspect-field-empty', '')]
+    >>> undated = sample.INTENT_RESULT.removesuffix(" (2026-01-05)")
+    >>> found = check_scope(sample.load(("spec.md", sample.INTENT_RESULT, undated)))
+    >>> brief(found), found[0]["line"]
+    ([('intent-without-date', 'result')], 25)
+    >>> found[0]["text"]
+    "The line 'result' of the intent of the owner has no date. Write the quote and its date, or '(no
+    answer)'."
+    >>> brief(check_scope(sample.load(("spec.md", sample.INTENT_RESULT, "  - `result`:"))))
+    [('intent-without-date', 'result')]
+    >>> brief(check_scope(sample.load(("spec.md", head + lines, head))))
+    [('intent-without-date', 'intent of the owner')]
+
+    "(no answer)" in each line passes: the owner was not in the session.
+
+    >>> none = [("spec.md", line, line.split(":")[0] + ": (no answer)") for line in sample.INTENT[:2]]
+    >>> data = sample.load(*none)
+    >>> check_scope(data), intent_asked(data), intent_asked(sample.load())
+    ([], False, True)
+
+    The stakeholders, the views, the contexts, the risk dimensions, the boundaries and the targets
+    are not part of the scope.
+
+    >>> findings = ("- **Views", "- **Contexts", "  ", "- **Boundaries", "- **Targets", "- **Stakeholders")
+    >>> intent = ("- **Intent", *sample.INTENT)
+    >>> lines = [x for x in sample.SPEC.splitlines() if x.startswith(intent) or not x.startswith(findings)]
     >>> folder = sample.folder()
     >>> _ = (folder / "spec.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     >>> check_scope(aspect.load(folder))
@@ -240,7 +298,63 @@ def check_scope(data):
     agreed = data["aspect"].get("agreed with the owner on")
     if agreed and agreed["value"] and not DATE.search(agreed["value"]):
         out.append(finding("agreed-without-date", agreed))
+    if not data["intent"]:
+        out.append(finding("aspect-field-empty", data["aspect"].get(aspect.INTENT, {}), "", aspect.INTENT))
+    for line in data["intent"]:
+        if not no_answer(line) and not DATE.search(line["text"]):
+            out.append(finding("intent-without-date", line, line["name"], line["name"]))
     return out
+
+
+def no_answer(line):
+    """True if a line of the intent of the owner says that the owner gave no answer.
+
+    >>> [no_answer({"text": text}) for text in ("(no answer)", " (No answer). ", '"No." (2026-01-05)', "")]
+    [True, True, False, False]
+    """
+    return line["text"].strip().rstrip(".").lower() == NO_ANSWER
+
+
+def intent_asked(data):
+    """False if each line of the intent of the owner says "(no answer)".
+
+    A specification without the field fails the check; this function then gives True, so that
+    the report does not say the same thing two times.
+
+    >>> intent_asked({"intent": []}), intent_asked({"intent": [{"text": "(no answer)"}]})
+    (True, False)
+    >>> intent_asked({"intent": [{"text": "(no answer)"}, {"text": '"Short." (2026-01-05)'}]})
+    True
+    """
+    return not data["intent"] or not all(no_answer(line) for line in data["intent"])
+
+
+def answer_counts(data):
+    """How many answers of risk and reward name a source, and how many say "judgement".
+
+    The answers are the six cells of each row of the table "Items" of vetting.md. An answer with
+    a different note, or without a note, is counted as "other". An empty cell is not an answer.
+
+    >>> import sample
+    >>> answer_counts(sample.load())
+    {'judgement': 22, 'other': 0, 'source': 8}
+    >>> row = "| C-04 | 1 (judgement) | 1 (judgement) |"
+    >>> answer_counts(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | |")))
+    {'judgement': 20, 'other': 1, 'source': 8}
+    >>> answer_counts({"vetting_items": []})
+    {'judgement': 0, 'other': 0, 'source': 0}
+    """
+    counts = {"judgement": 0, "other": 0, "source": 0}
+    for row in data["vetting_items"]:
+        for name in ANSWERS:
+            cell = row.get(name, "").strip()
+            if aspect.source_ids(cell):
+                counts["source"] += 1
+            elif "judgement" in cell.lower():
+                counts["judgement"] += 1
+            elif cell:
+                counts["other"] += 1
+    return counts
 
 
 def check_scope_findings(data):
@@ -374,7 +488,7 @@ def check_references(data):
     []
     >>> found = check_references(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |")))
     >>> brief(found), found[0]["line"], found[0]["text"]
-    ([('unknown-source', 'C-02')], 61, "The row cites 'S-09'. Section 2 does not list this source.")
+    ([('unknown-source', 'C-02')], 68, "The row cites 'S-09'. Section 2 does not list this source.")
 
     The rows of the strategy are checked also.
 
@@ -382,9 +496,14 @@ def check_references(data):
     >>> brief(check_references(sample.load(strategy)))
     [('unknown-source', '')]
 
-    The views and the targets of section 1 are checked also.
+    The views, the targets and the stakeholders of section 1 are checked also.
 
-    >>> view = ("spec.md", "copies are. (S-01 section 2)", "copies are. (S-08 section 2)")
+    >>> owners = sample.STAKEHOLDER_OWNERS
+    >>> other = ("spec.md", owners, owners.replace("S-01", "S-08"))
+    >>> brief(check_references(sample.load(other)))
+    [('unknown-source', 'owners of the data')]
+
+    >>> view = ("spec.md", "data) (S-01 section 2)", "data) (S-08 section 2)")
     >>> brief(check_references(sample.load(view)))
     [('unknown-source', 'storage')]
     >>> target = ("spec.md", "measures it. (S-02 section 4)", "measures it. (S-08 section 4)")
@@ -398,7 +517,7 @@ def check_references(data):
     for name in FINDING_FIELDS:
         field = data["aspect"].get(name) or {"value": "", "items": []}
         rows += [(field, field["value"], name)] + [(i, i["text"], i["name"]) for i in field["items"]]
-    findings = data["risk_dimensions"] + data["views"] + data["targets"]
+    findings = data["risk_dimensions"] + data["views"] + data["targets"] + data["stakeholders"]
     rows += [(d, d["text"], d["name"]) for d in findings]
     for row, cell, ident in rows:
         for sid in aspect.source_ids(cell):
@@ -480,7 +599,7 @@ def check_views(data):
     >>> import sample
     >>> check_views(sample.load())
     []
-    >>> storage = "  - `storage`: which data has a copy, and where the copies are. (S-01 section 2)"
+    >>> storage = sample.VIEW_STORAGE
     >>> brief(check_views(sample.load(("spec.md", storage, "  - `storage`:"))))
     [('view-empty', 'storage')]
     >>> brief(check_views(sample.load(("spec.md", storage, storage.removesuffix(" (S-01 section 2)")))))
@@ -510,7 +629,7 @@ def check_views(data):
 
     An aspect can have one view. A specification without a view fails, with one finding.
 
-    >>> operation = "  - `operation`: how a backup is made, restored and reviewed. (S-02 section 4)\n"
+    >>> operation = sample.VIEW_OPERATION + "\n"
     >>> one = sample.load(("spec.md", operation, ""))
     >>> brief(check_views(one))
     [('view-unknown', 'C-02'), ('view-unknown', 'C-04'), ('view-unknown', 'C-05')]
@@ -547,18 +666,94 @@ def check_views(data):
     return out
 
 
+def check_stakeholders(data):
+    r"""The stakeholders of section 1, and the stakeholders of each view.
+
+    A stakeholder is a group of persons that has an interest in the result or carries a duty for
+    it. Each stakeholder names its concerns and its source, or says "judgement". Each view names
+    one stakeholder of section 1 or more.
+
+    >>> import sample
+    >>> check_stakeholders(sample.load())
+    []
+    >>> owners, operators = sample.STAKEHOLDER_OWNERS, sample.STAKEHOLDER_OPERATORS
+    >>> found = check_stakeholders(sample.load(("spec.md", owners, "  - `owners of the data`:")))
+    >>> brief(found), found[0]["line"], found[0]["text"]
+    ([('stakeholder-empty', 'owners of the data')], 29,
+     "The stakeholder 'owners of the data' names no concern.")
+    >>> no_source = ("spec.md", owners, owners.removesuffix(" (S-01 section 2)"))
+    >>> brief(check_stakeholders(sample.load(no_source)))
+    [('finding-without-source', 'owners of the data')]
+
+    A view names only stakeholders of section 1, and names one or more.
+
+    >>> other = ("spec.md", "(stakeholders: operators)", "(stakeholders: users)")
+    >>> found = check_stakeholders(sample.load(other))
+    >>> brief(found), found[0]["line"]
+    ([('stakeholder-unknown', 'operation')], 13)
+    >>> found[0]["text"]
+    "The view 'operation' names the stakeholder 'users'. Section 1 does not have this stakeholder."
+    >>> found = check_stakeholders(sample.load(("spec.md", " (stakeholders: operators)", "")))
+    >>> brief(found), found[0]["text"]
+    ([('view-without-stakeholder', 'operation')],
+     "The view 'operation' names no stakeholder. Use the form '(stakeholders: a, b)'.")
+
+    A specification without a stakeholder fails, with one finding for section 1.
+
+    >>> none = sample.load(("spec.md", owners + "\n", ""), ("spec.md", operators + "\n", ""))
+    >>> brief(check_stakeholders(none))[0], check_stakeholders(none)[0]["line"]
+    (('stakeholders-missing', ''), 27)
+
+    A stakeholder that is in no view does not fail the check. It remains.
+
+    >>> more = ("spec.md", owners, owners + "\n  - `auditors`: they examine the record. (judgement)")
+    >>> check_stakeholders(sample.load(more)), stakeholders_without_view(sample.load(more))
+    ([], ['auditors'])
+    >>> stakeholders_without_view(sample.load())
+    []
+    """
+    out = []
+    if not data["stakeholders"]:
+        out.append(finding("stakeholders-missing", data["aspect"].get("stakeholders", {})))
+    for holder in data["stakeholders"]:
+        if not holder["text"]:
+            out.append(finding("stakeholder-empty", holder, holder["name"], holder["name"]))
+        elif not aspect.source_ids(holder["text"]) and "judgement" not in holder["text"].lower():
+            out.append(finding("finding-without-source", holder, holder["name"]))
+    known = {s["name"] for s in data["stakeholders"]}
+    for view in data["views"]:
+        if not view["stakeholders"]:
+            out.append(finding("view-without-stakeholder", view, view["name"], view["name"]))
+        for name in view["stakeholders"]:
+            if name not in known:
+                out.append(finding("stakeholder-unknown", view, view["name"], view["name"], name))
+    return out
+
+
+def stakeholders_without_view(data):
+    """The stakeholders of section 1 that no view names, sorted.
+
+    >>> names = [{"name": "b"}, {"name": "a"}, {"name": "c"}]
+    >>> stakeholders_without_view({"stakeholders": names, "views": [{"stakeholders": ["c"]}]})
+    ['a', 'b']
+    """
+    used = {name for view in data["views"] for name in view["stakeholders"]}
+    return sorted({s["name"] for s in data["stakeholders"]} - used)
+
+
 def view_counts(data):
-    """For each view of section 1, by name: its items on each level, and the sources they cite.
+    """For each view of section 1, by name: its items on each level, its sources, its stakeholders.
 
     A retired item does not count. A source counts one time for a view.
 
     >>> import sample
     >>> for view in view_counts(sample.load()):
     ...     print(*view.values())
-    operation 3 1 1 0 0 1 4
-    storage 2 1 0 1 0 0 2
+    operation 3 1 1 0 0 1 4 1
+    storage 2 1 0 1 0 0 2 1
     >>> list(view)
-    ['view', 'items', 'level 1', 'level 2', 'level 3', 'pending', 'not admitted', 'sources']
+    ['view', 'items', 'level 1', 'level 2', 'level 3', 'pending', 'not admitted', 'sources',
+     'stakeholders']
     """
     out = []
     for view in sorted(data["views"], key=lambda v: (v["name"], v["_line"])):
@@ -567,7 +762,8 @@ def view_counts(data):
         counts = {f"level {n}": levels.count(n) for n in (1, 2, 3)}
         counts |= {state: levels.count(state) for state in ("pending", "not admitted")}
         cited = {s for r in rows for s in aspect.source_ids(r.get("source", ""))}
-        out.append({"view": view["name"], "items": len(rows), **counts, "sources": len(cited)})
+        counts |= {"sources": len(cited), "stakeholders": len(set(view["stakeholders"]))}
+        out.append({"view": view["name"], "items": len(rows), **counts})
     return out
 
 
@@ -592,7 +788,7 @@ def check_basics(data):
     >>> other = ("spec.md", "| 2, operative |", "| pending |")
     >>> check_basics(sample.load(("spec.md", c01, above), other))
     ([], ['storage'])
-    >>> storage = "  - `storage`: which data has a copy, and where the copies are. (S-01 section 2)"
+    >>> storage = sample.VIEW_STORAGE
     >>> quality = storage + "\n  - `quality`: how the copies are examined. (judgement)"
     >>> check_basics(sample.load(("spec.md", storage, quality)))
     ([], [])
@@ -908,7 +1104,7 @@ def run_checks(data, previous_rows=None, words=()):
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
-          'trial': []})
+          'trial': [], 'stakeholders': []})
 
     What remains does not fail the check: a pending level, a pending vetting, a changed text.
 
@@ -942,7 +1138,7 @@ def run_checks(data, previous_rows=None, words=()):
     >>> level, cell = ("spec.md", "| 2, operative |", "| high |"), ("spec.md", "| Example Journal |", "| |")
     >>> two = sample.load(level, cell)
     >>> [(f["line"], f["rule"]) for f in run_checks(two, None, ["program"])[0]]
-    [(29, 'source-cell-empty'), (61, 'level-unknown'), (64, 'product-word')]
+    [(36, 'source-cell-empty'), (68, 'level-unknown'), (71, 'product-word')]
     """
     support, waiting = check_support(data)
     basics, without_basics = check_basics(data)
@@ -953,6 +1149,7 @@ def run_checks(data, previous_rows=None, words=()):
         + check_references(data)
         + check_items(data)
         + check_views(data)
+        + check_stakeholders(data)
         + basics
         + check_evidence(data)
         + check_other_sections(data)
@@ -978,6 +1175,7 @@ def run_checks(data, previous_rows=None, words=()):
         "judgement": sorted(r["id"] for r in live if r.get("check", "").strip().lower() == "judgement"),
         "changed": changed,
         "trial": open_findings(data),
+        "stakeholders": stakeholders_without_view(data),
     }
     return found, remains
 
@@ -1017,9 +1215,10 @@ def report(data, found, remains, previous_given):
     >>> data = sample.load()
     >>> print(report(data, *run_checks(data), previous_given=False))
     No check fails.
-    Views, with the number of items on each level and the number of sources:
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2.
+    Views, with the number of items on each level, of sources and of stakeholders:
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
+    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1.
+    Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Items that need judgement: C-04.
     Accepted: A. Person, 2026-01-15.
@@ -1031,26 +1230,40 @@ def report(data, found, remains, previous_given):
     ...     ("spec.md", "| judgement |", "| the review is in the record |"),
     ... )
     >>> print(report(data, *run_checks(data, data["checklist"]), previous_given=True))
-    FAIL unknown-source spec.md:61 C-02: The row cites 'S-09'. Section 2 does not list this source.
+    FAIL unknown-source spec.md:68 C-02: The row cites 'S-09'. Section 2 does not list this source.
     Failing checks: 1.
-    Views, with the number of items on each level and the number of sources:
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2.
+    Views, with the number of items on each level, of sources and of stakeholders:
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
+    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1.
+    Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - The owner did not accept the specification.
 
     When nothing remains, the report is short. A specification without a view has no such part.
+    A specification without answers of risk and reward has no line for them.
 
     >>> data = sample.load(("spec.md", "| judgement |", "| the review is in the record |"))
-    >>> data["views"] = []
+    >>> data["views"] = data["stakeholders"] = data["vetting_items"] = []
     >>> print(report(data, [], run_checks(data, data["checklist"])[1], previous_given=True))
     No check fails.
     Accepted: A. Person, 2026-01-15.
 
+    A stakeholder that is in no view remains. An intent of the owner that was not asked remains.
+
+    >>> owners = sample.STAKEHOLDER_OWNERS
+    >>> more = ("spec.md", owners, owners + "\n  - `auditors`: they examine the record. (judgement)")
+    >>> none = [("spec.md", line, line.split(":")[0] + ": (no answer)") for line in sample.INTENT[:2]]
+    >>> data = sample.load(more, *none)
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:9]))
+    What remains:
+    - The intent of the owner was not asked.
+    - Items that need judgement: C-04.
+    - Stakeholders that are in no view: auditors.
+
     An open finding of a trial remains. A recipe without a trial remains also.
 
     >>> data = sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[4:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings that are open: F-01.
@@ -1058,7 +1271,7 @@ def report(data, found, remains, previous_given):
     >>> folder = sample.folder()
     >>> (folder / "trial.md").unlink()
     >>> data = aspect.load(folder)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[4:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:]))
     What remains:
     - Items that need judgement: C-04.
     - The recipe has no trial.
@@ -1068,9 +1281,10 @@ def report(data, found, remains, previous_given):
 
     >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| storage | pending | authority (2) |")
     >>> data = sample.load(c01)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[2:7]))
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4.
-    - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2.
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[2:8]))
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
+    - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1.
+    Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Levels that are pending: C-01.
     - Views without an item on level 1, while levels are pending: storage.
@@ -1079,11 +1293,13 @@ def report(data, found, remains, previous_given):
         f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
     ]
     lines.append(MESSAGES["failures"].format(len(found)) if found else MESSAGES["no-failure"])
-    keys = ("view", "level 1", "level 2", "level 3", "pending", "not admitted", "sources")
+    keys = ("view", "level 1", "level 2", "level 3", "pending", "not admitted", "sources", "stakeholders")
     views = ["- " + MESSAGES["view-line"].format(*(v[k] for k in keys)) for v in view_counts(data)]
     if views:
         lines += [MESSAGES["views-head"], *views]
-    rest = [MESSAGES[f"remains-{key}"].format(", ".join(ids)) for key, ids in remains.items() if ids]
+    lines += answer_lines(data)
+    rest = [] if intent_asked(data) else [MESSAGES["remains-intent"]]
+    rest += [MESSAGES[f"remains-{key}"].format(", ".join(ids)) for key, ids in remains.items() if ids]
     if not data["trials"]:
         rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):
@@ -1097,11 +1313,33 @@ def report(data, found, remains, previous_given):
     return "\n".join(lines)
 
 
+def answer_lines(data):
+    """The lines of the report for the answers of risk and reward. No answer gives no line.
+
+    >>> import sample
+    >>> answer_lines(sample.load())
+    ['Answers of risk and reward: 8 with a source, 22 by judgement.']
+    >>> row = "| C-04 | 1 (judgement) | 1 (judgement) |"
+    >>> answer_lines(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | 1 |")))[1]
+    "Answers of risk and reward without a source and without 'judgement': 2."
+    >>> answer_lines({"vetting_items": []})
+    []
+    """
+    counts = answer_counts(data)
+    if not any(counts.values()):
+        return []
+    lines = [MESSAGES["answers"].format(counts["source"], counts["judgement"])]
+    if counts["other"]:
+        lines.append(MESSAGES["answers-other"].format(counts["other"]))
+    return lines
+
+
 def scope_report(data):
     """The report of phase 1: only what is settled before the research.
 
-    That is the head line, the aspect, the field and the date of the agreement. The other parts
-    of the sample have a defect here. The scope is correct, so nothing fails.
+    That is the head line, the aspect, the field, the intent of the owner and the date of the
+    agreement. The other parts of the sample have a defect here. The scope is correct, so nothing
+    fails.
 
     >>> import sample
     >>> print(scope_report(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |"))))
@@ -1112,13 +1350,25 @@ def scope_report(data):
     FAIL aspect-field-empty spec.md:9: The field 'aspect' of section 1 is empty.
     Failing checks: 1.
     Only the field and the thing to build were checked. The findings wait for the research.
+
+    An intent of the owner that has "(no answer)" in each line passes, and remains.
+
+    >>> none = [("spec.md", line, line.split(":")[0] + ": (no answer)") for line in sample.INTENT[:2]]
+    >>> print(scope_report(sample.load(*none)))
+    No check fails.
+    Only the field and the thing to build were checked. The findings wait for the research.
+    What remains:
+    - The intent of the owner was not asked.
     """
     found = sorted(check_scope(data), key=lambda f: (f["line"], f["rule"], f["id"]))
     lines = [
         f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
     ]
     lines.append(MESSAGES["failures"].format(len(found)) if found else MESSAGES["no-failure"])
-    return "\n".join([*lines, MESSAGES["scope-only"]])
+    lines.append(MESSAGES["scope-only"])
+    if not intent_asked(data):
+        lines += [MESSAGES["remains-head"], "- " + MESSAGES["remains-intent"]]
+    return "\n".join(lines)
 
 
 def option(args, flag):
@@ -1160,12 +1410,15 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'findings', 'previous', 'remains', 'trials', 'views'], [('unknown-source', 'C-02')], True)
+    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'remains', 'trials', 'views'],
+     [('unknown-source', 'C-02')], True)
+    >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
+    ({'judgement': 22, 'other': 0, 'source': 8}, True, [])
     >>> result["trials"], result["remains"]["trial"]
     (['T-01'], [])
     >>> result["views"][1]
     {'items': 2, 'level 1': 1, 'level 2': 0, 'level 3': 1, 'not admitted': 0, 'pending': 0, 'sources': 2,
-     'view': 'storage'}
+     'stakeholders': 1, 'view': 'storage'}
 
     --previous compares with an earlier revision, and --words finds product words.
 
@@ -1187,20 +1440,41 @@ def main(argv=None):
     >>> sample.run(main, no_field, "--scope")[0]
     1
 
-    In phase 1 the field Views is as the template has it. --scope does not examine it.
+    In phase 1 the fields of the research are as the template has them. --scope does not examine
+    them. The template holds a placeholder in each such line, and no name of a real concern: the
+    check does not depend on a word of the template.
 
     >>> import pathlib
     >>> template = pathlib.Path(__file__).resolve().parents[3] / ".specify/templates/overrides"
     >>> text = aspect.read_text(template / "aspect-spec-template.md")
     >>> "- **Views**:" in text and "| Id | Item | Why | View | Level |" in text
     True
+    >>> template_data = aspect.Doc(template / "aspect-spec-template.md")
+    >>> fields = template_data.fields(template_data.section("1"))
+    >>> research = ("stakeholders", "views", "contexts", "risk dimensions", "boundaries", "targets")
+    >>> sorted({item["name"] for name in research for item in fields[name]["items"]})
+    ['[name]']
     >>> text = text.replace("[one major aspect, in one line]", "backups")
     >>> text = text.replace("[the field it", "operations [it")
     >>> text = text.replace("[DATE; the field", "2026-01-05 [the field")
     >>> phase_1 = sample.folder()
     >>> _ = (phase_1 / "spec.md").write_text(text, encoding="utf-8")
-    >>> sample.run(main, phase_1, "--scope")[0], sample.run(main, phase_1)[0]
-    (0, 1)
+
+    The intent of the owner is settled in phase 1 also. A line that is as the template has it fails.
+
+    >>> code, out, _ = sample.run(main, phase_1, "--scope")
+    >>> code, [line.split(":")[0] for line in out.splitlines()[:3]]
+    (1, ['FAIL intent-without-date spec.md', 'FAIL intent-without-date spec.md',
+         'FAIL intent-without-date spec.md'])
+    >>> for name in ("meaning", "result", "not wanted"):
+    ...     start = text.index(f"  - `{name}`: [")
+    ...     text = text[:start] + f"  - `{name}`: (no answer)" + text[text.index("\n", start) :]
+    >>> _ = (phase_1 / "spec.md").write_text(text, encoding="utf-8")
+    >>> code, out, _ = sample.run(main, phase_1, "--scope")
+    >>> code, out.splitlines()[0], out.splitlines()[-1]
+    (0, 'No check fails.', '- The intent of the owner was not asked.')
+    >>> sample.run(main, phase_1)[0]
+    1
 
     Input that cannot be read gives the result code 2. No argument prints the usage text.
 
@@ -1241,7 +1515,9 @@ def main(argv=None):
     if as_json:
         result = {
             "accepted": is_accepted(data),
+            "answers": answer_counts(data),
             "findings": found,
+            "intent_asked": intent_asked(data),
             "previous": previous is not None,
             "remains": remains,
             "trials": sorted(t.get("id", "") for t in data["trials"]),

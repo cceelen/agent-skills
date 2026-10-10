@@ -345,6 +345,58 @@ specification whose check reports no failure other than "not accepted".
   record of the findings, and the decision of the owner for each finding. A finding with the
   route `recipe` MUST lead to more research for its view or question, and to a new trial.
 
+**The intent of the owner and input without bias**
+
+- **FR-038**: The template of an aspect specification, the procedure, the prompts and the
+  documentation of the tooling MUST NOT hold an example that names a real concern, dimension,
+  context, level reason or risk. A placeholder MUST be neutral, for example `[name]`. The
+  check MUST NOT depend on a word of the template. The sample specification of the examples
+  is permitted: a session of the research does not get it.
+- **FR-039**: The tooling MUST have an export of a neutral kit for a trial of the tooling
+  itself. The export writes, only into a new or empty folder outside each git repository: the
+  tooling without the sample specification and without the task of the reviewer of a plan,
+  the template of an aspect specification, the rules of the kit, the programs of a different
+  skill that the tooling loads, and two instruction files that hold only the language for the
+  owner, the rule for commit messages, the rules of the kit and where the procedure is. It
+  MUST NOT write documentation, tests, specifications or a different skill. Given a list of
+  words, it MUST write nothing when an exported file holds a word, and MUST give the file and
+  the line. The procedure MUST work in such a kit.
+- **FR-040**: Before the research, the skill MUST ask the owner three questions about the
+  intent, each one time and only if the owner did not answer it already: what the owner means
+  by the aspect and which concerns it brings together; what a project must be able to show
+  after it applied the recipe, and whether there is a measurable target; what the owner does
+  not want. The skill MUST write each answer as a quote with its date into the field "Intent
+  of the owner" of section 1, MUST NOT change the words, and MUST write `(no answer)` when
+  there is none. It MUST NOT ask for and MUST NOT propose a use case, a first user, a
+  reference project, an industry, a product, stakeholders, viewpoints, views, contexts, risk
+  dimensions or boundaries, and MUST NOT write a project for a trial into the specification.
+  In the research, the skill MUST compare the intent with the sources, record each difference
+  in section 3.4 and follow the owner. Each concern that the owner named is a view, or section
+  7 says why it is not. A target that the owner named is in the field "Targets" with
+  `(judgement)` until a source gives its scale. In the review, the owner MUST get the intent
+  first, beside the stakeholders, the views and the targets, with each difference. The check
+  of phase 1 MUST fail when the field is absent or empty, or when an answer has no date. When
+  each line says `(no answer)`, the check MUST pass and MUST list under "What remains" that
+  the intent was not asked.
+- **FR-041**: The skill MUST find the stakeholders of the aspect in the body of knowledge of
+  the field and in the sources, not in the name of the aspect, and MUST NOT ask the owner for
+  them. A stakeholder is a group of persons that has an interest in the result or carries a
+  duty for it. Section 1 MUST name each stakeholder with its concerns and its source. The
+  skill MUST aggregate the concerns into the views, and each view MUST name its stakeholders
+  in a form that a program reads. The requirements of the stakeholders of a view are the
+  candidates for its items; the calculation of risk and reward decides on them, and a
+  requirement that is dropped before the calculation MUST have a row in section 7. Outside
+  the check of phase 1, the check MUST fail when section 1 names no stakeholder, when a
+  stakeholder names no concern or no source, when a view names no stakeholder, and when a
+  view names a stakeholder that section 1 does not have. The check MUST list under "What
+  remains" each stakeholder that is in no view, and MUST give the number of stakeholders of
+  each view. The rendered skill MUST show the stakeholders of each view. In the review, the
+  owner can add, remove or rename a stakeholder.
+- **FR-042**: The check MUST report, in one line, how many answers of risk and reward in the
+  table "Items" of `vetting.md` name a source and how many say `judgement`. The line MUST NOT
+  fail the check, and MUST be in the JSON report. In the review, the owner MUST get this line
+  with the checklist.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -358,8 +410,12 @@ specification whose check reports no failure other than "not accepted".
 - **Vetting record**: for each independent source, the signals, the score, the version of the
   rubric and the confirmation of the owner. For each item, the answers and the result of the
   calculation of risk and reward.
-- **View**: one set of concerns that an aspect brings together, with its source. Each
-  checklist item belongs to one view.
+- **Intent of the owner**: the answers of the owner to three questions before the research,
+  each as a quote with its date.
+- **Stakeholder**: one group of persons that has an interest in the result or carries a duty
+  for it, with its concerns for the aspect and its source.
+- **View**: one set of concerns that an aspect brings together, with its stakeholders and its
+  source. Each checklist item belongs to one view.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
 - **Target**: one measurable result that a project reaches when it applies the recipe, with

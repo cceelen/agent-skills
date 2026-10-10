@@ -21,7 +21,21 @@ check.py SPEC --scope
   wrong. Then the summary: failing checks, pending levels, pending vettings, items that need
   judgement, and whether the specification is accepted.
 - `--json`: the same content as one JSON object with sorted keys.
-- `--scope`: examines only the head line and section 1, for phase 1. The report says so.
+- `--scope`: examines only the head line and the fields of section 1 that are settled before
+  the research: the aspect, the field, the intent of the owner and the date of the agreement.
+  The report says so.
+- The field `Intent of the owner` fails the check when it is absent or empty, and when a line
+  has no date and is not `(no answer)`. Under "remains", when each line is `(no answer)`:
+  `The intent of the owner was not asked.`
+- Outside `--scope`, the field `Stakeholders` fails the check when it has no stakeholder, and
+  when a stakeholder names no concern, or no source and no `judgement`. A view fails the check
+  when it names no stakeholder, or a stakeholder that section 1 does not have. Under
+  "remains": `Stakeholders that are in no view: <names>.` Each line of the part "Views" ends
+  with the number of stakeholders of the view.
+- After the part "Views", one line: `Answers of risk and reward: <n> with a source, <m> by
+  judgement.` It counts the answers in the table "Items" of `SPEC/vetting.md` and fails
+  nothing. With `--json`: the key `answers` with `source`, `judgement` and `other`, and the
+  key `intent_asked`.
 - Result code `1` when a check fails. Pending levels, pending vettings and a missing
   acceptance are listed as "remains" and do not fail the check.
 - A finding of `trial.md` with an unknown trial, viewpoint or route, an empty text or a wrong
@@ -51,6 +65,23 @@ render.py SPEC --commit HASH --trial DIR [--branch NAME] [--check]
   item must have a level, but the acceptance is not necessary. The stamp of each file says
   that the file is a trial rendering. With `--check`, the files in `DIR` are compared with a
   fresh trial rendering.
+
+## scripts/export.py
+
+```text
+export.py DIR [--words FILE]
+```
+
+- Writes a neutral kit for a trial of the tooling into `DIR`. `DIR` must be outside each git
+  repository, and must be new or empty.
+- The kit holds `factory/sota-research/` without `scripts/sample.py`, without
+  `prompts/plan-review.md` and without the files that Python makes when it runs; the template
+  `.specify/templates/overrides/aspect-spec-template.md`; the folder `rules/`;
+  `skills/library-vetting/scripts/collect.py` and `models.py`; and an `AGENTS.md` and a
+  `CLAUDE.md` that the program makes.
+- `--words FILE`: one word or phrase in each line. If an exported file holds one, the program
+  writes nothing and prints the file and the line of each use.
+- Prints each exported file, sorted. Result code `1` when nothing was exported.
 
 ## scripts/place.py
 

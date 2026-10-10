@@ -59,6 +59,25 @@ Section 1 gets one more field of the research, the measured targets:
 
 A specification without a target has `- **Targets**: (none found)`.
 
+Section 1 gets one more field that is settled before the research, the intent of the owner:
+
+```markdown
+- **Intent of the owner**: the answers of the owner to the questions of phase 1.
+  - `meaning`: "<the words of the owner>" (2026-10-10)
+  - `result`: "<the words of the owner>" (2026-10-10)
+  - `not wanted`: (no answer)
+```
+
+Section 1 gets one more field of the research, the stakeholders. The line of a view names its
+stakeholders before the source:
+
+```markdown
+- **Stakeholders**: each group of persons that has an interest in the result or carries a duty for it.
+  - `<name>`: <the concerns of this stakeholder for this aspect> (S-01 section 1)
+- **Views**: the points of view that the aspect brings together.
+  - `<name>`: <what this view is concerned with> (stakeholders: <name>, <name>) (S-01 section 1)
+```
+
 ## trial.md
 
 ```markdown

@@ -27,8 +27,8 @@ values of the scale.
 - If no source gives the answer, write `(judgement)` after the number. Do not invent a source.
 - Answer for a typical project. Do not answer for one project that you know.
 - If the return of an item depends on the risk of a project, write the name of the risk
-  dimension from section 1 of `spec.md` in the cell Dimension. Examples are an item that only
-  a regulated project needs, and an item with a high cost.
+  dimension from section 1 of `spec.md` in the cell Dimension. An example is an item with a
+  high cost.
 - If you cannot answer a question, leave the cell empty. The item then stays pending, and the
   owner sees it.
 

@@ -35,7 +35,7 @@ import sys
 import aspect
 import check
 
-ANSWERS = ("severity", "probability", "breadth", "adopt", "keep", "own risk")
+ANSWERS = check.ANSWERS
 COMPUTED = ("return", "cost", "score", "admitted", "level")
 QUESTION = re.compile(r"^question (\S+) (\d+)-(\d+):")
 SETTING = re.compile(r"^(version|threshold \S+|limit \S+):\s*(\d+)\s*$")
@@ -274,7 +274,7 @@ def write(data, results, rubric):
     >>> folder = sample.folder(short, ("vetting.md", "| C-01 | 3", extra + "| C-01 | 3"))
     >>> data = aspect.load(folder)
     >>> write(data, place(data, rubric), rubric)
-    ["The program cannot write the cell 'level' in line 64 of spec.md. Correct the table."]
+    ["The program cannot write the cell 'level' in line 71 of spec.md. Correct the table."]
     >>> extra in aspect.read_text(folder / "vetting.md")
     True
     """
@@ -372,7 +372,7 @@ def main(argv=None):
     >>> short = sample.folder(("spec.md", old + " S-01 section 3 |", " |"))
     >>> code, out, err = sample.run(main, short, "--write")
     >>> code, err, out.splitlines()[-2]
-    (1, '', "The program cannot write the cell 'level' in line 64 of spec.md. Correct the table.")
+    (1, '', "The program cannot write the cell 'level' in line 71 of spec.md. Correct the table.")
 
     --rubric gives a different rubric. Its version goes into the record.
 

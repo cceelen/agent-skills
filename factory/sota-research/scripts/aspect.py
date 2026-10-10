@@ -30,6 +30,8 @@ SOURCE_ID = re.compile(r"\bS-\d+\b")
 ITEM_ID = re.compile(r"\bC-\d+\b")
 ITEM_RANGE = re.compile(r"\bC-(\d+) to C-(\d+)\b")
 PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b", re.I)
+INTENT = "intent of the owner"
+STAKEHOLDERS = re.compile(r"\s*\(stakeholders:([^)]*)\)", re.I)
 
 
 class Unreadable(Exception):
@@ -335,6 +337,28 @@ def view_of(row):
     return row.get("view", "").strip().strip("`").strip()
 
 
+def stakeholders_of(text):
+    """The stakeholders that the line of a view names, in the form "(stakeholders: a, b)".
+
+    >>> stakeholders_of("what the view holds. (stakeholders: operators, `owners of the data`) (S-01)")
+    ['operators', 'owners of the data']
+    >>> stakeholders_of("what the view holds. (S-01)"), stakeholders_of("(stakeholders: )")
+    ([], [])
+    """
+    found = STAKEHOLDERS.search(text or "")
+    names = (name.strip().strip("`").strip() for name in found.group(1).split(",")) if found else ()
+    return [name for name in names if name]
+
+
+def without_stakeholders(text):
+    """The line of a view without the part that names its stakeholders.
+
+    >>> without_stakeholders("what the view holds. (stakeholders: operators) (S-01 section 2)")
+    'what the view holds. (S-01 section 2)'
+    """
+    return STAKEHOLDERS.sub("", text or "")
+
+
 def load(folder):
     r"""Read the folder of one specification into plain dictionaries and lists.
 
@@ -350,6 +374,30 @@ def load(folder):
     (['storage', 'operation'], ['storage', 'operation', 'storage'])
     >>> [(t["name"], t["text"][:13]) for t in data["targets"]]
     [('restore drill', 'three levels:')]
+
+    The stakeholders of the aspect are a field of section 1. Each view names its stakeholders.
+
+    >>> [s["name"] for s in data["stakeholders"]], [v["stakeholders"] for v in data["views"]]
+    (['operators', 'owners of the data'], [['owners of the data'], ['operators']])
+
+    The intent of the owner has one line for each answer: a quote with its date, or "(no answer)".
+
+    >>> [(i["name"], i["text"][-12:]) for i in data["intent"]]
+    [('meaning', '(2026-01-05)'), ('result', '(2026-01-05)'), ('not wanted', '(no answer)')]
+
+    A field without such lines gives its text as one line. A specification without the field
+    gives no line.
+
+    >>> one = "- **Intent of the owner**: (no answer)"
+    >>> text = sample.SPEC.replace("\n".join(sample.INTENT) + "\n", "")
+    >>> text = text.replace(sample.INTENT_HEAD, one)
+    >>> folder = sample.folder()
+    >>> _ = (folder / "spec.md").write_text(text, encoding="utf-8")
+    >>> [(i["name"], i["text"]) for i in load(folder)["intent"]]
+    [('intent of the owner', '(no answer)')]
+    >>> _ = (folder / "spec.md").write_text(text.replace(one + "\n", ""), encoding="utf-8")
+    >>> load(folder)["intent"]
+    []
 
     Each table is found in its section, and each row knows its place.
 
@@ -432,6 +480,12 @@ def load(folder):
     data["risk_dimensions"] = data["aspect"].get("risk dimensions", {}).get("items", [])
     data["views"] = data["aspect"].get("views", {}).get("items", [])
     data["targets"] = data["aspect"].get("targets", {}).get("items", [])
+    data["stakeholders"] = data["aspect"].get("stakeholders", {}).get("items", [])
+    for view in data["views"]:
+        view["stakeholders"] = stakeholders_of(view["text"])
+    intent = data["aspect"].get(INTENT, {})
+    whole = {"name": INTENT, "text": intent.get("value"), "_line": intent.get("_line")}
+    data["intent"] = intent.get("items") or ([whole] if whole["text"] else [])
     if (folder / "evidence.md").is_file():
         data["evidence"] = Doc(folder / "evidence.md").table((0, 10**9), "source")
     data["has_vetting"] = (folder / "vetting.md").is_file()

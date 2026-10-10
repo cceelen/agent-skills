@@ -330,6 +330,29 @@ had no step that tries a recipe on a project and feeds the findings back.
 - [x] T104 In `factory/sota-research/references/procedure.md`: add the part "The trial of a recipe" after phase 3, refer to it from phase 3 and from "The refresh", and find the targets in phase 2
 - [x] T105 In `docs/sota-research.md` and `CHANGELOG.md`: the trial, the review, the record of the trials and the measured targets
 
+## Phase 17: The intent of the owner and input without bias
+
+**Purpose**: FR-038 to FR-042. An audit of two trials of the tooling for one aspect found
+biased input. The repository of the trial was a copy of this kit, and its texts came back as
+findings. Both specifications repeated the example names of the template. Phase 1 did not ask
+for the intent of the owner, so the research took the meaning of the aspect from the
+literature that carries its name. 11 of 180 answers of risk and reward named a source, and no
+report gave that share. Direction of the owner, 2026-10-10: the factory finds the stakeholders
+and their concerns itself, and does not ask the owner for them.
+
+- [x] T106 In `.specify/templates/overrides/aspect-spec-template.md`: replace each example that names a real concern, dimension, context, level reason or risk with a neutral placeholder; do the same in `factory/sota-research/references/procedure.md`, `prompts/reader.md`, `prompts/risk-answers.md` and `docs/sota-research.md`
+- [x] T107 In `factory/sota-research/scripts/check.py`: an example shows that each line of the research in the template has the placeholder `[name]`, and that `--scope` passes on a copy of the template with the fields of phase 1 filled
+- [x] T108 Add `factory/sota-research/scripts/export.py`: write a neutral kit into a new or empty folder outside each git repository; leave out the sample and the task of the reviewer; make the two instruction files; refuse a kit that holds a word of `--words`, with the file and the line
+- [x] T109 Verify in a scratch folder outside the repository: export, make a repository with one commit, and run `check.py`, `models.py detect` and `render.py` with `uv run`
+- [x] T110 In `.specify/templates/overrides/aspect-spec-template.md`: add the field "Intent of the owner" to the part of section 1 that is settled before the research, and the field "Stakeholders" with the form `(stakeholders: <name>, <name>)` in the line of a view to the part that the research finds
+- [x] T111 In `factory/sota-research/scripts/aspect.py` and `sample.py`: read the intent, the stakeholders and the stakeholders of each view; give the sample an intent with three lines and two stakeholders
+- [x] T112 In `factory/sota-research/scripts/check.py`: with `--scope` and without it, fail for an intent that is absent or empty and for an answer without a date; list an intent that was not asked under "What remains"
+- [x] T113 In `factory/sota-research/scripts/check.py`: outside `--scope`, fail for no stakeholder, a stakeholder without a concern or a source, a view without a stakeholder and a view with an unknown stakeholder; list the stakeholders that are in no view under "What remains"; give the number of stakeholders of each view
+- [x] T114 In `factory/sota-research/scripts/check.py`: report the number of answers of risk and reward with a source and by judgement, in the text report and with `--json`; `place.py` takes the names of the answers from `check.py`
+- [x] T115 In `factory/sota-research/scripts/render.py`: show the stakeholders of each view in the table of the views in `SKILL.md`
+- [x] T116 In `factory/sota-research/references/procedure.md`: phase 1 asks the three questions of the intent and does not ask for stakeholders or viewpoints; phase 2 finds the stakeholders and compares the intent with the sources; phase 3 gives the intent first and the line of the answers with the checklist; a trial of the tooling starts with `export.py`, and the reviewer gets its task from the repository of the factory
+- [x] T117 In `docs/sota-research.md` and `CHANGELOG.md`: the intent of the owner, the stakeholders, the line of the answers and the export of a neutral kit
+
 ---
 
 ## Dependencies & Execution Order

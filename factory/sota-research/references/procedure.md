@@ -1,8 +1,9 @@
 # Procedure
 
 This procedure takes one aspect from "what to build" to an accepted aspect specification and a
-rendered recipe skill. It has four phases, and a trial of the recipe on a project. A person, the owner, is in the loop: the owner
-decides what to build, confirms the sources, corrects the answers and accepts the result.
+rendered recipe skill. It has four phases, and a trial of the recipe on a project. A person,
+the owner, is in the loop: the owner decides what to build, confirms the sources, corrects the
+answers and accepts the result.
 
 The programs are in `scripts/`. Run each program with `uv run` from the root of the
 repository; the folder `scripts/` is `factory/sota-research/scripts/`. A program without an
@@ -43,44 +44,62 @@ Rules for all phases:
 
 ## Phase 1: what to build
 
-Settle only the field and the thing to build. Do not narrow the aspect: do not ask for a use
-case, a first user, a reference project, views, contexts, risk dimensions or boundaries, and
-do not propose them. They come from the sources in phase 2, and the owner reviews them in phase 3. A
-use case is chosen only when the finished recipe is applied to a project.
+Settle only the intent of the owner, the field and the thing to build.
 
-Do not search and do not read a source in this phase.
+- Do not narrow the aspect. Do not ask for these, and do not propose them: a use case, a first
+  user, a reference project, an industry, a product, stakeholders, viewpoints, views,
+  contexts, risk dimensions or boundaries.
+- Do not ask for a project for a trial. Do not write a project into the specification.
+- Do not search and do not read a source in this phase.
 
-1. Ask the owner which field and which thing to build. If the owner named them, do not ask
+1. Ask the owner for the intent. Ask each question one time. Do not ask a question that the
+   owner answered already.
+   1. What do you mean by the aspect, in your words? Which concerns does it bring together?
+   2. What must a project be able to show after it applied the recipe? Is there a measurable
+      target?
+   3. What do you not want?
+2. Record the answers.
+   - Write each answer as a quote, with the date of the answer, for the field "Intent of the
+     owner" of section 1. Use one line for each answer.
+   - Do not change the words of the owner. Do not add to them.
+   - If the owner gives no answer to a question, write `(no answer)`.
+   - If the owner is not in the session, do not invent an answer. Write `(no answer)` in each
+     line.
+3. Ask the owner which field and which thing to build. If the owner named them, do not ask
    again. Settle only these points:
    - The aspect, in one line, as wide as the owner states it.
    - The field and the disciplines that the aspect covers.
    - The short name of the aspect, in lowercase letters, digits and hyphens. It becomes the
      name of the branch, of the folder and of the recipe skill. Propose one.
-2. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
+4. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
    the owner: the tooling must be delivered to `main` first.
-3. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
+5. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
    highest number at the start of a branch name, and add one. A step branch such as
    `002-name-plan` counts also, thus the number is never used two times.
-4. Make the branch `<number>-<name>` from `main`.
-5. Copy `.specify/templates/overrides/aspect-spec-template.md` to
-   `specs/<number>-<name>/spec.md`. Fill the head line and the first three fields of section 1
-   only: "Aspect", "Field and disciplines" and "Agreed with the owner on".
+6. Make the branch `<number>-<name>` from `main`.
+7. Copy `.specify/templates/overrides/aspect-spec-template.md` to
+   `specs/<number>-<name>/spec.md`. Fill the head line and the first four fields of section 1
+   only: "Aspect", "Field and disciplines", "Intent of the owner" and "Agreed with the owner
+   on".
    - In the head line, write `pending` for "Research date" and for "Accepted", and `none` for
      "Supersedes" if no earlier revision exists.
+   - Write the answers of step 2 into "Intent of the owner".
+   - If the owner was not in the session, add a row to section 7 with the date of today.
+     Write there, as what was not verified, that the intent of the owner was not asked.
    - Write the date of today, the field and the thing to build into "Agreed with the owner
      on".
-   - Leave "Views", "Contexts", "Risk dimensions", "Boundaries" and "Targets" as the template
-     has them. Do not ask for a target. If the owner named a measurable target with the thing
-     to build, write it into the field "Targets" with `(judgement)`.
-6. Run the check for this phase:
+   - Leave "Stakeholders", "Views", "Contexts", "Risk dimensions", "Boundaries" and "Targets"
+     as the template has them.
+8. Run the check for this phase:
    `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
    Correct each line that starts with `FAIL`.
-7. Tell the owner the three fields as they are written, and that the research starts now. If
-   the owner does not object, commit `spec.md` on the branch and push the branch. This first
-   commit makes the branch of the specification. Each later step is a pull request into it.
+9. Tell the owner the four fields as they are written, and that the research starts now. If
+   the owner does not object, commit `spec.md` on the branch. If the repository has a remote,
+   push the branch. This first commit makes the branch of the specification. Each later step
+   is a pull request into it.
 
-If the owner changes the field or the thing to build later, record the change with its reason
-and its date in section 7.
+If the owner changes the intent, the field or the thing to build later, record the change with
+its reason and its date in section 7.
 
 ## Phase 2: research
 
@@ -89,26 +108,50 @@ and its date in section 7.
      into knowledge areas. `references/bodies-of-knowledge.md` names them and tells how to
      read each one. If the field has no row there, search for its body of knowledge and add
      the row.
-   - Let readers read them, as in step 3. Record each one as a source in section 2.
+   - Let readers read them, as in step 5. Record each one as a source in section 2.
    - Find the knowledge areas that the aspect touches. Each one is a candidate for a view.
      Write the candidates into the field "Views" of section 1, each with its source.
    - Find the measurable targets of the aspect in the sources: a scale with levels, or a
      measured value, that tells how far a project is. Write each one into the field "Targets"
      of section 1: the name, the scale, the program or the method that measures it, and the
-     source. Keep a target that the owner named.
+     source.
+   - If the owner named a target in the intent, write it into the field "Targets" with
+     `(judgement)`. Replace `(judgement)` when a source gives the scale of the target.
    - If the sources of the complete research give no target, write `(none found)` into the
      field.
-2. **List what exists.** The state of the art of most aspects is written down.
+2. **Find the stakeholders.** A stakeholder is a group of persons that has an interest in the
+   result or carries a duty for it.
+   - Find the stakeholders of the aspect in the body of knowledge of the field and in the
+     sources. Do not take the list from the name of the aspect. Do not ask the owner for it.
+   - Write each stakeholder into the field "Stakeholders" of section 1: a short name, its
+     concerns for this aspect, and the source or `(judgement)`.
+   - Aggregate the concerns into the views. In the line of each view, name the stakeholders
+     whose concerns the view holds, in the form `(stakeholders: <name>, <name>)`.
+   - If the concerns of a stakeholder are in no view, record the stakeholder in section 7
+     with the reason.
+   - For each view, the requirements of its stakeholders are the candidates for checklist
+     items. The calculation of risk and reward decides on them. Do not drop a requirement
+     before the calculation without a row in section 7.
+3. **Compare the intent of the owner with the sources.**
+   - Read the field "Intent of the owner" of section 1.
+   - If the sources that carry the name of the aspect mean less than the owner, or something
+     different, record the difference in section 3.4.
+   - Follow the owner. Take each concern that the sources of the name do not have from the
+     sources of the field of that concern.
+   - Make each concern that the owner named a view, or record in section 7 why it is not a
+     view.
+4. **List what exists.** The state of the art of most aspects is written down.
    - Search for the aspect as wide as the owner stated it. Do not search for one use case,
      one industry or one product only.
    - Search for each candidate view in the words of that view. Do not search only for
      documents that you know by their title, or that carry the name of the aspect.
+   - Search for the concerns of each stakeholder in the words of that stakeholder.
    - Find the existing descriptions first: standards, frameworks of foundations, the
      documentation of platform vendors, research, recognized books. Then find the practice
      sources.
    - Record each search query in `vetting.md`, in the list "Searches", with the view that it
      serves. The owner sees the list in the review.
-3. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
+5. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
    `prompts/reader.md`. Start the readers in parallel. A reader returns text; you write the
    files. If your agent product shows the tool calls of a reader, compare them with the point
    "Read" of its report. If the report says `full` or `part` and the reader fetched no page,
@@ -120,24 +163,24 @@ and its date in section 7.
    - Do not read the converted file yourself. Give its path to one agent of the type
      `sota-file-reader`, with the task `prompts/reader.md`.
    - If the conversion gives no text, record the source under "not verified".
-4. **Record the sources** in section 2, each with its class. The classes of the fast lane are
+6. **Record the sources** in section 2, each with its class. The classes of the fast lane are
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
    `independent`. Mark a paid source that was read from its preview as `part`.
-5. **Vet** each independent source. See "The vetting of independent sources".
-6. **Name the views.** A view is a set of concerns that the aspect brings together.
+7. **Vet** each independent source. See "The vetting of independent sources".
+8. **Name the views.** A view is a set of concerns that the aspect brings together.
    - Settle the views of the aspect from the sources. Keep, change or remove each candidate.
-     Write each view into the field "Views" of section 1, with its source, or with
-     `(judgement)`.
+     Write each view into the field "Views" of section 1, with its stakeholders and its
+     source, or with `(judgement)`.
    - A source supports a view only if a reader read it for the concerns of that view. One
      page of a source about a different view does not count.
    - If a view has too few sources of its own, search and read again for that view, as in
-     steps 2 to 5.
+     steps 4 to 7.
    - If a view has no source of its own, record the view in section 7 as not verified.
-7. **Distil.**
+9. **Distil.**
    - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
      risk dimensions with their question and the opinion of the kit, and the boundaries to
      the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
-     range of contexts that the sources show, from a single maintainer to a company.
+     range of contexts that the sources show.
    - A statement that holds across contexts becomes a checklist item: one short sentence that
      names no product. Its "Why" is the risk that it answers.
    - Give each item its view: write one view name of section 1 into the cell "View".
@@ -149,38 +192,45 @@ and its date in section 7.
    - Write where the sources disagree into section 3.4, with the two positions.
    - A practice from a different field states the problem that it solves there, and what
      shows that it does not work here.
-8. **Write the evidence record** `evidence.md`: one row for each source, with what it
+10. **Write the evidence record** `evidence.md`: one row for each source, with what it
    contributes in the words of this kit, where in the source that is, the rows that it
    supports, and the date. Keep a quote only where the wording itself is the point.
-9. **Let a second reader check it.** Give the rows to an agent of the type
+11. **Let a second reader check it.** Give the rows to an agent of the type
    `sota-second-reader`, with the task `prompts/second-reader.md`. Give the rows of a
    converted source, with the path of its file, to a new agent of the type `sota-file-reader`,
    with the same task. Do not use the agent that read the source. Correct each finding in
    `evidence.md` and in each row of `spec.md` that says the same.
-10. **Place the items.** See "The calculation of risk and reward".
-11. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
+12. **Place the items.** See "The calculation of risk and reward".
+13. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
    suggested a judgement. Do not write a model name into the specification.
-12. **Run the check.** See "The check". Correct each failure.
-13. If a source cannot be reached, write what was not verified into section 7.
+14. **Run the check.** See "The check". Correct each failure.
+15. If a source cannot be reached, write what was not verified into section 7.
 
 ## Phase 3: review of the owner
 
 Stop. A model does not accept a recipe. Give the owner, in this order:
 
-1. The views that the research found, each with its source, and the part "Views" of the
-   check, as it is. The owner can add, remove or rename a view.
+1. The intent of the owner, as it is written, beside the stakeholders, the views and the
+   targets that the research found, each with its source. Give each difference between the
+   intent and these findings. Give the part "Views" of the check, as it is. The owner can
+   add, remove or rename a stakeholder or a view.
 2. The contexts, the risk dimensions and the boundaries that the research found, each with
    its source. The owner sees them here for the first time and can correct each one.
 3. The strategy: the goals, the order of the work and the decisions that depend on context.
 4. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
+   Give the line "Answers of risk and reward" of the check, as it is.
 5. The points where the sources disagree, and how the recipe handles each.
 6. The independent sources with their signals and scores, for the confirmation.
 7. The list "What remains" of the check, as it is.
 8. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
-change an item, change a view. If the owner adds a view, do step 6 of phase 2 for that view.
-If the owner removes or renames a view, change the cell "View" of each item of that view.
+change an item, change a view, change a stakeholder.
+
+- If the owner adds a stakeholder, do step 2 of phase 2 for that stakeholder.
+- If the owner adds a view, do step 8 of phase 2 for that view.
+- If the owner removes or renames a view, change the cell "View" of each item of that view.
+- If the owner removes or renames a stakeholder, change the line of each view that names it.
 
 Tell the owner that a trial of the recipe on a project is possible before the acceptance. If
 the owner asks for a trial, do the steps of "The trial of a recipe". Then continue here.
@@ -194,6 +244,12 @@ branch of the specification.
 A trial applies the recipe to one project, and a reviewer examines the plan. Do a trial only
 when the owner asks for it. The check must pass before a trial. The acceptance of the owner is
 not necessary.
+
+For a trial of the tooling itself, do this step first: make the repository of the trial with
+`uv run factory/sota-research/scripts/export.py <folder outside the repository>`. Do not make
+it as a copy of this repository. Then make a new repository in that folder with the branch
+`main` and one commit. To keep words out of the kit, write them into a file, one in each line,
+and add `--words <file>`.
 
 1. Commit the specification on its branch. Get the commit: `git rev-parse --short HEAD`. Render
    for the trial:
@@ -209,10 +265,11 @@ not necessary.
    what the research found or what you expect. The skill tells the session to stop at the
    plan. Do not let the session apply the plan.
 4. Start a reviewer that did not see the research: a new agent with the task
-   `prompts/plan-review.md`. Give it the folder of the trial project and the name of the
-   skill. If the owner gives a reference state of the same project, give its folder also. Do
-   not give the reviewer the specification, your opinion of the plan or a summary of the
-   plan.
+   `prompts/plan-review.md`. The reviewer gets its task from the repository of the factory. A
+   kit that `export.py` made does not hold this task. Give the reviewer the folder of the
+   trial project and the name of the skill. If the owner gives a reference state of the same
+   project, give its folder also. Do not give the reviewer the specification, your opinion of
+   the plan or a summary of the plan.
 5. Write the trial and each finding into `trial.md`, beside `spec.md`.
    - Add one row to the table "Trials": the next identifier `T-<number>`, the date, the
      project, the commit of the specification, and where the plan is or `not kept`.
@@ -263,7 +320,7 @@ The owner starts a refresh. Nothing runs on a schedule.
 1. Read the watch list in section 6. Find out which sources moved: a new version, a new date,
    a changed status.
 2. Read only those sources again, with the readers. For a finding of a trial with the route
-   `recipe`, search and read for the view or the question of the finding, as in steps 2 to 5
+   `recipe`, search and read for the view or the question of the finding, as in steps 4 to 7
    of phase 2.
 3. Save the current `spec.md` to a file outside the repository:
    `git show HEAD:specs/<number>-<name>/spec.md`.
@@ -287,11 +344,15 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
 - In phase 1, add `--scope`: it examines only what is settled before the research.
 - Give the list "What remains" to the owner as it is.
+- The list says so if the intent of the owner was not asked. It names each stakeholder that
+  is in no view.
+- The line "Answers of risk and reward" gives the number of answers with a source and the
+  number of answers by judgement. Give it to the owner as it is.
 - The list names each finding of a trial that is open. It says so if the recipe has no trial.
 - If a row of `trial.md` fails, correct the cell. Do not change the sentence of a finding.
-- The part "Views" gives, for each view, the number of items on each level and the number of
-  sources that its items cite. If a view has few items or few sources, do step 6 of phase 2
-  for that view again.
+- The part "Views" gives, for each view, the number of items on each level, the number of
+  sources that its items cite, and the number of its stakeholders. If a view has few items
+  or few sources, do step 8 of phase 2 for that view again.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.
 - To find product names in the checklist, write the names into a file, one in each line, and

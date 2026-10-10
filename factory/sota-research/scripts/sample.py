@@ -30,8 +30,8 @@ A small specification for the tests of the tooling. Its sources are invented.
 - **Aspect**: backups of the data of a software project.
 - **Field and disciplines**: operations; it cuts across development and support.
 - **Views**: the points of view that the aspect brings together.
-  - `storage`: which data has a copy, and where the copies are. (S-01 section 2)
-  - `operation`: how a backup is made, restored and reviewed. (S-02 section 4)
+  - `storage`: which data has a copy, and where the copies are. (stakeholders: owners of the data) (S-01 section 2)
+  - `operation`: how a backup is made, restored and reviewed. (stakeholders: operators) (S-02 section 4)
 - **Contexts**: the size of the data; who operates the software; the place where the data
   is. (S-01 section 1)
 - **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
@@ -41,6 +41,13 @@ A small specification for the tests of the tooling. Its sources are invented.
 - **Targets**: the measurable results that a project reaches when it applies the recipe.
   - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)
 - **Agreed with the owner on**: 2026-01-05; a recipe for backups of project data.
+- **Intent of the owner**: the answers of the owner to the questions of phase 1.
+  - `meaning`: "A copy of each record that we cannot make again, and a restore that works." (2026-01-05)
+  - `result`: "The project can show the date of its last restore." (2026-01-05)
+  - `not wanted`: (no answer)
+- **Stakeholders**: the groups of persons that have an interest in the result or carry a duty for it.
+  - `operators`: they must make a lost record again in the agreed time. (S-02 section 4)
+  - `owners of the data`: they must know where each copy of their data is. (S-01 section 2)
 
 ## 2. Sources
 
@@ -239,6 +246,23 @@ SOURCE_ROW = "| S-01 | A copy | Example | 2020 | standard | public | full | u |\
 CONFIRMED_S03 = "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 CONFIRMED_S04 = "| 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 APPLIES = "- **Applies**: the order of the work below; it judges C-04."
+INTENT_HEAD = "- **Intent of the owner**: the answers of the owner to the questions of phase 1."
+INTENT_RESULT = '  - `result`: "The project can show the date of its last restore." (2026-01-05)'
+INTENT = (
+    '  - `meaning`: "A copy of each record that we cannot make again, and a restore that works." (2026-01-05)',
+    INTENT_RESULT,
+    "  - `not wanted`: (no answer)",
+)
+VIEW_STORAGE = "  - `storage`: which data has a copy, and where the copies are. (stakeholders: owners of the data) (S-01 section 2)"
+VIEW_OPERATION = (
+    "  - `operation`: how a backup is made, restored and reviewed. (stakeholders: operators) (S-02 section 4)"
+)
+STAKEHOLDER_OPERATORS = (
+    "  - `operators`: they must make a lost record again in the agreed time. (S-02 section 4)"
+)
+STAKEHOLDER_OWNERS = (
+    "  - `owners of the data`: they must know where each copy of their data is. (S-01 section 2)"
+)
 TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 

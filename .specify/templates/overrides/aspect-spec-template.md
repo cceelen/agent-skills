@@ -11,38 +11,50 @@ file high level. It holds nothing that an agent can learn from the project or fr
 
 ## 1. Aspect
 
-Settled with the owner before the research. Only the field and the thing to build: no use
-case, no first user, nothing narrower.
+Settled with the owner before the research. Only the field, the thing to build and the intent
+of the owner: no use case, no first user, no stakeholder, nothing narrower.
 
 - **Aspect**: [one major aspect, in one line]
 - **Field and disciplines**: [the field it belongs to; the disciplines it covers or cuts across]
+- **Intent of the owner**: the answers of the owner to the questions of phase 1. One line each:
+  the words of the owner as a quote, with the date, or `(no answer)`.
+  - `meaning`: ["what the owner means by the aspect, and the concerns that it brings together" (DATE)]
+  - `result`: ["what a project must be able to show after it applied the recipe" (DATE)]
+  - `not wanted`: ["what the owner does not want" (DATE)]
 - **Agreed with the owner on**: [DATE; the field and the thing to build]
 
 Found by the research, and reviewed by the owner with the other findings. Each line names its
 source, or says `(judgement)`. A use case is chosen only when the recipe is applied to a project.
 
+- **Stakeholders**: each group of persons that has an interest in the result or carries a duty
+  for it. The research finds them in the body of knowledge of the field and in the sources.
+  One line each: a short name, the concerns of the stakeholder for this aspect, and the source.
+  - `[name]`: [the concerns of this stakeholder for this aspect] ([S-01 section 1])
+  - `[name]`: [the concerns of this stakeholder for this aspect] ([source])
 - **Views**: the points of view that the aspect brings together. A view is a set of concerns
-  of the aspect, for example for backups of data: storage and operation. The views come from
-  the sources in the research, not from the owner before the research. One line each: a short
-  name, what the view is concerned with, and the source.
-  - `[view]`: [what this view is concerned with] ([S-01 section 1])
-  - `[view]`: [what this view is concerned with] ([source])
+  of the aspect. The research aggregates the concerns of the stakeholders into the views. A
+  concern that the owner named in the intent is in a view, or section 7 says why it is not.
+  One line each: a short name, what the view is concerned with, the stakeholders whose
+  concerns the view holds, and the source. Name the stakeholders in this form, before the
+  source: `(stakeholders: [name], [name])`. Use the names of the field "Stakeholders".
+  - `[name]`: [what this view is concerned with] (stakeholders: [name], [name]) ([S-01 section 1])
+  - `[name]`: [what this view is concerned with] (stakeholders: [name]) ([source])
 - **Contexts**: the values of each dimension that change the strategy. One line each.
-  - `[use case]`: [values] ([S-01 section 2])
-  - `[how the software reaches its users]`: [values] ([source])
+  - `[name]`: [values] ([S-01 section 2])
+  - `[name]`: [values] ([source])
 - **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
   One line each: the name, the question that finds it out, the opinion of the kit on the
   answer, and the source.
-  - `[operative]`: [Can an operation be undone? Opinion: ...] ([source])
-  - `[regulatory]`: [Is personal data involved? Opinion: ...] ([source])
+  - `[name]`: [question] [Opinion: the opinion of the kit on the answer] ([source])
+  - `[name]`: [question] [Opinion: the opinion of the kit on the answer] ([source])
 - **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each.
-  - `[neighbour]`: [what it owns; what this aspect keeps] ([source])
+  - `[name]`: [what it owns; what this aspect keeps] ([source])
 - **Targets**: the measurable results that a project reaches when it applies the recipe. The
-  targets come from the sources in the research; the owner can name one with the thing to
-  build. One line each: the name, the scale with its levels, the program or the method that
-  measures it, and the source of the scale. If the sources give no target, write
-  `(none found)` in place of the lines.
-  - `[target]`: [the scale and its levels; the program or the method that measures it] ([source])
+  targets come from the sources in the research; the owner can name one in the intent. One
+  line each: the name, the scale with its levels, the program or the method that measures it,
+  and the source of the scale. If the sources give no target, write `(none found)` in place
+  of the lines.
+  - `[name]`: [the scale and its levels; the program or the method that measures it] ([source])
 
 ## 2. Sources
 
@@ -82,9 +94,9 @@ High level, for the agent that runs the work. One page.
 
 ## 4. Checklist
 
-Generic items, valid across contexts, from a single maintainer to a company. One short sentence
-each. An item that holds only in some contexts belongs in 3.3; an item for one product belongs
-in an implementation skill. There is no fixed number of items: distil until each item earns its
+Generic items, valid across the contexts of section 1. One short sentence each. An item that
+holds only in some contexts belongs in 3.3; an item for one product belongs in an
+implementation skill. There is no fixed number of items: distil until each item earns its
 place.
 
 - **Why**: the risk that the item answers, in one line. A practice of the state of the art
@@ -93,8 +105,9 @@ place.
   item on level 1: the practices that are basic and not negotiable in that view.
 - **Level**: 1, 2 or 3, cumulative. The risk and reward calculation places the item: a good
   return at a low cost in each context is level 1, the basic practices. An item above level 1
-  names the risk dimension of section 1 that calls for it, for example `2, regulatory`. The
-  risk of a project on each dimension decides how far the project goes past level 1.
+  names the risk dimension of section 1 that calls for it, in the form
+  `2, [risk dimension]`. The risk of a project on each dimension decides how far the project
+  goes past level 1.
 - **Admitted by**: `authority` (a fast-lane source states it; name how many agree), `practice`
   (vetted independent sources demonstrate it) or `own rule` (a rule of this kit, with its
   principle).
@@ -104,15 +117,15 @@ place.
 
 | Id | Item | Why | View | Level | Admitted by | Check | Source |
 |---|---|---|---|---|---|---|---|
-| C-01 | | | | | | | [S-01 PW.4.1] |
+| C-01 | | | | | | | [S-01 unit] |
 
 **Selection.** The kit recommends; the user decides. The recipe skill leads the owner of the
-project through a risk analysis of their software, their market, their context, their users and
-their data, along the risk dimensions of section 1. It gives the opinion of the kit and
-proposes a target level for each dimension. The user picks the targets and declines single items with a reason. The selection is a Markdown checklist that is
-committed in the project, and the recipe skill shows and changes it on request. A declined item
-keeps its reason, and a refresh shows the declined items whose source changed. The distance of
-a project is the list of adopted items whose check fails.
+project through a risk analysis of the project, along the risk dimensions of section 1. It
+gives the opinion of the kit and proposes a target level for each dimension. The user picks
+the targets and declines single items with a reason. The selection is a Markdown checklist
+that is committed in the project, and the recipe skill shows and changes it on request. A
+declined item keeps its reason, and a refresh shows the declined items whose source changed.
+The distance of a project is the list of adopted items whose check fails.
 
 ## 5. Skill set to define
 
@@ -170,8 +183,7 @@ Terms that mean different things in the sources. One preferred form per meaning.
 - `evidence.md`: for each source a summary of what it contributes, where in the source that
   is, the rows of this specification that it supports, and the date read. The summary is in
   Simplified Technical English and in the words of this kit. A second reader compares each
-  line with the source. A quote stays only where the wording itself is the point, for example
-  a legal definition.
+  line with the source. A quote stays only where the wording itself is the point.
 - `vetting.md`: for each independent source the measured signals, the result of the rubric and
   the owner's confirmation; for each item the answers of the risk and reward calculation.
 - `trial.md`: the record of the trials of the recipe on a project. This file is optional.
@@ -179,7 +191,6 @@ Terms that mean different things in the sources. One preferred form per meaning.
     of the specification, and Plan. The cell "Plan" holds where the plan is, or `not kept`.
   - The table "Findings" has one row for each finding of the review of a plan. Its columns
     are Id, Trial, Viewpoint, Finding, Route and Status.
-  - The viewpoint is `architecture`, `operations`, `quality`, `development`, `security`,
-    `product owner` or `views of the recipe`.
+  - The viewpoint is one of the viewpoints of the review. The reviewer gives it.
   - The route is `recipe`, `tooling` or `implementation skill`.
   - The status is `open`, `corrected in <revision or commit>` or `declined: <reason>`.

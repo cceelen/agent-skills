@@ -9,7 +9,7 @@ program writes `trial.md`.
 | Part | Fields | Rules that the check applies |
 |---|---|---|
 | Head | branch, research date, supersedes, accepted | accepted is a person and a date, or `pending` |
-| 1 Aspect | aspect, field, views, contexts, risk dimensions, boundaries, targets, agreed on | each field is filled; agreed on has a date; each view is one line below the field, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion ``; each target is one line below the field and names its source, or the field says `(none found)` |
+| 1 Aspect | aspect, field, intent of the owner, agreed on, stakeholders, views, contexts, risk dimensions, boundaries, targets | each field is filled; agreed on has a date; each line of the intent is a quote with a date, or `(no answer)`; each stakeholder is one line below the field, names its concerns and names its source or `judgement`; each view is one line below the field, names one stakeholder of section 1 or more in the form `(stakeholders: a, b)`, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion ``; each target is one line below the field and names its source, or the field says `(none found)` |
 | 2 Sources | id, source, issuer, version or date, class, license, read, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
@@ -55,6 +55,9 @@ State of a source: `not vetted` → `rejected by a gate` or `scored` → `confir
 
 State of an item: `pending` (an answer is missing) → `placed` (admitted with a level, or not
 admitted).
+
+An answer names its source or says `judgement`. The check counts the answers of each kind and
+reports the two numbers. The numbers do not fail the check.
 
 ## Record of the trials (`trial.md`)
 

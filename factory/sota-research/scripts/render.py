@@ -185,6 +185,15 @@ def without_source(text):
     return re.sub(r"\s*\((?:S-\d+[^)]*|judgement)\)\s*$", "", text, flags=re.I)
 
 
+def concerns_of(view):
+    """The concerns of a view, without its stakeholders and without its source.
+
+    >>> concerns_of({"text": "where the copies are. (stakeholders: operators) (S-01 section 2)"})
+    'where the copies are.'
+    """
+    return without_source(aspect.without_stakeholders(view["text"]))
+
+
 def field(data, name):
     """The value of one field of the recipe skill in section 5, or "".
 
@@ -271,6 +280,11 @@ def render_skill(data, name, mark):
 
     >>> "one group for each view" in text, "| `storage` | which data has a copy, and where the" in text
     (True, True)
+
+    The table of the views names the stakeholders whose concerns each view holds.
+
+    >>> "copies are. | owners of the data |" in text, "(stakeholders:" in text
+    (True, False)
     >>> "S-0" in text or "standards.example" in text, len(lines) < MAX_LINES
     (False, True)
 
@@ -292,7 +306,7 @@ def render_skill(data, name, mark):
     """
     title = data["title"]
     dims = [[f"`{d['name']}`", without_source(d["text"])] for d in data["risk_dimensions"]]
-    views = [[f"`{v['name']}`", without_source(v["text"])] for v in data["views"]]
+    views = [[f"`{v['name']}`", concerns_of(v), ", ".join(v["stakeholders"])] for v in data["views"]]
     targets = [[f"`{t['name']}`", without_source(t["text"])] for t in data["targets"]]
     decisions = [
         [r.get("decision", ""), r.get("depends on", ""), r.get("options", "")]
@@ -329,7 +343,7 @@ def render_skill(data, name, mark):
         table(["Dimension", "Question, and the opinion of the kit"], dims),
         "## Selection\n",
         SELECTION.format(name=name),
-        table(["View", "What the view is concerned with"], views),
+        table(["View", "What the view is concerned with", "Stakeholders"], views),
         "## Order of the work\n",
         data["order"] + "\n",
     ]

@@ -16,6 +16,13 @@ reports are not comparable with new reports.
   the plan from seven viewpoints, and the check reports the findings that are open.
 - An aspect specification names the measured targets of its aspect. The check fails for an
   empty field `Targets`.
+- The tooling asks the owner for the intent before the research, and compares it with the
+  sources. The check fails for an aspect specification without the field `Intent of the owner`.
+- The research finds the stakeholders of an aspect. Each view names its stakeholders. The check
+  fails for an aspect specification without the field `Stakeholders`.
+- The check gives the number of answers of risk and reward with a source and by judgement.
+- The template of an aspect specification holds no example of a real concern.
+- `export.py` writes a neutral kit for a trial of the tooling.
 
 ## 1.0.3
 

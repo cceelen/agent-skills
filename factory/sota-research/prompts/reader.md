@@ -34,7 +34,7 @@ Report these points, in this order. Write in short sentences, in your own words.
    each. After each line, give the location: the section, the item, the clause or the heading.
    For a converted file, the location is the page number of the heading `## Page N` above the
    statement, for example "page 12". Say no more than the source says. Keep the limits of the
-   source, for example "for health reviews" or "in one company".
+   source: the group, the place or the condition for which the source makes the statement.
 4. **Where the source disagrees** with a different source that the caller named.
 5. **For an independent source only**:
    - Does the author have a record in the field? Answer `yes` or `no`, with the address of
