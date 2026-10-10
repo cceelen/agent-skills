@@ -56,6 +56,18 @@ MESSAGES = {
     "unreadable": "The input cannot be read: {0}",
 }
 
+PLAN = """\
+A change to the project is shown as a plan before it is applied.
+
+1. Write the plan into `.agents/kit/{name}-plan.md`. For each adopted item whose check fails,
+   give the change, the files that it touches, and what only the owner can do. Put the items
+   in groups by view.
+2. Stop. Show the plan to the owner. Before the owner accepts the plan, change no file of the
+   project but the selection and the plan.
+3. After the owner accepts the plan, apply it on a new branch, and give the result to the
+   owner as a diff or a pull request.
+"""
+
 RISK_ANALYSIS = """\
 A practice of the state of the art answers a specific result of a risk analysis. Thus do the
 risk analysis first, together with the owner of the project.
@@ -218,7 +230,7 @@ def render_skill(data, name, mark):
     >>> [line for line in lines if line.startswith("## ")][1:]
     ['## Goal', '## Before you start', '## Risk analysis', '## Selection', '## Order of the work',
      '## Decisions that depend on context', '## Where the sources disagree', '## What to delegate',
-     '## When to stop']
+     '## Plan, then apply', '## When to stop']
     >>> "| `regulatory` | Is personal data in the backup?" in text, ".agents/kit/backups.md" in text
     (True, True)
 
@@ -234,7 +246,7 @@ def render_skill(data, name, mark):
     >>> data = sample.load()
     >>> data["context_decisions"] = data["disagreement"] = data["implementation_skills"] = []
     >>> [line for line in render_skill(data, "backups", "").splitlines() if line.startswith("## ")][5:]
-    ['## Order of the work', '## What to delegate', '## When to stop']
+    ['## Order of the work', '## What to delegate', '## Plan, then apply', '## When to stop']
     """
     title = data["title"]
     dims = [[f"`{d['name']}`", without_source(d["text"])] for d in data["risk_dimensions"]]
@@ -295,6 +307,7 @@ def render_skill(data, name, mark):
             "no such skill is installed, tell the owner and do the work with the tools of the project.\n",
             table(["Capability", "Checklist items"], capabilities),
         ]
+    parts += ["## Plan, then apply\n", PLAN.format(name=name)]
     parts += ["## When to stop\n", field(data, "stops when") + "\n"]
     return "\n".join(parts)
 
