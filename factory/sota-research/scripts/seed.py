@@ -77,6 +77,13 @@ MESSAGES = {
         "{0}: changed: the document has a new version or was altered. "
         "The digest was {1}. It is {2} now, with {3} pages."
     ),
+    "ask": (
+        "The seed '{0}' is a file that you must get: {1}, {2}.\n"
+        "Get it from this page: {3}\n"
+        "Terms: {4}\n"
+        "Give the path of the file, or an empty line to continue without it: "
+    ),
+    "ask-absent": "The file {0} is not there.",
     "waits": "{0}: the owner must give the file. Get it from {1}. Then add --file {0}=PATH.",
     "recorded": "{0}: recorded: a web reader reads the page {1}.",
     "failed": "{0}: failed: {1}",
@@ -498,6 +505,74 @@ def given_files(args):
     return files
 
 
+def ask_owner(seeds, files, work, ask):
+    r"""Ask the owner for each file that only the owner can get. Returns the files, with the answers.
+
+    The question names the page of the issuer and its terms. An empty answer continues without
+    the file. A file that a run before took is not asked for again. Without a person at the
+    keyboard (ask is None) nothing is asked.
+
+    >>> import tempfile
+    >>> work = pathlib.Path(tempfile.mkdtemp())
+    >>> given = work / "given.pdf"
+    >>> _ = given.write_bytes(b"%PDF")
+    >>> seeds = [{"id": "a", "kind": "pdf"}, {"id": "b", "kind": "owner file", "document": "Guide",
+    ...           "version or date": "1.0", "address": "https://b.example/form", "terms": "own use"}]
+    >>> answers = iter(["absent.pdf", str(given)])
+    >>> def person(question):
+    ...     print(question.replace(str(work), "WORK"))
+    ...     return next(answers)
+    >>> ask_owner(seeds, {}, work, person) == {"b": str(given)}
+    The seed 'b' is a file that you must get: Guide, 1.0.
+    Get it from this page: https://b.example/form
+    Terms: own use
+    Give the path of the file, or an empty line to continue without it:
+    The file absent.pdf is not there.
+    The seed 'b' is a file that you must get: Guide, 1.0.
+    Get it from this page: https://b.example/form
+    Terms: own use
+    Give the path of the file, or an empty line to continue without it:
+    True
+    >>> ask_owner(seeds, {}, work, lambda question: "  "), ask_owner(seeds, {}, work, None)
+    ({}, {})
+    >>> ask_owner(seeds, {"b": "x.pdf"}, work, person)
+    {'b': 'x.pdf'}
+    >>> (work / "seeds").mkdir()
+    >>> _ = (work / "seeds" / "b.pdf").write_bytes(b"%PDF")
+    >>> ask_owner(seeds, {}, work, person)
+    {}
+    """
+    files = dict(files)
+    if ask is None:
+        return files
+    for seed in seeds:
+        ident = seed["id"]
+        if seed["kind"] != "owner file" or ident in files or (work / "seeds" / f"{ident}.pdf").exists():
+            continue
+        question = MESSAGES["ask"].format(
+            ident, seed["document"], seed["version or date"], seed["address"], seed["terms"]
+        )
+        for _ in range(2):
+            answer = ask(question).strip()
+            if not answer or pathlib.Path(answer).expanduser().is_file():
+                break
+            print(MESSAGES["ask-absent"].format(answer))
+        else:
+            answer = ""
+        if answer:
+            files[ident] = str(pathlib.Path(answer).expanduser())
+    return files
+
+
+def person_at_the_keyboard():
+    """The function that asks a person, or None when no person can answer.
+
+    >>> person_at_the_keyboard() in (None, input)
+    True
+    """
+    return input if sys.stdin is not None and sys.stdin.isatty() else None
+
+
 def wrong_options(seeds, files, today):
     """The message for a wrong option --file or --today, or None.
 
@@ -521,7 +596,7 @@ def wrong_options(seeds, files, today):
     return None
 
 
-def main(argv=None, download=pdf.download, run=subprocess.run):
+def main(argv=None, download=pdf.download, run=subprocess.run, ask=None):
     r"""The command line. See the text at the start of this file. Returns the result code.
 
     >>> import tempfile
@@ -612,6 +687,7 @@ def main(argv=None, download=pdf.download, run=subprocess.run):
     if reason:
         print(reason)
         return 2
+    files = ask_owner(seeds, files, work, ask if argv is not None else person_at_the_keyboard())
     code, lines = get(work, seeds, files, today, fresh, download, run)
     print("\n".join(lines))
     return code

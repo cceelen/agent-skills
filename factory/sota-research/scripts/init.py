@@ -252,7 +252,7 @@ def next_steps(kit, work):
     ]
 
 
-def main(argv=None, run=subprocess.run, download=pdf.download):
+def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     r"""The command line. See the text at the start of this file. Returns the result code.
 
     The examples use a manifest with three seeds, and functions in the place of git, of the
@@ -405,6 +405,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download):
     files_of_kit[MARKER] = (MARKER_TEXT.format(commit).encode("utf-8"), False)
     print(MESSAGES["made"].format(kit, len(export.write(files_of_kit, kit)), commit))
     print(make_repository(run, kit))
+    files = seed.ask_owner(seeds, files, work, ask if argv is not None else seed.person_at_the_keyboard())
     code, lines = seed.get(work, seeds, files, today, False, download, run)
     print("\n".join(lines + next_steps(kit, work)))
     return code

@@ -101,7 +101,7 @@ repository holds no seed document.
 | Kind | What `seed.py get` does |
 |---|---|
 | `pdf` | It downloads the file from its public address and converts it. |
-| `owner file` | It uses the file that you give with `--file <id>=<path>`, and converts it. |
+| `owner file` | It uses the file that you give with `--file <id>=<path>`, and converts it. If you run the program in a terminal without that option, it shows the page of the issuer and the terms, and asks for the path. |
 | `page` | It only records the seed. A web reader reads the page. |
 
 To see the seeds, run `seed.py list`. To retrieve them, run `seed.py get`:
