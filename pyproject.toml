@@ -8,6 +8,7 @@ dependencies = []
 
 [dependency-groups]
 dev = [
+    "coverage>=7.16.2",
     "pre-commit>=4",
     "pytest>=8",
     "ruff>=0.6",
@@ -21,9 +22,31 @@ environments = ["python_version >= '3.10'"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 
+# The programs of the factory hold their tests as examples (doctests). tests/test_repo.py runs
+# each program with --selftest under coverage and fails below this minimum.
+[tool.coverage.run]
+branch = true
+source = ["factory"]
+# Paths relative to the root of the repository: the report for Codecov must match the files.
+relative_files = true
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+skip_empty = true
+
 [tool.ruff]
 line-length = 110
+
+# The tooling of the factory uses the latest stable Python. The target here is one version
+# lower: the tools that examine the code in the CI must be able to parse it.
+[tool.ruff.per-file-target-version]
+"factory/**" = "py313"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 ignore = ["UP015"]
+
+[tool.ruff.lint.per-file-ignores]
+# The sample holds Markdown tables. A table row cannot continue on a second line.
+"factory/sota-research/scripts/sample.py" = ["E501"]

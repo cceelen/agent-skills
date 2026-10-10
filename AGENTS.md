@@ -20,7 +20,10 @@ folders in `skills/` without a build step. Thus each skill folder must be comple
 | `hooks/` | The hooks of the plugin. A hook puts the rules into the context of a session. |
 | `.specify/` | Spec Kit. The template for an aspect specification is in `.specify/templates/overrides/`. Do not edit the other templates there: an upgrade of Spec Kit replaces them. |
 
-Each skill has its documentation in `docs/<name>.md` and its tests in `tests/<name>/`. The agent
+To distil an aspect, read `factory/sota-research/SKILL.md` and do its steps.
+
+Each skill has its documentation in `docs/<name>.md`. Its tests are examples in its programs, or
+files in `tests/<name>/`. The agent
 files that wrap a recipe skill for one agent product are templates inside the skill. Do not
 edit a rendered recipe skill by hand: change its specification and render it again. The layout
 of a skill is:
@@ -84,7 +87,10 @@ Run the two commands before each commit. The two commands must pass.
 
 - Write helper software in Python. Do not write it in a shell language. Prefer a declarative
   tool where one exists.
-- Use Python 3.9 or later, and only the standard library.
+- For a skill that users install, use Python 3.9 or later, and only the standard library.
+- For the tooling in `factory/`, use the latest stable Python and only the standard library.
+  Declare the version in the script header of each program. Run a program with `uv run`, and
+  a tool with `uvx` or `uv run`.
 - The tools for development (`pytest`, `ruff`, `pre-commit`) need Python 3.10 or later. The CI
   runs the tests of the programs on Python 3.9 also.
 - A program must not stop when the network is not available. It must record the error and
@@ -94,7 +100,21 @@ Run the two commands before each commit. The two commands must pass.
 
 ## Rules for the tests
 
-- The tests must not use the network. Put the input data in `tests/<name>/fixture/`.
+- Write the tests of a new program as examples (doctests) in the program itself. Do not add a
+  test file when an example can do the work. Thus a user installs a program that validates
+  itself, without test files.
+- Put each example into the documentation of the function or the class that it tests. Do not
+  collect examples in a `__test__` table. An example shows its result; do not hide a result in
+  an `assert`.
+- A program with examples runs them with the option `--selftest`. Keep the sample data that the
+  examples use in a Python file beside the program, not in a fixture folder.
+- Use the coverage report to find the lines without an example, and add the example.
+- `tests/test_repo.py` runs each program of `factory/` with `--selftest` under coverage. The
+  coverage must be at or above the minimum in `pyproject.toml`. Ruff examines each new file.
+- The CI sends the coverage of each branch and each pull request to Codecov. The rules for a
+  change are in `codecov.yml`: the lines that a pull request adds need a coverage of 90 percent.
+- The tests must not use the network. For a skill that has test files, put the input data in
+  `tests/<name>/fixture/`.
 - If you change the scoring of `library-vetting`, update the expected values in the test and
   increase the rubric version in `score.py`.
 - Do not change the identifier of a criterion in `rubric.txt`. Earlier reports refer to it.
@@ -179,3 +199,6 @@ The owner sets these one time. The files in the repository cannot set them.
 - Release immutability: on. The files and the tag of a published release cannot be changed.
   Thus a release with a defect gets a new version, not a correction.
 - Actions: the default permission of the workflow token is "read".
+- Codecov: the CI sends the reports with OIDC, thus no token is stored as a secret. The
+  Codecov app must be installed for this repository: it writes the checks and the comment of
+  Codecov into a pull request.
