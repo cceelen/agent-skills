@@ -24,7 +24,7 @@ it shows a direction only and is not a baseline.
 | M-13 | What did the run cost? | sessions, reader agents, minutes; from the transcripts | lower |
 | M-14 | Does the created skill work alone? | `render.py` check, and a run in a clean environment through `factory/experiment-rigor` | yes |
 
-M-08 and M-09 need the answer key of the owner. It does not exist yet.
+M-08 and M-09 use the answer key in the registration of each trial. The key of `trials/I-2` is a draft from the words of the owner; the owner did not review it.
 
 ## Iterations
 
@@ -32,7 +32,7 @@ M-08 and M-09 need the answer key of the owner. It does not exist yet.
 |---|---|---|---|---|---|
 | I-0 | 2026-10-10 | `feat/research-tooling` 96033b3 | the first tooling with the rules for evidence | none; the first trial | trial 1, not registered |
 | I-1 | 2026-10-10 | `002-research-tooling-tasks` e6ffafd | views and their check; PDF converter; file reader with a hook; start from the bodies of knowledge; search rules | one view only; standards not read | trial 2, not registered |
-| I-2 | 2026-10-11 | `002-research-tooling-tasks` ce9320f | plan step in a rendered skill; trial rendering, plan review and trial record; targets; intent of the owner; stakeholders; template without content examples; neutral kit; seeds and reinitialisation; the skill must work alone; `factory/experiment-rigor` | full implementation in place of a plan; biased input; no intent; no stakeholders; no measured target | none yet |
+| I-2 | 2026-10-11 | `002-research-tooling-tasks` ce9320f | plan step in a rendered skill; trial rendering, plan review and trial record; targets; intent of the owner; stakeholders; template without content examples; neutral kit; seeds and reinitialisation; the skill must work alone; `factory/experiment-rigor` | full implementation in place of a plan; biased input; no intent; no stakeholders; no measured target | `trials/I-2`, registered, one run, verdict refuted |
 
 Between I-0 and I-1 several things changed together, and each condition has one run. Thus no
 value below shows the effect of one change.
@@ -41,20 +41,20 @@ value below shows the effect of one change.
 
 | Metric | I-0, trial 1 (not registered) | I-1, trial 2 (not registered) | I-2 |
 |---|---|---|---|
-| M-01 sources read in full | 3 of 23 | 11 of 20 | not run |
-| M-02 sources not read | 5 of 23 | 0 of 20, and 3 not reached | not run |
-| M-03 answers with a source | 37 of 156 | 14 of 180 | not run |
-| M-04 each view has a level 1 item | no views | yes, 6 of 6 views | not run |
-| M-05 stakeholders | 0 | 0 | not run |
-| M-06 items on level 3 | 0 of 26 | 0 of 30 | not run |
-| M-07 searches by known title or one concern only | 8 of 8 (not judged blind) | 10 of 10 (not judged blind) | not run |
-| M-08 basics of the owner on level 1 | not measured: no key | not measured: no key | not run |
-| M-09 stakeholders and viewpoints of the owner found | not measured: no key | not measured: no key | not run |
-| M-10 target levels of the plan | Build 2, Source 1, Dependency 1 (the workflows did not run); reference project: 2, 1, 3 | no plan | not run |
-| M-11 maintained components in the plan | 5 maintained, 4 own construction (not judged blind) | no plan | not run |
-| M-12 rows corrected by the second reading | "most rows"; not counted | not counted | not run |
-| M-13 cost | 3 sessions, 56 reader agents, 28 minutes of research | 2 sessions, 51 reader agents | not run |
-| M-14 the skill works alone | not examined | not examined | not run |
+| M-01 sources read in full | 3 of 23 | 11 of 20 | 4 of 14 |
+| M-02 sources not read | 5 of 23 | 0 of 20, and 3 not reached | 1 of 14; one guide read in part by one reader |
+| M-03 answers with a source | 37 of 156 | 14 of 180 | 25 of 180 |
+| M-04 each view has a level 1 item | no views | yes, 6 of 6 views | yes, 4 of 4 views |
+| M-05 stakeholders | 0 | 0 | 10, each in a view |
+| M-06 items on level 3 | 0 of 26 | 0 of 30 | 1 of 30 |
+| M-07 searches by known title or one concern only | 8 of 8 (not judged blind) | 10 of 10 (not judged blind) | not judged |
+| M-08 basics of the owner on level 1 | not measured: no key | not measured: no key | 2 of 4 (blind judge) |
+| M-09 stakeholders and viewpoints of the owner found | not measured: no key | not measured: no key | 4 of 5 (blind judge); architecture not found |
+| M-10 target levels of the plan | Build 2, Source 1, Dependency 1 (the workflows did not run); reference project: 2, 1, 3 | no plan | no plan yet |
+| M-11 maintained components in the plan | 5 maintained, 4 own construction (not judged blind) | no plan | no plan yet |
+| M-12 rows corrected by the second reading | "most rows"; not counted | not counted | 9 of 13 |
+| M-13 cost | 3 sessions, 56 reader agents, 28 minutes of research | 2 sessions, 51 reader agents | 2 sessions, 20 reader agents |
+| M-14 the skill works alone | not examined | not examined | not examined |
 
 ## What the values show
 
