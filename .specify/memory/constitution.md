@@ -103,6 +103,22 @@ English: questions, plans, reports, and the files that it writes for that person
 of the evidence record are in the same language. One word has
 one meaning, an instruction is a command, and the condition comes before the instruction.
 
+### XII. Evidence before action
+
+A value in the context of an agent is a claim. This applies to a value in an instruction, in a
+summary and in a memory. It applies also to a file content that the agent product shows again
+after a compaction. An agent of the factory and a skill of the kit read the source in the turn
+in which they use a value from it. A setting is written from the documentation that was read in
+that turn, not from memory.
+
+A record points. A handoff, a summary and a memory name the file and the key where a fact is,
+not the value. A report says that a source was read only when the read was made, and a reviewer
+can compare the report with the tool calls.
+
+Each skill of the kit holds the rules of the kit for this principle. A rule about the behaviour
+of an agent enters the kit with its measured effect, as the number of runs and the result, or
+with the statement that it was not tested.
+
 ## How the factory works
 
 1. **What to build.** The owner and the agent settle, in dialogue, the field and the thing to
@@ -112,6 +128,9 @@ one meaning, an instruction is a command, and the condition comes before the ins
 4. **Spec Kit and implementation.** Layer one is the specification of the aspect, the source of
    its recipe. Layer two is one specification per set of implementation skills, with the helper
    software, built through the product flow of Spec Kit. The layers iterate.
+
+Each step starts in a new session. The session gets the paths of its inputs and reads them. It
+does not get a summary of their content.
 
 The main branch holds the machinery and the delivered skills only. Each specification, with its
 evidence and its research records, stays on its own branch.
@@ -132,4 +151,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.2.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-09
+**Version**: 3.3.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
