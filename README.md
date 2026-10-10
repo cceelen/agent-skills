@@ -55,6 +55,21 @@ and then your request.
 If your agent cannot load skills, tell it to read `skills/<skill name>/SKILL.md` and to obey
 it.
 
+### The rules of the kit
+
+An agent can use a value from its context that is not correct now. The kit gives the agent
+five rules against this error. The rules are in `rules/evidence-before-action.md`.
+
+- Each skill holds the rules. They apply when the agent uses the skill.
+- The plugin puts the rules into the context at the start of a session and after a compaction.
+- `./install.sh` adds the rules to the instruction file of the user: `~/.claude/CLAUDE.md` for
+  Claude Code, `~/.codex/AGENTS.md` for Codex. The rules are between two marker lines.
+- If you use `--dir`, the program changes no instruction file. To name one, add
+  `--rules /path/to/project/AGENTS.md`.
+- To see the change first, use the command `python3 rules/apply.py FILE`.
+- To prevent the change, add `--no-rules`.
+- To remove the rules, use the command `python3 rules/apply.py --remove FILE`.
+
 ## Use
 
 Tell the agent what you want in your own words. Each page in `docs/` gives examples.
@@ -69,6 +84,8 @@ Tell the agent what you want in your own words. Each page in `docs/` gives examp
 | `skills/<name>/agent-templates/` | The templates for the agent files. |
 | `docs/<name>.md` | The documentation for the user. |
 | `tests/<name>/` | The tests for the skill. The tests do not use the network. |
+| `rules/` | The rules that the kit gives to the agent, and the program that installs them. |
+| `hooks/` | The hook of the plugin that puts the rules into a session. |
 | `AGENTS.md` | The rules for agents and persons who change this repository. |
 
 There is no build step. The files in `skills/` are the source and the product.

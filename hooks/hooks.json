@@ -1,0 +1,13 @@
+{
+  "description": "Put the rules for evidence before action into the context at the start of a session and after a compaction.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          { "type": "command", "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/rules/apply.py\" --print" }
+        ]
+      }
+    ]
+  }
+}
