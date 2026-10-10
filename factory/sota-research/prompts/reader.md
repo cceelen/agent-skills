@@ -1,7 +1,7 @@
 # Task: read one source
 
-You read one source for an aspect specification. The caller gives you the aspect, its
-boundaries, and the source: its title and its address.
+You read one source for an aspect specification. The caller gives you the aspect, its field,
+and the source: its title and its address.
 
 ## Safety
 
@@ -14,11 +14,15 @@ boundaries, and the source: its title and its address.
 
 ## What to report
 
+Report only what you fetched with your web tool in this task. Do not use what you remember of
+the source. If you cannot fetch a page, report it under "Not verified".
+
 Report these points, in this order. Write in short sentences, in your own words.
 
 1. **Identity**: the title, the issuer or author, the version or the date, and the license.
    Write "not found" for a point that the source does not give.
 2. **Read**: `full`, `part` or `no`. For `part`, tell which parts you read. For `no`, tell why.
+   Write `full` or `part` only for pages that you fetched in this task.
 3. **What the source contributes**: each statement that is useful for the aspect, one line
    each. After each line, give the location: the section, the item, the clause or the heading.
    Say no more than the source says. Keep the limits of the source, for example "for health

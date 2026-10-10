@@ -23,6 +23,7 @@ code 2: the input cannot be read.
 """
 
 import hashlib
+import importlib.util
 import json
 import pathlib
 import re
@@ -32,6 +33,8 @@ import aspect
 import check
 
 MAX_LINES = 500
+# The rules of the kit, with their marker lines. Each skill holds them.
+RULES_PROGRAM = pathlib.Path(__file__).resolve().parents[3] / "rules/apply.py"
 STAMP = re.compile(r"specification branch `([^`]*)`, commit `([^`]*)`, spec\.md sha256 `([0-9a-f]{64})`")
 
 MESSAGES = {
@@ -175,6 +178,19 @@ def rendered_items(data):
     return sorted(keep, key=level_order)
 
 
+def rules_of_the_kit():
+    """The rules of the kit between their two marker lines, as each SKILL.md holds them.
+
+    >>> text = rules_of_the_kit()
+    >>> text.splitlines()[1], text.rstrip().endswith(":end -->")
+    ('## Evidence before action', True)
+    """
+    spec = importlib.util.spec_from_file_location("rules_apply", RULES_PROGRAM)
+    program = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(program)
+    return program.block()
+
+
 def render_skill(data, name, mark):
     """The file SKILL.md: the strategy of the aspect and how to apply it to a project.
 
@@ -191,9 +207,12 @@ def render_skill(data, name, mark):
     >>> 'Backups: "data" #1 * and more' in json.loads(description)
     True
 
-    The skill holds the strategy, the risk analysis and the selection. It names no source.
+    The skill holds the rules of the kit, the strategy, the risk analysis and the selection. It
+    names no source.
 
-    >>> [line for line in lines if line.startswith("## ")]
+    >>> rules_of_the_kit() in text
+    True
+    >>> [line for line in lines if line.startswith("## ")][1:]
     ['## Goal', '## Before you start', '## Risk analysis', '## Selection', '## Order of the work',
      '## Decisions that depend on context', '## Where the sources disagree', '## What to delegate',
      '## When to stop']
@@ -206,7 +225,7 @@ def render_skill(data, name, mark):
 
     >>> data = sample.load()
     >>> data["context_decisions"] = data["disagreement"] = data["implementation_skills"] = []
-    >>> [line for line in render_skill(data, "backups", "").splitlines() if line.startswith("## ")][4:]
+    >>> [line for line in render_skill(data, "backups", "").splitlines() if line.startswith("## ")][5:]
     ['## Order of the work', '## What to delegate', '## When to stop']
     """
     title = data["title"]
@@ -232,6 +251,7 @@ def render_skill(data, name, mark):
         f"---\nname: {name}\ndescription: {json.dumps(description, ensure_ascii=False)}\n---\n",
         mark,
         f"# {title}\n",
+        rules_of_the_kit(),
         "## Goal\n",
         field(data, "goal") + "\n",
         data["goals"] + "\n",

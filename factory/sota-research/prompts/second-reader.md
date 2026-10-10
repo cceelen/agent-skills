@@ -10,8 +10,9 @@ source with its address, a summary of what the source contributes, and the locat
 
 ## What to do
 
-For each row, read the location in the source. Then compare each sentence of the summary with
-the source.
+For each row, fetch the location in the source with your web tool in this task. Then compare
+each sentence of the summary with the text that you fetched. Do not compare with what you
+remember of the source.
 
 - A sentence is **correct** when the source says it at that location.
 - A sentence is **overstated** when it says more than the source. Examples: the summary drops

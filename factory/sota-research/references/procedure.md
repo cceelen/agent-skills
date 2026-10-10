@@ -18,6 +18,14 @@ Rules for all phases:
 - Do not store what was read. Keep only `spec.md`, `evidence.md` and `vetting.md`.
 - Do not write a level, a score or a confirmation by hand. Programs compute the levels and
   the scores, and only the owner confirms.
+- Start each phase in a new session. Give the session the folder of the specification, not a
+  summary of its files. Read `spec.md`, `evidence.md` and `vetting.md` before you write.
+- If the session had a compaction, read those files again before you write.
+- Do not write a statement about a source from your memory. Use only the reports of the
+  readers of this run.
+- In the task for a reader, give the address of the source. Do not write what the source says.
+- Before each stop for the owner, compare each "read" and each "verified" in your report with
+  the tool calls of the session. Remove each statement that has no tool call.
 
 ## Before the first run
 
@@ -75,7 +83,9 @@ and its date in section 7.
    one product only.
 2. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
    `prompts/reader.md`. Start the readers in parallel. A reader returns text; you write the
-   files.
+   files. If your agent product shows the tool calls of a reader, compare them with the point
+   "Read" of its report. If the report says `full` or `part` and the reader fetched no page,
+   do not use the report. Start the reader again.
 3. **Record the sources** in section 2, each with its class. The classes of the fast lane are
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
    `independent`. Mark a paid source that was read from its preview as `part`.

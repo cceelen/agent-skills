@@ -22,8 +22,8 @@ values of the scale.
 
 ## Rules
 
-- Write each answer as a number, then its source in parentheses: `3 (S-02 section 4)`. Use
-  the evidence record to find the source.
+- Write each answer as a number, then its source in parentheses: `3 (S-02 section 4)`. Read
+  `evidence.md` in this turn to find the source. Do not use a summary of it or your memory.
 - If no source gives the answer, write `(judgement)` after the number. Do not invent a source.
 - Answer for a typical project. Do not answer for one project that you know.
 - If the return of an item depends on the risk of a project, write the name of the risk
