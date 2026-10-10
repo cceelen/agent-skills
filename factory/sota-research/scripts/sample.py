@@ -1,6 +1,7 @@
 """Sample data for the examples of the research tooling. Standard library only.
 
-A small and correct aspect specification with its evidence record, its vetting record, its
+A small and correct aspect specification with its evidence record, its vetting record with the
+register of the requirements, its
 record of the trials and the signal files of its two independent sources. The examples (doctests) of the programs in this
 folder use it: each program validates itself with the option --selftest, and needs no test
 file. The sources of the sample are invented.
@@ -51,12 +52,12 @@ A small specification for the tests of the tooling. Its sources are invented.
 
 ## 2. Sources
 
-| Id | Source | Issuer | Version or date | Class | License | Read | URL |
-|---|---|---|---|---|---|---|---|
-| S-01 | Guide to backups | Example Standards Body | 2.0, 2025-03 | standard | public | full | https://standards.example/backups |
-| S-02 | A study of restore failures | Example Journal | 2024 | research | CC BY 4.0 | full | https://journal.example/restore |
-| S-03 | Notes on restore drills | A. Writer | 2025-06-01 | independent | all rights reserved | full | https://writer.example/drills |
-| S-04 | backup-examples | example-org | commit of 2025-11-02 | independent | MIT | part | https://forge.example/example-org/backup-examples |
+| Id | Source | Issuer | Version or date | Class | License | Read | Views | URL |
+|---|---|---|---|---|---|---|---|---|
+| S-01 | Guide to backups | Example Standards Body | 2.0, 2025-03 | standard | public | full | storage, operation | https://standards.example/backups |
+| S-02 | A study of restore failures | Example Journal | 2024 | research | CC BY 4.0 | full | storage, operation | https://journal.example/restore |
+| S-03 | Notes on restore drills | A. Writer | 2025-06-01 | independent | all rights reserved | full | operation | https://writer.example/drills |
+| S-04 | backup-examples | example-org | commit of 2025-11-02 | independent | MIT | part | operation | https://forge.example/example-org/backup-examples |
 
 ## 3. Strategy
 
@@ -162,6 +163,19 @@ Rubric for sources: version 1. Rubric for items: version 1.
 | C-03 | 3 (S-01 section 5) | 2 (judgement) | 2 (judgement) | 3 (judgement) | 3 (judgement) | 0 (judgement) | regulatory | 12 | 6 | 20 | yes | 3, regulatory |
 | C-04 | 1 (judgement) | 1 (judgement) | 2 (judgement) | 3 (judgement) | 2 (judgement) | 1 (judgement) |  | 2 | 5 | -1 | no | not admitted |
 | C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) | 1 (judgement) | 2 (judgement) | 0 (judgement) |  | 18 | 3 | 60 | yes | 1 |
+
+## Requirements
+
+| Id | Requirement | Stakeholder | View | Source | Goes to |
+|---|---|---|---|---|---|
+| R-01 | Make a backup of the data that cannot be made again. | owners of the data | storage | S-01 section 2 | C-01 |
+| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |
+| R-03 | Do a restore from the backup as a test. | operators | operation | S-02 section 4 | C-02 |
+| R-04 | Write a review after each restore drill. | operators | operation | S-03 "After the drill" | C-04 |
+| R-05 | Make the backup with a program. | operators | operation | S-01 section 3 | C-05 |
+| R-06 | Start the backup program by a schedule. | operators | operation | S-04 README | duplicate: R-05 |
+| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | 3.3: How frequently to make a backup |
+| R-08 | Keep the schedule in the settings file of the backup tool. | operators | operation | S-04 README | 5 |
 """
 
 TRIAL = """\
@@ -242,7 +256,7 @@ BARE_PAGE = """\
 """
 
 # Texts of the sample that the examples of the programs replace to plant a defect.
-SOURCE_ROW = "| S-01 | A copy | Example | 2020 | standard | public | full | u |\n| S-02 | A study"
+SOURCE_ROW = "| S-01 | A copy | Example | 2020 | standard | public | full | all | u |\n| S-02 | A study"
 CONFIRMED_S03 = "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 CONFIRMED_S04 = "| 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 APPLIES = "- **Applies**: the order of the work below; it judges C-04."
@@ -264,6 +278,9 @@ STAKEHOLDER_OWNERS = (
     "  - `owners of the data`: they must know where each copy of their data is. (S-01 section 2)"
 )
 TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)"
+REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |"
+REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a backup |"
+BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 
 _KEEP = []

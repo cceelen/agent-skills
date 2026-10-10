@@ -64,11 +64,13 @@ items that cite it. **Class** decides the route of admission. The fast lane: `st
 on its own platform), `research` (peer-reviewed research and recognized books), `trusted-data`
 (a recorded data source marked as trusted). Every other source is `independent` and passes the
 source vetting first. **Read**: full, part or no. A paid source is cited from its official
-preview and marked part.
+preview and marked part. **Views**: the views of section 1 that the source was read for, with a
+comma between two names, or `all` for a body of knowledge. Each view has two or more sources
+of its own field that were read.
 
-| Id | Source | Issuer | Version or date | Class | License | Read | URL |
-|---|---|---|---|---|---|---|---|
-| S-01 | | | | | | | |
+| Id | Source | Issuer | Version or date | Class | License | Read | Views | URL |
+|---|---|---|---|---|---|---|---|---|
+| S-01 | | | | | | | | |
 
 ## 3. Strategy
 
@@ -186,6 +188,11 @@ Terms that mean different things in the sources. One preferred form per meaning.
   line with the source. A quote stays only where the wording itself is the point.
 - `vetting.md`: for each independent source the measured signals, the result of the rubric and
   the owner's confirmation; for each item the answers of the risk and reward calculation.
+  - The table "Requirements" has one row for each requirement that a source states for a
+    stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
+  - The cell "Goes to" has one of these forms: `C-<nn>`, `3.3: <decision>`, `5`,
+    `boundary: <name>` or `duplicate: R-<nn>`. A requirement has no other exit.
+  - Each checklist item holds a requirement, or its cell "Admitted by" is `own rule`.
 - `trial.md`: the record of the trials of the recipe on a project. This file is optional.
   - The table "Trials" has one row for each trial. Its columns are Id, Date, Project, Commit
     of the specification, and Plan. The cell "Plan" holds where the plan is, or `not kept`.

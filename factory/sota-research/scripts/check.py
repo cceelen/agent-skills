@@ -33,6 +33,24 @@ an item, and an item on level 1 when no level is pending. The report gives the i
 Section 1 names the stakeholders of the aspect, each with its concerns and its source. Each view
 names its stakeholders in the form "(stakeholders: a, b)". A stakeholder that is in no view remains.
 
+The table "Requirements" of vetting.md is the register of the requirements: one row for each
+requirement that a source states for a stakeholder. The cell "Goes to" of a row has one of these
+forms, and no other:
+
+  C-<nn>              the checklist item that holds the requirement
+  3.3: <decision>     a decision that depends on context; the cell Decision of its row in section 3.3
+  5                   knowledge of one product, for an implementation skill
+  boundary: <name>    a neighbouring aspect owns the requirement; a boundary of section 1
+  duplicate: R-<nn>   the same requirement from a second source; a row that is not a duplicate
+
+Each item that is not retired holds a requirement, or its cell "Admitted by" is "own rule". Each
+stakeholder of section 1 has a requirement. The report gives the requirements of each view by
+their exit. A view with more than half of its requirements at a boundary remains.
+
+The cell "Views" of a source in section 2 names the views that the source was read for, or "all"
+for a body of knowledge. A specification of an earlier revision has no such cell: this fails
+nothing. A view with fewer than two sources that were read for it remains.
+
 The file trial.md records each trial of the recipe on a project, and each finding of the review of
 the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
 The names of the viewpoints are in the file references/viewpoints.txt, one in each line. A kit
@@ -50,6 +68,19 @@ import aspect
 CLASSES = ("standard", "foundation", "vendor", "research", "trusted-data", "independent")
 READ = ("full", "part", "no")
 SOURCE_CELLS = ("id", "source", "issuer", "version or date", "class", "license", "read", "url")
+# The cell Views of a source: the views that the source was read for, or "all".
+ALL_VIEWS = "all"
+OWN_SOURCES = 2
+REQUIREMENT_CELLS = ("id", "requirement", "stakeholder", "view", "source", "goes to")
+# The exits of a requirement, with the words of the report.
+EXIT_WORDS = {
+    "item": "to an item",
+    "decision": "to a decision",
+    "skill": "to an implementation skill",
+    "boundary": "to a boundary",
+    "duplicate": "duplicates",
+}
+OWN_RULE = "own rule"
 SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
 FINDING_FIELDS = ("contexts", "boundaries")
 NO_ANSWER = "(no answer)"
@@ -112,6 +143,33 @@ MESSAGES = {
     "only-unread-source": "The item rests only on sources that were not read.",
     "only-rejected-source": "Each source of the item was rejected or was not read.",
     "sources-empty": "Section 2 lists no source.",
+    "requirements-missing": "The table Requirements of vetting.md is absent or empty.",
+    "requirement-cell-empty": "The cell '{0}' of the requirement is empty.",
+    "requirement-id-twice": "The identifier of the requirement is used two times.",
+    "requirement-exit-unknown": (
+        "The cell 'Goes to' is '{0}'. "
+        "Use 'C-<nn>', '3.3: <decision>', '5', 'boundary: <name>' or 'duplicate: R-<nn>'."
+    ),
+    "requirement-item-unknown": "The requirement goes to '{0}'. The checklist does not have this item.",
+    "requirement-item-retired": "The requirement goes to '{0}'. This item is retired.",
+    "requirement-decision-unknown": (
+        "The requirement goes to the decision '{0}'. Section 3.3 does not have this decision."
+    ),
+    "requirement-boundary-unknown": (
+        "The requirement goes to the boundary '{0}'. Section 1 does not have this boundary."
+    ),
+    "requirement-duplicate-unknown": (
+        "The requirement is a duplicate of '{0}'. The table Requirements does not have this row."
+    ),
+    "requirement-duplicate-of-duplicate": (
+        "The requirement is a duplicate of '{0}'. That row is a duplicate also."
+    ),
+    "requirement-stakeholder-unknown": (
+        "The requirement names the stakeholder '{0}'. Section 1 does not have this stakeholder."
+    ),
+    "requirement-without-source": "The requirement names no source of section 2.",
+    "item-without-requirement": "No requirement of the table Requirements goes to the item.",
+    "stakeholder-without-requirement": "The stakeholder '{0}' has no requirement in the table Requirements.",
     "checklist-empty": "The checklist of section 4 has no item.",
     "product-word": "The item uses the product word '{0}'.",
     "id-removed": "The earlier revision has this item. Keep the row and set its level to 'retired'.",
@@ -131,7 +189,12 @@ MESSAGES = {
     "views-head": "Views, with the number of items on each level, of sources and of stakeholders:",
     "view-line": (
         "{0}: level 1: {1}, level 2: {2}, level 3: {3}, pending: {4}, not admitted: {5}, sources: {6}, "
-        "stakeholders: {7}."
+        "stakeholders: {7}, sources read for the view: {8}."
+    ),
+    "requirements-head": "Requirements of the sources, with the number for each view and where they go:",
+    "requirement-line": (
+        "{0}: requirements: {1}, to an item: {2}, to a decision: {3}, to an implementation skill: {4}, "
+        "to a boundary: {5}, duplicates: {6}."
     ),
     "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
     "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
@@ -146,6 +209,8 @@ MESSAGES = {
     "remains-trial": "Trial findings that are open: {0}.",
     "remains-viewpoints": "Trial findings with a viewpoint that was not checked: {0}. The list is absent.",
     "remains-stakeholders": "Stakeholders that are in no view: {0}.",
+    "remains-boundaries": "More than half of the requirements of the view '{0}' go to a boundary.",
+    "remains-own-sources": "Views with fewer than two sources of their own field that were read: {0}.",
     "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
     "accepted": "Accepted: {0}.",
@@ -459,8 +524,29 @@ def check_sources(data):
     >>> data["sources"] = []
     >>> brief(check_sources(data))
     [('sources-empty', '')]
+
+    The cell Views names the views that the source was read for, or "all". A view that section 1
+    does not have fails. An empty cell fails.
+
+    >>> for cell in ("all", "operation; storage", "operation, quality", ""):
+    ...     edit = ("spec.md", "| MIT | part | operation |", f"| MIT | part | {cell} |")
+    ...     print(repr(cell), [(f["rule"], f["id"], f["text"]) for f in check_sources(sample.load(edit))])
+    'all' []
+    'operation; storage' []
+    'operation, quality' [('view-unknown', 'S-04', "The view 'quality' is not in section 1.")]
+    '' [('source-cell-empty', 'S-04', "The cell 'views' of the source is empty.")]
+
+    A specification of an earlier revision has no cell Views. This fails nothing.
+
+    >>> old = sample.load()
+    >>> for row in old["sources"]:
+    ...     del row["views"]
+    ...     row["_header"] = [name for name in row["_header"] if name != "views"]
+    >>> check_sources(old)
+    []
     """
     out, seen = [], set()
+    views = {v["name"] for v in data["views"]}
     if not data["sources"]:
         out.append(finding("sources-empty", {}))
     for row in data["sources"]:
@@ -473,6 +559,11 @@ def check_sources(data):
             out.append(finding("class-unknown", row, ident, row["class"]))
         if row.get("read") and row["read"] not in READ:
             out.append(finding("read-unknown", row, ident, row["read"]))
+        if "views" in row.get("_header", ()) and not row.get("views", ""):
+            out.append(finding("source-cell-empty", row, ident, "views"))
+        for name in aspect.names_of(row.get("views")):
+            if views and name != ALL_VIEWS and name not in views:
+                out.append(finding("view-unknown", row, ident, name))
         if ident in seen:
             out.append(finding("source-id-twice", row, ident))
         seen.add(ident)
@@ -743,16 +834,17 @@ def stakeholders_without_view(data):
 def view_counts(data):
     """For each view of section 1, by name: its items on each level, its sources, its stakeholders.
 
-    A retired item does not count. A source counts one time for a view.
+    A retired item does not count. A source counts one time for a view. The last number is the
+    number of the sources of the own field of the view: see own_sources.
 
     >>> import sample
     >>> for view in view_counts(sample.load()):
     ...     print(*view.values())
-    operation 3 1 1 0 0 1 4 1
-    storage 2 1 0 1 0 0 2 1
+    operation 3 1 1 0 0 1 4 1 4
+    storage 2 1 0 1 0 0 2 1 2
     >>> list(view)
     ['view', 'items', 'level 1', 'level 2', 'level 3', 'pending', 'not admitted', 'sources',
-     'stakeholders']
+     'stakeholders', 'sources read for the view']
     """
     out = []
     for view in sorted(data["views"], key=lambda v: (v["name"], v["_line"])):
@@ -762,8 +854,278 @@ def view_counts(data):
         counts |= {state: levels.count(state) for state in ("pending", "not admitted")}
         cited = {s for r in rows for s in aspect.source_ids(r.get("source", ""))}
         counts |= {"sources": len(cited), "stakeholders": len(set(view["stakeholders"]))}
+        counts["sources read for the view"] = len(own_sources(data, view["name"]))
         out.append({"view": view["name"], "items": len(rows), **counts})
     return out
+
+
+def own_sources(data, view):
+    """The sources of the own field of a view: read for the view, in full or in part. Sorted.
+
+    A source with "all" in the cell Views is a body of knowledge. It is not such a source.
+
+    >>> import sample
+    >>> own_sources(sample.load(), "storage"), own_sources(sample.load(), "operation")
+    (['S-01', 'S-02'], ['S-01', 'S-02', 'S-03', 'S-04'])
+    >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
+    >>> unread = ("spec.md", "| CC BY 4.0 | full |", "| CC BY 4.0 | no |")
+    >>> own_sources(sample.load(whole), "storage"), own_sources(sample.load(whole, unread), "storage")
+    (['S-02'], [])
+    >>> views_with_few_sources(sample.load()), views_with_few_sources(sample.load(whole))
+    ([], ['storage'])
+    """
+    out = set()
+    for row in data["sources"]:
+        names = aspect.names_of(row.get("views"))
+        if row.get("read") in ("full", "part") and view in names and ALL_VIEWS not in names:
+            out.add(row.get("id", ""))
+    return sorted(out)
+
+
+def views_with_few_sources(data):
+    """The views with fewer than two sources of their own field that were read, sorted.
+
+    >>> views = [{"name": "b"}, {"name": "a"}]
+    >>> first = {"id": "S-01", "read": "full", "views": "a"}
+    >>> second = {"id": "S-02", "read": "part", "views": "a; b"}
+    >>> views_with_few_sources({"views": views, "sources": [first, second]})
+    ['b']
+    """
+    return sorted({v["name"] for v in data["views"] if len(own_sources(data, v["name"])) < OWN_SOURCES})
+
+
+def boundary_names(data):
+    r"""The names of the boundaries of section 1.
+
+    >>> import sample
+    >>> boundary_names(sample.load())
+    set()
+    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
+    >>> boundary_names(sample.load(("spec.md", sample.BOUNDARIES, named))), boundary_names({"aspect": {}})
+    ({'recovery'}, set())
+    """
+    return {item["name"] for item in data["aspect"].get("boundaries", {}).get("items", [])}
+
+
+def exit_fault(data, kind, name):
+    """The rule that the exit of a requirement fails, or None. See check_requirements.
+
+    >>> import sample
+    >>> exit_fault(sample.load(), None, "a text"), exit_fault(sample.load(), "skill", "5")
+    ('requirement-exit-unknown', None)
+    """
+    if kind is None:
+        return "requirement-exit-unknown"
+    if kind == "item":
+        levels = {r.get("id"): aspect.level_of(r.get("level"))[0] for r in data["checklist"]}
+        if name not in levels:
+            return "requirement-item-unknown"
+        return "requirement-item-retired" if levels[name] == "retired" else None
+    if kind == "decision":
+        known = {r.get("decision", "").strip().lower() for r in data["context_decisions"]}
+        return None if name.lower() in known else "requirement-decision-unknown"
+    if kind == "boundary":
+        return None if name in boundary_names(data) else "requirement-boundary-unknown"
+    if kind == "duplicate":
+        exits = {r.get("id"): aspect.exit_of(r.get("goes to"))[0] for r in data["requirements"]}
+        if name not in exits:
+            return "requirement-duplicate-unknown"
+        return "requirement-duplicate-of-duplicate" if exits[name] == "duplicate" else None
+    return None
+
+
+def check_requirements(data):
+    r"""The register of the requirements: the table "Requirements" of vetting.md.
+
+    Each requirement that a source states for a stakeholder has one row. Each cell is filled. The
+    stakeholder and the view are in section 1, and the source is in section 2.
+
+    >>> import sample
+    >>> check_requirements(sample.load())
+    []
+    >>> def planted(old, new, *more):
+    ...     found = check_requirements(sample.load(("vetting.md", old, new), *more))
+    ...     return [(f["rule"], f["id"], f["text"]) for f in found]
+    >>> planted("| Do a restore from the backup as a test. |", "| |")
+    [('requirement-cell-empty', 'R-03', "The cell 'requirement' of the requirement is empty.")]
+    >>> planted("| R-02 | Keep a copy", "| R-01 | Keep a copy")
+    [('requirement-id-twice', 'R-01', 'The identifier of the requirement is used two times.')]
+    >>> r03 = "| operators | operation | S-02 section 4 |"
+    >>> planted(r03, "| operators; users | operation | S-02 section 4 |")
+    [('requirement-stakeholder-unknown', 'R-03',
+      "The requirement names the stakeholder 'users'. Section 1 does not have this stakeholder.")]
+    >>> planted(r03, "| operators | quality | S-02 section 4 |")
+    [('view-unknown', 'R-03', "The view 'quality' is not in section 1.")]
+    >>> planted(r03, "| operators | operation | S-09 section 4 |")
+    [('unknown-source', 'R-03', "The row cites 'S-09'. Section 2 does not list this source.")]
+    >>> planted(r03, "| operators | operation | a talk |")
+    [('requirement-without-source', 'R-03', 'The requirement names no source of section 2.')]
+
+    The cell "Goes to" has one of five forms. A requirement has no other exit.
+
+    >>> exit = sample.REQUIREMENT_R07
+    >>> def goes(cell, *more):
+    ...     return planted(exit, exit.replace("3.3: How frequently to make a backup", cell), *more)
+    >>> for cell in ("one source only states it", "depends on context", "3.3", ""):
+    ...     print(goes(cell)[0][::2])
+    ('requirement-exit-unknown', "The cell 'Goes to' is 'one source only states it'. Use 'C-<nn>',
+    '3.3: <decision>', '5', 'boundary: <name>' or 'duplicate: R-<nn>'.")
+    ('requirement-exit-unknown', "The cell 'Goes to' is 'depends on context'. Use 'C-<nn>',
+    '3.3: <decision>', '5', 'boundary: <name>' or 'duplicate: R-<nn>'.")
+    ('requirement-exit-unknown', "The cell 'Goes to' is '3.3'. Use 'C-<nn>', '3.3: <decision>', '5',
+    'boundary: <name>' or 'duplicate: R-<nn>'.")
+    ('requirement-cell-empty', "The cell 'goes to' of the requirement is empty.")
+
+    An exit names a row that exists: an item that is not retired, a decision of section 3.3, a
+    boundary of section 1, or a requirement that is not a duplicate.
+
+    >>> goes("C-09")
+    [('requirement-item-unknown', 'R-07',
+      "The requirement goes to 'C-09'. The checklist does not have this item.")]
+    >>> goes("3.3: Where to keep the copies")
+    [('requirement-decision-unknown', 'R-07',
+      "The requirement goes to the decision 'Where to keep the copies'. Section 3.3 does not have this
+      decision.")]
+    >>> goes("3.3: how frequently to make a backup"), goes("5"), goes("C-02")
+    ([], [], [])
+    >>> goes("boundary: recovery")
+    [('requirement-boundary-unknown', 'R-07',
+      "The requirement goes to the boundary 'recovery'. Section 1 does not have this boundary.")]
+    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
+    >>> goes("boundary: recovery", ("spec.md", sample.BOUNDARIES, named))
+    []
+    >>> goes("duplicate: R-19")
+    [('requirement-duplicate-unknown', 'R-07',
+      "The requirement is a duplicate of 'R-19'. The table Requirements does not have this row.")]
+    >>> goes("duplicate: R-06")
+    [('requirement-duplicate-of-duplicate', 'R-07',
+      "The requirement is a duplicate of 'R-06'. That row is a duplicate also.")]
+    >>> goes("duplicate: R-07")[0][0], goes("duplicate: R-05")
+    ('requirement-duplicate-of-duplicate', [])
+
+    A requirement that goes to a retired item has no exit.
+
+    >>> retired = ("spec.md", "| storage | 3, regulatory |", "| | retired |")
+    >>> found = check_requirements(sample.load(retired))
+    >>> [(f["rule"], f["id"], f["text"]) for f in found]
+    [('requirement-item-retired', 'R-02', "The requirement goes to 'C-03'. This item is retired.")]
+
+    Each item that is not retired holds a requirement. An item of an own rule needs none.
+
+    >>> row = sample.REQUIREMENT_R02
+    >>> other = ("vetting.md", row, row.replace("| C-03 |", "| C-01 |"))
+    >>> found = check_requirements(sample.load(other))
+    >>> [(f["rule"], f["id"], f["file"], f["line"], f["text"]) for f in found]
+    [('item-without-requirement', 'C-03', 'spec.md', 69,
+      'No requirement of the table Requirements goes to the item.')]
+    >>> own = ("spec.md", "| 3, regulatory | authority (1) |", "| 3, regulatory | own rule (IX) |")
+    >>> check_requirements(sample.load(other, own)), check_requirements(sample.load(other, retired))
+    ([], [])
+
+    Each stakeholder of section 1 has a requirement.
+
+    >>> owners = sample.STAKEHOLDER_OWNERS
+    >>> more = ("spec.md", owners, owners + "\n  - `auditors`: they examine the record. (judgement)")
+    >>> found = check_requirements(sample.load(more))
+    >>> [(f["rule"], f["id"], f["line"], f["text"]) for f in found]
+    [('stakeholder-without-requirement', 'auditors', 30,
+      "The stakeholder 'auditors' has no requirement in the table Requirements.")]
+
+    A specification without the table, or with a table without a row, fails with one finding.
+
+    >>> data = sample.load()
+    >>> data["requirements"] = []
+    >>> [(f["rule"], f["file"], f["line"], f["text"]) for f in check_requirements(data)]
+    [('requirements-missing', 'vetting.md', 0, 'The table Requirements of vetting.md is absent or empty.')]
+    """
+    rows = data["requirements"]
+    if not rows:
+        return [finding("requirements-missing", {"_file": "vetting.md"})]
+    out, seen, held, served = [], set(), set(), set()
+    views = {v["name"] for v in data["views"]}
+    holders = {s["name"] for s in data["stakeholders"]}
+    known = {s.get("id") for s in data["sources"]}
+    for row in rows:
+        ident = row.get("id", "")
+        for cell in REQUIREMENT_CELLS:
+            if not row.get(cell, ""):
+                out.append(finding("requirement-cell-empty", row, ident, cell))
+        if ident in seen:
+            out.append(finding("requirement-id-twice", row, ident))
+        seen.add(ident)
+        names = aspect.names_of(row.get("stakeholder"))
+        served.update(names)
+        for name in names:
+            if name not in holders:
+                out.append(finding("requirement-stakeholder-unknown", row, ident, name))
+        view = aspect.view_of(row)
+        if view and view not in views:
+            out.append(finding("view-unknown", row, ident, view))
+        cited = aspect.source_ids(row.get("source", ""))
+        if row.get("source") and not cited:
+            out.append(finding("requirement-without-source", row, ident))
+        for sid in cited:
+            if sid not in known:
+                out.append(finding("unknown-source", row, ident, sid))
+        if not row.get("goes to", ""):
+            continue
+        kind, name = aspect.exit_of(row["goes to"])
+        if kind == "item":
+            held.add(name)
+        fault = exit_fault(data, kind, name)
+        if fault:
+            out.append(finding(fault, row, ident, name))
+    for row in live_items(data):
+        own = row.get("admitted by", "").strip().lower().startswith(OWN_RULE)
+        if row.get("id") not in held and not own:
+            out.append(finding("item-without-requirement", row, row.get("id", "")))
+    for holder in data["stakeholders"]:
+        if holder["name"] not in served:
+            out.append(finding("stakeholder-without-requirement", holder, holder["name"], holder["name"]))
+    return out
+
+
+def requirement_counts(data):
+    """For each view of section 1, by name: its requirements, and how many take each exit.
+
+    >>> import sample
+    >>> for view in requirement_counts(sample.load()):
+    ...     print(*view.values())
+    operation 6 3 1 1 0 1
+    storage 2 2 0 0 0 0
+    >>> list(view)
+    ['view', 'requirements', 'to an item', 'to a decision', 'to an implementation skill', 'to a boundary',
+     'duplicates']
+    """
+    out = []
+    for view in sorted(data["views"], key=lambda v: (v["name"], v["_line"])):
+        rows = [r for r in data["requirements"] if aspect.view_of(r) == view["name"]]
+        kinds = [aspect.exit_of(r.get("goes to"))[0] for r in rows]
+        exits = {words: kinds.count(kind) for kind, words in EXIT_WORDS.items()}
+        out.append({"view": view["name"], "requirements": len(rows), **exits})
+    return out
+
+
+def views_emptied_by_boundaries(data):
+    r"""The views with more than half of their requirements at a boundary, sorted.
+
+    The owner sees such a view: the boundaries took most of what the sources state for it.
+
+    >>> import sample
+    >>> views_emptied_by_boundaries(sample.load())
+    []
+    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
+    >>> named = ("spec.md", sample.BOUNDARIES, named)
+    >>> row = sample.REQUIREMENT_R02
+    >>> away = ("vetting.md", row, row.replace("| C-03 |", "| boundary: recovery |"))
+    >>> views_emptied_by_boundaries(sample.load(named, away))
+    []
+    >>> more = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
+    >>> views_emptied_by_boundaries(sample.load(named, away, more))
+    ['storage']
+    """
+    counts = requirement_counts(data)
+    return sorted({c["view"] for c in counts if 2 * c["to a boundary"] > c["requirements"]})
 
 
 def check_basics(data):
@@ -1141,7 +1503,20 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
-          'trial': [], 'viewpoints': [], 'stakeholders': []})
+          'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'own-sources': []})
+
+    A view that the boundaries emptied remains. A view with fewer than two sources of its own
+    field remains also.
+
+    >>> named = sample.BOUNDARIES + chr(10) + "  - `recovery`: a complete site. (judgement)"
+    >>> away = [
+    ...     ("vetting.md", f"| S-01 section {n} | C-0{c} |", f"| S-01 section {n} | boundary: recovery |")
+    ...     for n, c in ((2, 1), (5, 3))
+    ... ]
+    >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
+    >>> found, remains = run_checks(sample.load(("spec.md", sample.BOUNDARIES, named), whole, *away))
+    >>> brief(found), remains["boundaries"], remains["own-sources"]
+    ([('item-without-requirement', 'C-01'), ('item-without-requirement', 'C-03')], ['storage'], ['storage'])
 
     What remains does not fail the check: a pending level, a pending vetting, a changed text.
 
@@ -1193,6 +1568,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         + check_items(data)
         + check_views(data)
         + check_stakeholders(data)
+        + check_requirements(data)
         + basics
         + check_evidence(data)
         + check_other_sections(data)
@@ -1220,6 +1596,8 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         "trial": open_findings(data),
         "viewpoints": unchecked_viewpoints(data, viewpoints_file),
         "stakeholders": stakeholders_without_view(data),
+        "boundaries": views_emptied_by_boundaries(data),
+        "own-sources": views_with_few_sources(data),
     }
     return found, remains
 
@@ -1253,15 +1631,22 @@ def read_words(path):
 
 
 def report(data, found, remains, previous_given):
-    r"""The text report: each failing rule with its place, the views, then what remains.
+    r"""The text report: the failing rules, the views, the requirements, then what remains.
 
     >>> import sample
     >>> data = sample.load()
     >>> print(report(data, *run_checks(data), previous_given=False))
     No check fails.
     Views, with the number of items on each level, of sources and of stakeholders:
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1.
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
+      sources read for the view: 4.
+    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
+      sources read for the view: 2.
+    Requirements of the sources, with the number for each view and where they go:
+    - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
+      to a boundary: 0, duplicates: 1.
+    - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
+      to a boundary: 0, duplicates: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Items that need judgement: C-04.
@@ -1277,8 +1662,15 @@ def report(data, found, remains, previous_given):
     FAIL unknown-source spec.md:68 C-02: The row cites 'S-09'. Section 2 does not list this source.
     Failing checks: 1.
     Views, with the number of items on each level, of sources and of stakeholders:
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1.
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
+      sources read for the view: 4.
+    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
+      sources read for the view: 2.
+    Requirements of the sources, with the number for each view and where they go:
+    - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
+      to a boundary: 0, duplicates: 1.
+    - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
+      to a boundary: 0, duplicates: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - The owner did not accept the specification.
@@ -1287,7 +1679,7 @@ def report(data, found, remains, previous_given):
     A specification without answers of risk and reward has no line for them.
 
     >>> data = sample.load(("spec.md", "| judgement |", "| the review is in the record |"))
-    >>> data["views"] = data["stakeholders"] = data["vetting_items"] = []
+    >>> data["views"] = data["stakeholders"] = data["vetting_items"] = data["requirements"] = []
     >>> print(report(data, [], run_checks(data, data["checklist"])[1], previous_given=True))
     No check fails.
     Accepted: A. Person, 2026-01-15.
@@ -1298,16 +1690,46 @@ def report(data, found, remains, previous_given):
     >>> more = ("spec.md", owners, owners + "\n  - `auditors`: they examine the record. (judgement)")
     >>> none = [("spec.md", line, line.split(":")[0] + ": (no answer)") for line in sample.INTENT[:2]]
     >>> data = sample.load(more, *none)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:9]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[0:2]))
+    FAIL stakeholder-without-requirement spec.md:30 auditors: The stakeholder 'auditors' has no requirement
+    in the table Requirements.
+    Failing checks: 1.
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[9:13]))
     What remains:
     - The intent of the owner was not asked.
     - Items that need judgement: C-04.
     - Stakeholders that are in no view: auditors.
 
+    A view that the boundaries emptied remains, with one line for each view. A view with fewer
+    than two sources of its own field remains also.
+
+    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
+    >>> row = sample.REQUIREMENT_R02
+    >>> away = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
+    >>> second = ("vetting.md", "| S-02 section 4 | C-02 |", "| S-02 section 4 | C-01 |")
+    >>> third = ("vetting.md", row, row.replace("| C-03 |", "| boundary: recovery |"))
+    >>> fourth = ("vetting.md", "| S-01 section 3 | C-05 |", "| S-01 section 3 | C-03 |")
+    >>> fifth = ("vetting.md", "| duplicate: R-05 |", "| C-05 |")
+    >>> sixth = ("vetting.md", '| S-03 "After the drill" | C-04 |', '| S-03 "After the drill" | C-02 |')
+    >>> own = ("spec.md", "| not admitted | practice |", "| not admitted | own rule, constitution IX |")
+    >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
+    >>> edits = (("spec.md", sample.BOUNDARIES, named), away, second, third, fourth, fifth, sixth, own, whole)
+    >>> data = sample.load(*edits)
+    >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
+    >>> print("\n".join([lines[0], lines[6], *lines[8:]]))
+    No check fails.
+    - storage: requirements: 2, to an item: 0, to a decision: 0, to an implementation skill: 0,
+      to a boundary: 2, duplicates: 0.
+    What remains:
+    - Items that need judgement: C-04.
+    - More than half of the requirements of the view 'storage' go to a boundary.
+    - Views with fewer than two sources of their own field that were read: storage.
+    Accepted: A. Person, 2026-01-15.
+
     An open finding of a trial remains. A recipe without a trial remains also.
 
     >>> data = sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings that are open: F-01.
@@ -1315,7 +1737,7 @@ def report(data, found, remains, previous_given):
     >>> folder = sample.folder()
     >>> (folder / "trial.md").unlink()
     >>> data = aspect.load(folder)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[5:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
     What remains:
     - Items that need judgement: C-04.
     - The recipe has no trial.
@@ -1325,7 +1747,7 @@ def report(data, found, remains, previous_given):
 
     >>> data = sample.load()
     >>> found, remains = run_checks(data, viewpoints_file="absent.txt")
-    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[5:8]))
+    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[8:11]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings with a viewpoint that was not checked: F-01, F-02. The list is absent.
@@ -1334,9 +1756,12 @@ def report(data, found, remains, previous_given):
 
     >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| storage | pending | authority (2) |")
     >>> data = sample.load(c01)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[2:8]))
-    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1.
-    - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1.
+    >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
+    >>> print("\n".join(lines[2:4] + lines[7:11]))
+    - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
+      sources read for the view: 4.
+    - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1,
+      sources read for the view: 2.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Levels that are pending: C-01.
@@ -1347,12 +1772,21 @@ def report(data, found, remains, previous_given):
     ]
     lines.append(MESSAGES["failures"].format(len(found)) if found else MESSAGES["no-failure"])
     keys = ("view", "level 1", "level 2", "level 3", "pending", "not admitted", "sources", "stakeholders")
+    keys += ("sources read for the view",)
     views = ["- " + MESSAGES["view-line"].format(*(v[k] for k in keys)) for v in view_counts(data)]
     if views:
         lines += [MESSAGES["views-head"], *views]
+    keys = ("view", "requirements", *EXIT_WORDS.values())
+    counts = requirement_counts(data) if data["requirements"] else []
+    if counts:
+        lines.append(MESSAGES["requirements-head"])
+        lines += ["- " + MESSAGES["requirement-line"].format(*(c[k] for k in keys)) for c in counts]
     lines += answer_lines(data)
     rest = [] if intent_asked(data) else [MESSAGES["remains-intent"]]
-    rest += [MESSAGES[f"remains-{key}"].format(", ".join(ids)) for key, ids in remains.items() if ids]
+    for key, ids in remains.items():
+        # The key "boundaries" gives one line for each view.
+        groups = [[name] for name in ids] if key == "boundaries" else [ids]
+        rest += [MESSAGES[f"remains-{key}"].format(", ".join(group)) for group in groups if group]
     if not data["trials"]:
         rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):
@@ -1463,15 +1897,18 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'remains', 'trials', 'views'],
-     [('unknown-source', 'C-02')], True)
+    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'remains', 'requirements', 'trials',
+      'views'], [('unknown-source', 'C-02')], True)
     >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
     ({'judgement': 22, 'other': 0, 'source': 8}, True, [])
     >>> result["trials"], result["remains"]["trial"]
     (['T-01'], [])
     >>> result["views"][1]
     {'items': 2, 'level 1': 1, 'level 2': 0, 'level 3': 1, 'not admitted': 0, 'pending': 0, 'sources': 2,
-     'stakeholders': 1, 'view': 'storage'}
+     'sources read for the view': 2, 'stakeholders': 1, 'view': 'storage'}
+    >>> result["requirements"][1]
+    {'duplicates': 0, 'requirements': 2, 'to a boundary': 0, 'to a decision': 0,
+     'to an implementation skill': 0, 'to an item': 2, 'view': 'storage'}
 
     --previous compares with an earlier revision, and --words finds product words.
 
@@ -1573,6 +2010,7 @@ def main(argv=None):
             "intent_asked": intent_asked(data),
             "previous": previous is not None,
             "remains": remains,
+            "requirements": requirement_counts(data),
             "trials": sorted(t.get("id", "") for t in data["trials"]),
             "views": view_counts(data),
         }

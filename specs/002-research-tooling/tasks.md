@@ -374,6 +374,22 @@ and to retrieve the seed documents and standards.
 
 ---
 
+## Phase 19: Each requirement of a source goes through the calculation (iteration I-3)
+
+**Purpose**: FR-048 and FR-049. The registered trial of I-2 was refuted. Its registration
+fixed the next change: how the research finds the basic practices of each view.
+
+- [x] T127 In `factory/sota-research/scripts/aspect.py` and `sample.py`: read the table "Requirements" of `vetting.md` and the forms of the cell "Goes to"; give the sample eight requirements and the cell `Views` in each source
+- [x] T128 In `factory/sota-research/scripts/check.py`: outside `--scope`, fail for an absent or empty table, an empty cell, an identifier that is used two times, an exit that is not one of the five forms or names a row that does not exist, an unknown stakeholder, view or source, an item without a requirement that is not an own rule, and a stakeholder without a requirement
+- [x] T129 In `factory/sota-research/scripts/check.py`: the part "Requirements" of the report, in the text report and with `--json`; list a view with more than half of its requirements at a boundary under "What remains"
+- [x] T130 In `factory/sota-research/scripts/check.py`: fail for a cell `Views` with an unknown view or without a name; give the number of sources that were read for each view; list a view with fewer than two such sources under "What remains"
+- [x] T131 In `.specify/templates/overrides/aspect-spec-template.md`: the cell `Views` in the table of section 2, and the table "Requirements" in "Files beside this specification"
+- [x] T132 In `factory/sota-research/references/procedure.md` and `prompts/reader.md`: the reader reports each requirement; a new step records the requirements; "Distil" gives each one its exit and drops none; the references of the field of each view; the owner gets the part "Requirements"
+- [x] T133 In `docs/sota-research.md` and `CHANGELOG.md`: the register of the requirements and the sources of the own field of a view
+- [x] T134 Verify: the check on the specification of the trial `trials/I-2` fails for the absent table; a kit of `export.py` holds the new table in the template and in the procedure, and `check.py --scope` passes there as before
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

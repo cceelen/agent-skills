@@ -224,6 +224,8 @@ The report has two parts.
   asked, levels that are pending, vettings that are pending, items that rest only on such
   sources, items that need judgement, items with a changed text, findings of a trial that are
   open, findings with a viewpoint that was not checked, stakeholders that are in no view, a recipe without a trial, and a missing acceptance.
+  A view that the boundaries emptied and a view with few sources of its own field are in this
+  list also.
 
 Between the two parts, the report gives one line for the answers of risk and reward:
 
@@ -294,6 +296,43 @@ While a level is pending, a view without an item on level 1 is in the list "What
 The report has a part "Views". For each view, it gives the number of items on each level, the
 number of sources that these items cite, and the number of its stakeholders. Use it to find a
 view that has few items or few sources. In the review, you can add, remove or rename a view.
+
+Each source of section 2 names, in the cell `Views`, the views that it was read for. A body of
+knowledge has `all` there. The last number of a line of the part "Views" counts the sources
+that were read for the view, without the sources with `all`. If this number is less than two,
+the list "What remains" names the view:
+`Views with fewer than two sources of their own field that were read: <names>.`
+The check fails for a cell `Views` that is empty or names a view that section 1 does not have.
+
+### The requirements of the sources
+
+A requirement is a thing that a source says a project must or should do. The agent writes each
+requirement into the table "Requirements" of `vetting.md`. It does not judge a requirement
+there. The columns are Id, Requirement, Stakeholder, View, Source and Goes to.
+
+The cell `Goes to` holds the one exit of the requirement:
+
+| Form | Meaning |
+|---|---|
+| `C-<nn>` | The checklist item that holds the requirement. The calculation places the item. |
+| `3.3: <decision>` | The requirement depends on context. The name is the cell `Decision` of a row of section 3.3. |
+| `5` | The requirement is knowledge of one product, for an implementation skill. |
+| `boundary: <name>` | A neighbouring aspect owns the requirement. The name is a boundary of section 1. |
+| `duplicate: R-<nn>` | A second source states the same requirement. The row that it names is not a duplicate. |
+
+The check fails in these cases:
+
+- The table is absent or has no row, or a cell is empty.
+- The cell `Goes to` has a different text, or names a row that does not exist.
+- A requirement goes to a retired item.
+- A stakeholder, a view or a source of a requirement is not in the specification.
+- No requirement goes to an item, and the cell `Admitted by` of the item is not `own rule`.
+- A stakeholder of section 1 has no requirement.
+
+The report has a part "Requirements". For each view, it gives the number of requirements and
+the number for each exit. If more than half of the requirements of a view go to a boundary,
+the list "What remains" says so. Examine such a view in the review. With `--json`, the numbers
+are in the key `requirements`.
 
 ### The measured targets of an aspect
 

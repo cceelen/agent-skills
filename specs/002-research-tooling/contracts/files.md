@@ -38,7 +38,19 @@ Rubric for sources: version <n>. Rubric for items: version <n>.
 | Item | Severity | Probability | Breadth | Adopt | Keep | Own risk | Dimension | Return | Cost | Score | Admitted | Level |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | C-07 | 3 (S-14 abstract) | 3 (S-14 finding 1) | 3 (judgement) | 2 (judgement) | 2 (judgement) | 0 (judgement) | | 27 | 4 | 67 | yes | 1 |
+
+## Requirements
+
+| Id | Requirement | Stakeholder | View | Source | Goes to |
+|---|---|---|---|---|---|
+| R-01 | <one sentence> | <stakeholder> | <view> | S-14 finding 1 | C-07 |
 ```
+
+- The session writes the table "Requirements": one row for each requirement that a source
+  states for a stakeholder. The cell "Goes to" is `C-<nn>`, `3.3: <decision>`, `5`,
+  `boundary: <name>` or `duplicate: R-<nn>`. No program writes this table.
+- The table of section 2 of `spec.md` gets the cell `Views` after the cell `Read`: the views
+  that the source was read for, with a comma between two names, or `all`.
 
 - A person or the session writes the cells Answers, Severity to Own risk, Dimension, and
   Confirmed by. The cell Dimension names the risk dimension of an item whose return depends on

@@ -47,6 +47,24 @@ check.py SPEC --scope
   `--json`: the key `viewpoints` in `remains`.
 - Outside `--scope`, the field `Targets` of section 1 fails the check when it has no target
   and not `(none found)`, and when a target names no source and no `judgement`.
+- Outside `--scope`, the table "Requirements" of `SPEC/vetting.md` fails the check when it is
+  absent or empty; when a cell is empty; when an identifier is used two times; when the cell
+  "Goes to" is not `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
+  `duplicate: R-<nn>`; when the exit names an item, a decision, a boundary or a row that does
+  not exist, an item that is retired, or a row that is a duplicate; when a stakeholder or a
+  view is not in section 1; and when the source is not in section 2. An item that is not
+  retired fails the check when no requirement goes to it and its cell "Admitted by" does not
+  start with `own rule`. A stakeholder of section 1 without a requirement fails the check.
+- After the part "Views", the part "Requirements": one line for each view with the number of
+  requirements and the number for each exit. With `--json`: the key `requirements`. Under
+  "remains", one line for each view: `More than half of the requirements of the view '<name>'
+  go to a boundary.` With `--json`: the key `boundaries` in `remains`.
+- A source of section 2 fails the check when its cell `Views` names a view that section 1
+  does not have, or when the table has the cell and it is empty. Each line of the part
+  "Views" ends with `sources read for the view: <n>`: the sources with the view in the cell
+  `Views`, without `all`, and with `full` or `part` in the cell `Read`. Under "remains":
+  `Views with fewer than two sources of their own field that were read: <names>.` With
+  `--json`: the key `own-sources` in `remains`.
 
 ## scripts/render.py
 

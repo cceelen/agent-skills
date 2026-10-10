@@ -7,6 +7,9 @@
 
   load(folder)  reads spec.md, evidence.md, vetting.md and trial.md into plain dictionaries and lists
 
+The file vetting.md has three tables: "Sources", "Items" and "Requirements". The table
+"Requirements" has one row for each requirement that a source states for a stakeholder.
+
 A module for the programs in this folder; it needs Python 3.14.
 
 The Markdown files are the only store. A section is found by its number, a table by its place
@@ -32,6 +35,14 @@ ITEM_RANGE = re.compile(r"\bC-(\d+) to C-(\d+)\b")
 PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b", re.I)
 INTENT = "intent of the owner"
 STAKEHOLDERS = re.compile(r"\s*\(stakeholders:([^)]*)\)", re.I)
+# The forms of the cell "Goes to" of a requirement. A requirement has no other exit.
+EXITS = (
+    ("item", re.compile(r"(C-\d+)")),
+    ("decision", re.compile(r"3\.3:\s*(\S.*)")),
+    ("skill", re.compile(r"(5)")),
+    ("boundary", re.compile(r"boundary:\s*(\S.*)")),
+    ("duplicate", re.compile(r"duplicate:\s*(R-\d+)")),
+)
 
 
 class Unreadable(Exception):
@@ -337,6 +348,49 @@ def view_of(row):
     return row.get("view", "").strip().strip("`").strip()
 
 
+def names_of(cell):
+    """The names in a cell that holds a list, for example the cell Views of a source.
+
+    A comma or a semicolon is between two names.
+
+    >>> names_of("storage, `operation`; quality"), names_of(" all "), names_of(""), names_of(None)
+    (['storage', 'operation', 'quality'], ['all'], [], [])
+    """
+    names = (part.strip().strip("`").strip() for part in re.split(r"[,;]", cell or ""))
+    return [name for name in names if name]
+
+
+def exit_of(cell):
+    """(kind, name) of the cell "Goes to" of a requirement. The kind is None for a different text.
+
+    A requirement goes to a checklist item, to a decision of section 3.3, to an implementation
+    skill of section 5 or to a boundary of section 1, or it is a duplicate of a different row.
+
+    >>> exit_of("C-02"), exit_of("3.3: How frequently to make a backup"), exit_of("5")
+    (('item', 'C-02'), ('decision', 'How frequently to make a backup'), ('skill', '5'))
+    >>> exit_of("boundary: `recovery`"), exit_of("`duplicate: R-05`")
+    (('boundary', 'recovery'), ('duplicate', 'R-05'))
+
+    Each other text is not an exit.
+
+    >>> other = ("one source only states it", "depends on context", "3.3", "C-02, C-03", "boundary:", None)
+    >>> for cell in other:
+    ...     print(exit_of(cell))
+    (None, 'one source only states it')
+    (None, 'depends on context')
+    (None, '3.3')
+    (None, 'C-02, C-03')
+    (None, 'boundary:')
+    (None, '')
+    """
+    cell = (cell or "").strip().strip("`").strip()
+    for kind, form in EXITS:
+        found = form.fullmatch(cell)
+        if found:
+            return kind, found.group(1).strip().strip("`").strip()
+    return None, cell
+
+
 def stakeholders_of(text):
     """The stakeholders that the line of a view names, in the form "(stakeholders: a, b)".
 
@@ -414,6 +468,17 @@ def load(folder):
     >>> data["vetting_items"][0]["severity"], data["has_vetting"]
     ('3 (S-02 abstract)', True)
 
+    The table "Requirements" of vetting.md has one row for each requirement that a source states.
+    The cell "Goes to" names the one exit of the requirement. Each source names the views that it
+    was read for.
+
+    >>> [(r["id"], r["stakeholder"], view_of(r), r["goes to"]) for r in data["requirements"]][5:]
+    [('R-06', 'operators', 'operation', 'duplicate: R-05'),
+     ('R-07', 'operators', 'operation', '3.3: How frequently to make a backup'),
+     ('R-08', 'operators', 'operation', '5')]
+    >>> data["requirements"][0]["_file"], [names_of(s["views"]) for s in data["sources"]][1:3]
+    ('vetting.md', [['storage', 'operation'], ['operation']])
+
     The record of the trials has the table of the trials and the table of their findings.
 
     >>> [t["id"] for t in data["trials"]], data["trials"][0]["plan"]
@@ -431,6 +496,8 @@ def load(folder):
     >>> data = load(folder)
     >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
     ([], [], False, [], [])
+    >>> data["requirements"]
+    []
     >>> (folder / "spec.md").unlink()
     >>> load(folder)
     Traceback (most recent call last):
@@ -473,6 +540,7 @@ def load(folder):
         "evidence": [],
         "vetting_sources": [],
         "vetting_items": [],
+        "requirements": [],
         "has_vetting": False,
         "trials": [],
         "trial_findings": [],
@@ -490,7 +558,11 @@ def load(folder):
         data["evidence"] = Doc(folder / "evidence.md").table((0, 10**9), "source")
     data["has_vetting"] = (folder / "vetting.md").is_file()
     tables = {
-        "vetting.md": (("Sources", "vetting_sources"), ("Items", "vetting_items")),
+        "vetting.md": (
+            ("Sources", "vetting_sources"),
+            ("Items", "vetting_items"),
+            ("Requirements", "requirements"),
+        ),
         "trial.md": (("Trials", "trials"), ("Findings", "trial_findings")),
     }
     for name, parts in tables.items():

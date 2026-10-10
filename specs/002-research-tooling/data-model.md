@@ -10,7 +10,7 @@ program writes `trial.md`.
 |---|---|---|
 | Head | branch, research date, supersedes, accepted | accepted is a person and a date, or `pending` |
 | 1 Aspect | aspect, field, intent of the owner, agreed on, stakeholders, views, contexts, risk dimensions, boundaries, targets | each field is filled; agreed on has a date; each line of the intent is a quote with a date, or `(no answer)`; each stakeholder is one line below the field, names its concerns and names its source or `judgement`; each view is one line below the field, names one stakeholder of section 1 or more in the form `(stakeholders: a, b)`, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion ``; each target is one line below the field and names its source, or the field says `(none found)` |
-| 2 Sources | id, source, issuer, version or date, class, license, read, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique |
+| 2 Sources | id, source, issuer, version or date, class, license, read, views, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique; views holds views of section 1 or `all`, and a table without this cell is permitted |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
 | 4 Checklist | id, item, why, view, level, admitted by, check, source | see below; the view is a view of section 1 |
@@ -42,13 +42,20 @@ check reads the id, the supports cell and the date. It does not judge the summar
 
 ## Vetting record (`vetting.md`)
 
-Written by `vet.py score` and `place.py`, corrected by the owner. Two tables, formats in
-`contracts/files.md`.
+Written by `vet.py score` and `place.py`, corrected by the owner. The session writes the
+table "Requirements". Three tables, formats in `contracts/files.md`.
 
 | Table | Row | Fields |
 |---|---|---|
 | Sources | one independent source | source id, kind (`repository` or `page`), gate result, signals, answers with their URL, score, rubric version, date, confirmed by |
 | Items | one checklist item | item id, the six answers with their source, return, cost, score, admitted, level, rubric version |
+| Requirements | one requirement that a source states for a stakeholder | id `R-<nn>`, requirement, stakeholder, view, source with its location, goes to |
+
+The cell "Goes to" of a requirement is `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
+`duplicate: R-<nn>`. The check fails for each other text, for an exit that names a row that
+does not exist, for an item without a requirement that is not admitted by `own rule`, and for
+a stakeholder without a requirement. A view with more than half of its requirements at a
+boundary is listed under "what remains".
 
 State of a source: `not vetted` → `rejected by a gate` or `scored` → `confirmed` or `rejected`
 (by the owner). Only `confirmed` lets the source carry an item alone.

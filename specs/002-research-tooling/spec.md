@@ -384,8 +384,9 @@ specification whose check reports no failure other than "not accepted".
   duty for it. Section 1 MUST name each stakeholder with its concerns and its source. The
   skill MUST aggregate the concerns into the views, and each view MUST name its stakeholders
   in a form that a program reads. The requirements of the stakeholders of a view are the
-  candidates for its items; the calculation of risk and reward decides on them, and a
-  requirement that is dropped before the calculation MUST have a row in section 7. Outside
+  candidates for its items; the calculation of risk and reward decides on them. FR-048
+  gives the exits of a requirement and supersedes the row in section 7 for a requirement
+  that was dropped before the calculation. Outside
   the check of phase 1, the check MUST fail when section 1 names no stakeholder, when a
   stakeholder names no concern or no source, when a view names no stakeholder, and when a
   view names a stakeholder that section 1 does not have. The check MUST list under "What
@@ -396,6 +397,42 @@ specification whose check reports no failure other than "not accepted".
   table "Items" of `vetting.md` name a source and how many say `judgement`. The line MUST NOT
   fail the check, and MUST be in the JSON report. In the review, the owner MUST get this line
   with the checklist.
+
+**A register of the requirements, and sources of the own field of a view**
+
+Iteration I-3, 2026-10-11. The registered trial of I-2 was refuted, and its registration
+fixed this change: how the research finds the basic practices of each view. The session
+dropped requirements of the sources before the calculation, one requirement of the evidence
+record became no item, and one view had no source of its own field.
+
+- **FR-048**: `vetting.md` MUST hold a table "Requirements" with one row for each requirement
+  that a source states for a stakeholder: the identifier `R-<nn>`, the requirement in one
+  sentence, the stakeholder, the view, the source with its location, and the cell "Goes to".
+  The reader of a source MUST report each requirement of the source as its own point, with
+  the group of persons that it serves and the location. The session MUST record each one
+  without a judgement. The cell "Goes to" MUST have one of five forms: `C-<nn>`, a checklist
+  item; `3.3: <decision>`, a decision of section 3.3; `5`, an implementation skill;
+  `boundary: <name>`, a boundary of section 1; `duplicate: R-<nn>`, a row that is not a
+  duplicate. No other exit is permitted. A requirement that is basic in its view becomes an
+  item also when its cost is high, and the calculation places it. The check MUST fail, outside
+  the check of phase 1, when the table is absent or empty; when a cell is empty; when an
+  identifier is used two times; when the cell "Goes to" has no such form or names a row that
+  does not exist or an item that is retired; when a stakeholder or a view is not in section
+  1; when the source is not in section 2; when an item that is not retired holds no
+  requirement and is not admitted by `own rule`; and when a stakeholder of section 1 has no
+  requirement. The report MUST give, for each view, the number of requirements and the number
+  for each exit, also in the JSON report. The check MUST list under "What remains" each view
+  with more than half of its requirements at a boundary. In the review, the owner MUST get
+  this part with the views.
+- **FR-049**: Each source of section 2 MUST name, in the cell `Views`, the views that it was
+  read for, or `all` for a body of knowledge. For each view, the skill MUST find and read the
+  references of the field of that view: the standards and references that the body of
+  knowledge names for the knowledge areas of the view, and the results of a search in the
+  words of the view. The check MUST fail when the cell names a view that section 1 does not
+  have, and when the cell is present and empty. A specification without the cell MUST NOT
+  fail for it. The check MUST list under "What remains" each view with fewer than two sources
+  that were read in full or in part for it and do not say `all`, and MUST give this number in
+  the part "Views".
 
 **A neutral environment, the seeds, and a skill that works alone**
 
@@ -466,6 +503,8 @@ and standards.
   for it, with its concerns for the aspect and its source.
 - **View**: one set of concerns that an aspect brings together, with its stakeholders and its
   source. Each checklist item belongs to one view.
+- **Requirement**: one thing that a source says a project must or should do, with its
+  stakeholder, its view, its source and its one exit.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
 - **Target**: one measurable result that a project reaches when it applies the recipe, with

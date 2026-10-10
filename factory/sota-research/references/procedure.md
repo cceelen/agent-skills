@@ -155,8 +155,8 @@ its reason and its date in section 7.
    - If the concerns of a stakeholder are in no view, record the stakeholder in section 7
      with the reason.
    - For each view, the requirements of its stakeholders are the candidates for checklist
-     items. The calculation of risk and reward decides on them. Do not drop a requirement
-     before the calculation without a row in section 7.
+     items. The calculation of risk and reward decides on them. Do not drop a requirement:
+     do steps 9 and 10 for each one.
 3. **Compare the intent of the owner with the sources.**
    - Read the field "Intent of the owner" of section 1.
    - If the sources that carry the name of the aspect mean less than the owner, or something
@@ -192,18 +192,36 @@ its reason and its date in section 7.
    - If the conversion gives no text, record the source under "not verified".
 6. **Record the sources** in section 2, each with its class. The classes of the fast lane are
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
-   `independent`. Mark a paid source that was read from its preview as `part`.
+   `independent`. Mark a paid source that was read from its preview as `part`. Write the
+   views that the source was read for into the cell `Views`, with a comma between two names.
+   Write `all` for a body of knowledge.
 7. **Vet** each independent source. See "The vetting of independent sources".
 8. **Name the views.** A view is a set of concerns that the aspect brings together.
    - Settle the views of the aspect from the sources. Keep, change or remove each candidate.
      Write each view into the field "Views" of section 1, with its stakeholders and its
      source, or with `(judgement)`.
+   - For each view, find the references of the field of that view. Take the standards and
+     the references that the body of knowledge names for the knowledge areas of the view.
+   - Search also for references of that field in the words of that view.
+   - Read these references for the view, as in steps 4 to 7.
    - A source supports a view only if a reader read it for the concerns of that view. One
      page of a source about a different view does not count.
-   - If a view has too few sources of its own, search and read again for that view, as in
-     steps 4 to 7.
+   - Write the view into the cell `Views` of each source that a reader read for it.
+   - If a view has fewer than two sources of its own field that were read, search and read
+     again for that view, as in steps 4 to 7.
    - If a view has no source of its own, record the view in section 7 as not verified.
-9. **Distil.**
+9. **Record the requirements.** Write each requirement that a reader reported into the table
+   "Requirements" of `vetting.md`. The format is below this list of steps.
+   - Use one row for each requirement of each source. Give the row the next identifier
+     `R-<number>`.
+   - Write the requirement in one sentence, in the words of this kit. Do not make it
+     stronger than the source states it.
+   - Write the stakeholder of section 1 that the requirement serves into the cell
+     "Stakeholder", and one view of section 1 into the cell "View".
+   - Write the source with the location into the cell "Source".
+   - Do not judge a requirement here. Do not leave out a requirement.
+   - Leave the cell "Goes to" empty. Step 10 fills it.
+10. **Distil.**
    - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
      risk dimensions with their question and the opinion of the kit, and the boundaries to
      the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
@@ -215,23 +233,51 @@ its reason and its date in section 7.
      each one a checklist item.
    - A statement that depends on context becomes a decision in section 3.3.
    - A statement about one product goes to the table of implementation skills in section 5.
-   - Leave out what an agent can learn from the project or from the source itself.
+   - Leave out what an agent can learn from the project or from the source itself. Do not
+     leave out a requirement of the table "Requirements".
+   - Write the cell "Goes to" of each row of the table "Requirements". Use one of these
+     forms:
+     - `C-<nn>`: the checklist item that holds the requirement. Two or more requirements
+       can go to one item.
+     - `3.3: <decision>`: the requirement depends on context. Write the cell "Decision" of
+       its row in section 3.3.
+     - `5`: the requirement is knowledge of one product, for an implementation skill.
+     - `boundary: <name>`: a neighbouring aspect owns the requirement. Write the name of a
+       boundary of section 1.
+     - `duplicate: R-<nn>`: a second source states the same requirement. Write the row
+       that has the exit of the requirement.
+   - Do not use a different exit. Do not write a different text into the cell.
+   - If a requirement is basic in its view, make it a checklist item, also when its cost is
+     high. The calculation of risk and reward places the item or does not admit it.
+   - Make sure that each checklist item holds a requirement. An item without a requirement
+     has `own rule` in the cell "Admitted by".
    - Write where the sources disagree into section 3.4, with the two positions.
    - A practice from a different field states the problem that it solves there, and what
      shows that it does not work here.
-10. **Write the evidence record** `evidence.md`: one row for each source, with what it
+11. **Write the evidence record** `evidence.md`: one row for each source, with what it
    contributes in the words of this kit, where in the source that is, the rows that it
    supports, and the date. Keep a quote only where the wording itself is the point.
-11. **Let a second reader check it.** Give the rows to an agent of the type
+12. **Let a second reader check it.** Give the rows to an agent of the type
    `sota-second-reader`, with the task `prompts/second-reader.md`. Give the rows of a
    converted source, with the path of its file, to a new agent of the type `sota-file-reader`,
    with the same task. Do not use the agent that read the source. Correct each finding in
-   `evidence.md` and in each row of `spec.md` that says the same.
-12. **Place the items.** See "The calculation of risk and reward".
-13. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
+   `evidence.md`, in each row of `spec.md` and in each row of the table "Requirements" that
+   says the same.
+13. **Place the items.** See "The calculation of risk and reward".
+14. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
    suggested a judgement. Do not write a model name into the specification.
-14. **Run the check.** See "The check". Correct each failure.
-15. If a source cannot be reached, write what was not verified into section 7.
+15. **Run the check.** See "The check". Correct each failure.
+16. If a source cannot be reached, write what was not verified into section 7.
+
+The format of the table "Requirements" in `vetting.md`:
+
+```markdown
+## Requirements
+
+| Id | Requirement | Stakeholder | View | Source | Goes to |
+|---|---|---|---|---|---|
+| R-01 | <one sentence> | <stakeholder> | <view> | <source and location> | <exit> |
+```
 
 ## Phase 3: review of the owner
 
@@ -239,8 +285,8 @@ Stop. A model does not accept a recipe. Give the owner, in this order:
 
 1. The intent of the owner, as it is written, beside the stakeholders, the views and the
    targets that the research found, each with its source. Give each difference between the
-   intent and these findings. Give the part "Views" of the check, as it is. The owner can
-   add, remove or rename a stakeholder or a view.
+   intent and these findings. Give the part "Views" and the part "Requirements" of the
+   check, as they are. The owner can add, remove or rename a stakeholder or a view.
 2. The contexts, the risk dimensions and the boundaries that the research found, each with
    its source. The owner sees them here for the first time and can correct each one.
 3. The strategy: the goals, the order of the work and the decisions that depend on context.
@@ -256,8 +302,10 @@ change an item, change a view, change a stakeholder.
 
 - If the owner adds a stakeholder, do step 2 of phase 2 for that stakeholder.
 - If the owner adds a view, do step 8 of phase 2 for that view.
-- If the owner removes or renames a view, change the cell "View" of each item of that view.
-- If the owner removes or renames a stakeholder, change the line of each view that names it.
+- If the owner removes or renames a view, change the cell "View" of each item and of each
+  requirement of that view, and the cell `Views` of each source that names it.
+- If the owner removes or renames a stakeholder, change the line of each view and the cell
+  "Stakeholder" of each requirement that names it.
 
 Tell the owner that a trial of the recipe on a project is possible before the acceptance. If
 the owner asks for a trial, do the steps of "The trial of a recipe". Then continue here.
@@ -360,7 +408,7 @@ The owner starts a refresh. Nothing runs on a schedule.
      that file for its row.
 2. Read only those sources again, with the readers. For a finding of a trial with the route
    `recipe`, search and read for the view or the question of the finding, as in steps 4 to 7
-   of phase 2.
+   of phase 2. Record each requirement that a reader reports, as in steps 9 and 10 of phase 2.
 3. Save the current `spec.md` to a file outside the repository:
    `git show HEAD:specs/<number>-<name>/spec.md`.
 4. Change the rows that the new text touches. Keep the row of an item that is no longer
@@ -390,8 +438,18 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - The list names each finding of a trial that is open. It says so if the recipe has no trial.
 - If a row of `trial.md` fails, correct the cell. Do not change the sentence of a finding.
 - The part "Views" gives, for each view, the number of items on each level, the number of
-  sources that its items cite, and the number of its stakeholders. If a view has few items
-  or few sources, do step 8 of phase 2 for that view again.
+  sources that its items cite, the number of its stakeholders, and the number of sources that
+  were read for the view. If a view has few items or few sources, do step 8 of phase 2 for
+  that view again.
+- The list names each view with fewer than two sources of its own field that were read. Do
+  step 8 of phase 2 for each such view.
+- The part "Requirements" gives, for each view, the number of requirements and the number for
+  each exit. Give it to the owner as it is.
+- The list names each view with more than half of its requirements at a boundary.
+- If a stakeholder has no requirement, search and read for the concerns of that stakeholder,
+  as in steps 4 to 7 of phase 2. Then do steps 9 and 10 of phase 2 for the new requirements.
+- If an item holds no requirement, find its requirement in the reports of the readers. Do
+  not write a requirement that no reader reported.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.
 - To find product names in the checklist, write the names into a file, one in each line, and
