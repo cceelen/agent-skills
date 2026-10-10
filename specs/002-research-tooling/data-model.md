@@ -1,14 +1,15 @@
 # Data model: research tooling
 
 The Markdown files of a specification are the store. `aspect.py` reads them into the plain
-data below. No program writes `spec.md` except `place.py`, which fills the Level cells.
+data below. No program writes `spec.md` except `place.py`, which fills the Level cells. No
+program writes `trial.md`.
 
 ## Aspect specification (`spec.md`)
 
 | Part | Fields | Rules that the check applies |
 |---|---|---|
 | Head | branch, research date, supersedes, accepted | accepted is a person and a date, or `pending` |
-| 1 Aspect | aspect, field, views, contexts, risk dimensions, boundaries, agreed on | each field is filled; agreed on has a date; each view is one line below the field, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion `` |
+| 1 Aspect | aspect, field, views, contexts, risk dimensions, boundaries, targets, agreed on | each field is filled; agreed on has a date; each view is one line below the field, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion ``; each target is one line below the field and names its source, or the field says `(none found)` |
 | 2 Sources | id, source, issuer, version or date, class, license, read, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
@@ -55,6 +56,19 @@ State of a source: `not vetted` → `rejected by a gate` or `scored` → `confir
 State of an item: `pending` (an answer is missing) → `placed` (admitted with a level, or not
 admitted).
 
+## Record of the trials (`trial.md`)
+
+Optional. Written by the session after a trial, and by the owner's decision for each finding.
+Two tables.
+
+| Table | Row | Fields | Rules that the check applies |
+|---|---|---|---|
+| Trials | one trial of the recipe on a project | id, date, project, commit of the specification, plan (where the plan is, or `not kept`) | |
+| Findings | one finding of the review of a plan | id, trial, viewpoint, finding, route, status | the trial is in the table "Trials"; the viewpoint is one of `architecture`, `operations`, `quality`, `development`, `security`, `product owner`, `views of the recipe`; the finding has a text; the route is `recipe`, `tooling` or `implementation skill`; the status is `open`, `corrected in <revision or commit>` or `declined: <reason>` |
+
+State of a finding: `open` → `corrected` or `declined` (by the owner). A finding that is open
+is listed under "what remains". A specification without a trial is listed there also.
+
 ## Rubrics (in the tooling)
 
 | File | Holds |
@@ -69,6 +83,7 @@ of a question does not change.
 
 Owned by the renderer: `SKILL.md`, `references/checklist.md`, `agent-templates/<name>.md`,
 `docs/<name>.md`. Each starts with the stamp: specification branch, commit, digest of `spec.md`.
+The stamp of a trial rendering starts with a note that the file is a trial rendering.
 
 ## Selection (in a project of a user)
 

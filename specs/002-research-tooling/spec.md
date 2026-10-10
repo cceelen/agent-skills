@@ -312,6 +312,39 @@ specification whose check reports no failure other than "not accepted".
   and the number of sources that they cite. The rendered skill MUST show the view of each
   item, and MUST tell its agent to show the selection in groups by view.
 
+**The trial of a recipe**
+
+- **FR-033**: The renderer MUST have a trial rendering. It renders a specification that the
+  owner did not accept, only into a folder that is outside each git repository. The check of
+  the specification MUST pass. The stamp of each file MUST say that the file is a trial
+  rendering, so that nobody takes a trial file for a delivered file. Without the option, the
+  renderer MUST behave as before.
+- **FR-034**: The tooling MUST hold the task for a reviewer that did not write the plan. The
+  reviewer reads the plan and the selection in the trial project and, if there is one, a
+  reference state of the same project. It answers fixed questions from seven viewpoints:
+  architecture, operations, quality, development, security, product owner, and the views of
+  the recipe. Each answer MUST be `yes`, `partly`, `no` or `not applicable`, with a file and a
+  line of the trial project and one sentence. The reviewer MUST end with a list of findings,
+  each with its viewpoint and a proposed route: `recipe`, `tooling` or `implementation skill`.
+  The reviewer MUST NOT correct anything.
+- **FR-035**: An aspect specification MAY have a record of the trials, `trial.md`, with the
+  table of the trials and the table of the findings. The check MUST fail for a finding with an
+  unknown trial, an unknown viewpoint, an empty text, an unknown route or a status that is not
+  `open`, `corrected in <revision or commit>` or `declined: <reason>`. The check MUST list the
+  findings that are open under "What remains". Without the file, the check MUST say under
+  "What remains" that the recipe has no trial, and MUST NOT fail.
+- **FR-036**: An aspect specification MUST name the measured targets of its aspect in
+  section 1: for each target the name, the scale, what measures it, and the source. The value
+  `(none found)` is permitted. The check MUST fail for an empty field and for a target without
+  a source, but not in the check of phase 1. The rendered skill MUST hold the targets, and
+  MUST tell its agent to give, in the plan, the level of each target that the plan reaches and
+  what stops the next level.
+- **FR-037**: The procedure MUST have the trial of a recipe: a trial rendering, a copy of a
+  project that the owner names as a new repository without its history, a new session that
+  only uses the skill and stops at the plan, a reviewer that did not see the research, the
+  record of the findings, and the decision of the owner for each finding. A finding with the
+  route `recipe` MUST lead to more research for its view or question, and to a new trial.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -329,6 +362,12 @@ specification whose check reports no failure other than "not accepted".
   checklist item belongs to one view.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
+- **Target**: one measurable result that a project reaches when it applies the recipe, with
+  its scale, what measures it, and its source.
+- **Trial**: one application of a recipe that is not delivered to a copy of a project, up to
+  the plan.
+- **Trial finding**: one defect of a plan that a reviewer found, with its viewpoint, its route
+  and its status.
 - **Recipe skill**: the rendered skill of one aspect, with its checklist as a reference file
   and its templates for agent files.
 - **Selection**: the checklist that a project commits: the answers of the risk assessment, the

@@ -12,6 +12,10 @@ reports are not comparable with new reports.
   state of the art of one aspect of software engineering into a recipe skill. Users of the
   kit do not install it.
 - The tooling uses the latest stable Python and runs with `uv`.
+- The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
+  the plan from seven viewpoints, and the check reports the findings that are open.
+- An aspect specification names the measured targets of its aspect. The check fails for an
+  empty field `Targets`.
 
 ## 1.0.3
 

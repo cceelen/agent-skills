@@ -37,6 +37,12 @@ source, or says `(judgement)`. A use case is chosen only when the recipe is appl
   - `[regulatory]`: [Is personal data involved? Opinion: ...] ([source])
 - **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each.
   - `[neighbour]`: [what it owns; what this aspect keeps] ([source])
+- **Targets**: the measurable results that a project reaches when it applies the recipe. The
+  targets come from the sources in the research; the owner can name one with the thing to
+  build. One line each: the name, the scale with its levels, the program or the method that
+  measures it, and the source of the scale. If the sources give no target, write
+  `(none found)` in place of the lines.
+  - `[target]`: [the scale and its levels; the program or the method that measures it] ([source])
 
 ## 2. Sources
 
@@ -168,3 +174,12 @@ Terms that mean different things in the sources. One preferred form per meaning.
   a legal definition.
 - `vetting.md`: for each independent source the measured signals, the result of the rubric and
   the owner's confirmation; for each item the answers of the risk and reward calculation.
+- `trial.md`: the record of the trials of the recipe on a project. This file is optional.
+  - The table "Trials" has one row for each trial. Its columns are Id, Date, Project, Commit
+    of the specification, and Plan. The cell "Plan" holds where the plan is, or `not kept`.
+  - The table "Findings" has one row for each finding of the review of a plan. Its columns
+    are Id, Trial, Viewpoint, Finding, Route and Status.
+  - The viewpoint is `architecture`, `operations`, `quality`, `development`, `security`,
+    `product owner` or `views of the recipe`.
+  - The route is `recipe`, `tooling` or `implementation skill`.
+  - The status is `open`, `corrected in <revision or commit>` or `declined: <reason>`.

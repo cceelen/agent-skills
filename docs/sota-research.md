@@ -19,6 +19,8 @@ The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 To start, tell your agent to read `factory/sota-research/SKILL.md` and to distil an aspect.
 The steps of the agent are in `factory/sota-research/references/procedure.md`.
 
+Before you accept a recipe, you can try it on a project. See "Try a recipe on a project".
+
 Three agents read the sources. No reader has a shell, a tool that writes or credentials.
 
 | Agent | Tools | What it reads |
@@ -90,8 +92,8 @@ Run each program with `uv run`. A program without an argument prints its usage t
 
 ## Check an aspect specification
 
-Use `check.py` after each change of an aspect specification. It reads `spec.md`, `evidence.md`
-and `vetting.md` in the folder of the specification.
+Use `check.py` after each change of an aspect specification. It reads `spec.md`, `evidence.md`,
+`vetting.md` and `trial.md` in the folder of the specification.
 
 ```text
 uv run factory/sota-research/scripts/check.py specs/<number>-<name>
@@ -103,7 +105,8 @@ The report has two parts.
   one. The result code is 1 until no check fails.
 - **What remains.** These points do not fail the check: levels that are pending, vettings that
   are pending, items that rest only on such sources, items that need judgement, items with a
-  changed text, and a missing acceptance.
+  changed text, findings of a trial that are open, a recipe without a trial, and a missing
+  acceptance.
 
 To compare with an earlier revision, give that file to the program:
 
@@ -143,6 +146,22 @@ The report has a part "Views". For each view, it gives the number of items on ea
 the number of sources that these items cite. Use it to find a view that has few items or few
 sources. In the review, you can add, remove or rename a view.
 
+### The measured targets of an aspect
+
+A target is a measurable result that a project reaches when it applies the recipe. An example
+is a scale with levels that a program measures. The research finds the targets in the sources
+and writes them into the field `Targets` of section 1. You can name a target with the thing to
+build.
+
+- Each target is one line: the name, the scale, the program or the method that measures it,
+  and the source.
+- If the sources give no target, the field holds `(none found)`.
+- The check fails if the field is empty, or if a target names no source and no `judgement`.
+- The check with `--scope` does not examine the field.
+
+The rendered skill holds the targets. It tells its agent to give, in the plan, the level of
+each target that the plan reaches, and what stops the next level.
+
 ## Render a recipe skill
 
 Use `render.py` after the owner accepted an aspect specification. The owner accepts it in the
@@ -173,6 +192,89 @@ To deliver a rendered skill, do these steps:
 3. Get only the rendered files from the branch of the specification:
    `git checkout <branch of the specification> -- skills/<name> docs/<name>.md`
 4. Open a pull request into `main`.
+
+## Try a recipe on a project
+
+A recipe can pass each check and give a poor plan. Thus you can try a recipe on a real project
+before you accept it, and after each correction. Your agent does the steps of "The trial of a
+recipe" in the procedure.
+
+1. Tell your agent to do a trial, and name the project.
+2. The agent renders the skill into a folder outside the repository:
+
+   ```text
+   uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <commit> --trial <folder>
+   ```
+
+3. The agent makes a copy of the project without its history, and installs the skill in it.
+4. A new session uses the skill in the copy. It writes a plan and stops.
+5. A reviewer that did not see the research examines the plan. Its task is in
+   `factory/sota-research/prompts/plan-review.md`.
+6. The agent writes the trial and the findings into `trial.md`, and gives you the findings.
+7. Decide for each finding: correct it or decline it. Give a reason when you decline one.
+
+Rules of a trial rendering:
+
+- `--trial` renders a specification that you did not accept. The check must pass, and each
+  item must have a level.
+- The folder of `--trial` must be outside each git repository. Do not use `--out` with it.
+- Each file starts with a stamp that says "Trial rendering". Do not deliver such a file.
+- If you give a reference state of the project, the reviewer compares the plan with it. The
+  reference state is what the project really has.
+
+### The viewpoints of the review
+
+The reviewer answers fixed questions from seven viewpoints. Each answer is `yes`, `partly`,
+`no` or `not applicable`, with a file and a line of the trial project as evidence.
+
+| Viewpoint | What the questions examine |
+|---|---|
+| `architecture` | Technical debt, maintained components in place of own construction, reuse in a second project, changes of the project, silent failures. |
+| `operations` | The practices for delivery, who learns that the pipeline is defective, the time of a run. |
+| `quality` | The checks of the quality of the code, and which of them stop a change. |
+| `development` | The checks before the push, the time to the result, the needs of a contributor from outside. |
+| `security` | The basic practices that the plan leaves out, and the reason. |
+| `product owner` | The decisions for the owner, the frameworks of governance, the measured targets, the effort against the risk. |
+| `views of the recipe` | The basic practices of each view, and the differences from the reference state. |
+
+### The record of the trials
+
+The file `trial.md` is beside `spec.md`. It is optional. It has two tables.
+
+```markdown
+## Trials
+
+| Id | Date | Project | Commit of the specification | Plan |
+|---|---|---|---|---|
+| T-01 | 2026-10-10 | <project> | abc1234 | not kept |
+
+## Findings
+
+| Id | Trial | Viewpoint | Finding | Route | Status |
+|---|---|---|---|---|---|
+| F-01 | T-01 | operations | <one sentence> | recipe | open |
+```
+
+The route tells where the correction is made.
+
+| Route | Meaning | What follows |
+|---|---|---|
+| `recipe` | The specification of the aspect lacks or misstates something. | More research for that view or question, then a new trial. |
+| `tooling` | The factory lacks a step or a check. | A change of the factory through its own specification. |
+| `implementation skill` | Knowledge of one product is missing. | A row in the table of implementation skills in section 5. |
+
+The status is `open`, `corrected in <revision or commit>` or `declined: <reason>`.
+
+The check fails in these cases:
+
+- A finding names a trial that the table "Trials" does not have.
+- A finding names a viewpoint that is not one of the seven viewpoints. Use lowercase letters.
+- A finding has no text.
+- A finding names a route that is not one of the three routes.
+- A finding has a status that is not one of the three forms.
+
+The list "What remains" names the findings that are open: `Trial findings that are open: F-01.`
+If the specification has no trial, the list says: `The recipe has no trial.`
 
 ## Place the items with the calculation of risk and reward
 

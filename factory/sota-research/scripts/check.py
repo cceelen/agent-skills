@@ -8,7 +8,7 @@
   check.py SPEC [--previous FILE] [--words FILE] [--json]
   check.py SPEC --scope
 
-  SPEC             the folder with spec.md, evidence.md and, if present, vetting.md
+  SPEC             the folder with spec.md, evidence.md and, if present, vetting.md and trial.md
   --previous FILE  an earlier revision of spec.md, for the check of stable identifiers
   --words FILE     the product words of the aspect, one in each line; an item must not use one
   --json           print one JSON object in place of the text report
@@ -17,10 +17,14 @@
 
 The report lists each failing rule with its place, then what remains. Result code 0: no rule
 fails. Result code 1: a rule fails. Result code 2: the input cannot be read. Pending levels,
-pending vettings, changed items and a missing acceptance remain; they do not fail the check.
+pending vettings, changed items, open findings of a trial, a recipe without a trial and a missing
+acceptance remain; they do not fail the check.
 
 Each item names one view of section 1. A view is a set of concerns of the aspect. Each view needs
 an item, and an item on level 1 when no level is pending. The report gives the items of each view.
+
+The file trial.md records each trial of the recipe on a project, and each finding of the review of
+the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
 """
 
 import json
@@ -36,6 +40,18 @@ SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
 FINDING_FIELDS = ("contexts", "boundaries")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 NOT_CONFIRMED = ("", "pending", "rejected")
+NONE_FOUND = "none found"
+VIEWPOINTS = (
+    "architecture",
+    "operations",
+    "quality",
+    "development",
+    "security",
+    "product owner",
+    "views of the recipe",
+)
+ROUTES = ("recipe", "tooling", "implementation skill")
+STATUS = re.compile(r"open|corrected in \S.*|declined: \S.*")
 
 MESSAGES = {
     "accepted-missing": "The head line has no field Accepted.",
@@ -44,6 +60,7 @@ MESSAGES = {
     "finding-without-source": "This finding of section 1 names no source. Name it, or write 'judgement'.",
     "risk-dimensions-missing": "Section 1 names no risk dimension.",
     "risk-dimension-empty": "The risk dimension '{0}' has no question.",
+    "targets-missing": "Section 1 names no target. Write one line for each target, or '(none found)'.",
     "views-missing": "Section 1 names no view.",
     "view-empty": "The view '{0}' does not name its concerns.",
     "view-twice": "The view '{0}' is in section 1 two times.",
@@ -80,6 +97,13 @@ MESSAGES = {
     "id-reused": "The earlier revision retired this identifier. Use a new identifier.",
     "skill-field-empty": "The field '{0}' of the recipe skill in section 5 is empty.",
     "skill-refers-to-section": "The field '{0}' of the recipe skill refers to a section of spec.md.",
+    "trial-unknown": "The finding names the trial '{0}'. The table Trials does not have this trial.",
+    "trial-viewpoint-unknown": "The viewpoint '{0}' is not one of the seven viewpoints.",
+    "trial-finding-empty": "The finding of the trial has no text.",
+    "trial-route-unknown": "The route '{0}' is not permitted. Use recipe, tooling or implementation skill.",
+    "trial-status-unknown": (
+        "The status '{0}' is not permitted. Use 'open', 'corrected in <revision>' or 'declined: <reason>'."
+    ),
     "no-failure": "No check fails.",
     "scope-only": "Only the field and the thing to build were checked. The findings wait for the research.",
     "failures": "Failing checks: {0}.",
@@ -94,6 +118,8 @@ MESSAGES = {
     "remains-waiting": "Items that rest only on sources with a pending vetting: {0}.",
     "remains-judgement": "Items that need judgement: {0}.",
     "remains-changed": "Items with a changed text. Make sure that the meaning is the same: {0}.",
+    "remains-trial": "Trial findings that are open: {0}.",
+    "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
     "accepted": "Accepted: {0}.",
     "previous-skipped": "The check of stable identifiers was skipped: no earlier revision was given.",
@@ -194,9 +220,10 @@ def check_scope(data):
     >>> brief(check_scope(sample.load(date)))
     [('agreed-without-date', '')]
 
-    The views, the contexts, the risk dimensions and the boundaries are not part of the scope.
+    The views, the contexts, the risk dimensions, the boundaries and the targets are not part of
+    the scope.
 
-    >>> findings = ("- **Views", "- **Contexts", "  ", "- **Boundaries")
+    >>> findings = ("- **Views", "- **Contexts", "  ", "- **Boundaries", "- **Targets")
     >>> lines = [x for x in sample.SPEC.splitlines() if not x.startswith(findings)]
     >>> folder = sample.folder()
     >>> _ = (folder / "spec.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -217,7 +244,7 @@ def check_scope(data):
 
 
 def check_scope_findings(data):
-    r"""What the research finds for section 1: the contexts, the risk dimensions, the boundaries.
+    r"""What the research finds for section 1: contexts, risk dimensions, boundaries, targets.
 
     They are findings, as the checklist items are. Thus each one is filled and names its source,
     or says "judgement".
@@ -252,6 +279,23 @@ def check_scope_findings(data):
     >>> two += "  - `recovery`: a complete site. (S-01 section 5)\n  - `tests`: test design."
     >>> brief(check_scope_findings(sample.load(("spec.md", one, two))))
     [('finding-without-source', 'tests')]
+
+    A target is a measurable result of the recipe. Each target is one line below the field and
+    names its source. A field without a target says "(none found)".
+
+    >>> no_source = sample.TARGET.removesuffix(" (S-02 section 4)")
+    >>> brief(check_scope_findings(sample.load(("spec.md", sample.TARGET, no_source))))
+    [('finding-without-source', 'restore drill')]
+    >>> found = check_scope_findings(sample.load(("spec.md", sample.TARGET + "\n", "")))
+    >>> brief(found), found[0]["line"], found[0]["text"]
+    ([('targets-missing', '')], 20,
+     "Section 1 names no target. Write one line for each target, or '(none found)'.")
+    >>> field = "- **Targets**: the measurable results that a project reaches when it applies the recipe.\n"
+    >>> none = ("spec.md", field + sample.TARGET, "- **Targets**: (none found)")
+    >>> check_scope_findings(sample.load(none))
+    []
+    >>> brief(check_scope_findings(sample.load(("spec.md", field + sample.TARGET + "\n", ""))))
+    [('targets-missing', '')]
     """
     out = []
     for name in FINDING_FIELDS:
@@ -270,6 +314,12 @@ def check_scope_findings(data):
             out.append(finding("risk-dimension-empty", dim, dim["name"], dim["name"]))
         elif not aspect.source_ids(dim["text"]) and "judgement" not in dim["text"].lower():
             out.append(finding("finding-without-source", dim, dim["name"]))
+    field = data["aspect"].get("targets", {})
+    if not data["targets"] and NONE_FOUND not in field.get("value", "").lower():
+        out.append(finding("targets-missing", field))
+    for target in data["targets"]:
+        if not aspect.source_ids(target["text"]) and "judgement" not in target["text"].lower():
+            out.append(finding("finding-without-source", target, target["name"]))
     return out
 
 
@@ -324,7 +374,7 @@ def check_references(data):
     []
     >>> found = check_references(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |")))
     >>> brief(found), found[0]["line"], found[0]["text"]
-    ([('unknown-source', 'C-02')], 59, "The row cites 'S-09'. Section 2 does not list this source.")
+    ([('unknown-source', 'C-02')], 61, "The row cites 'S-09'. Section 2 does not list this source.")
 
     The rows of the strategy are checked also.
 
@@ -332,11 +382,14 @@ def check_references(data):
     >>> brief(check_references(sample.load(strategy)))
     [('unknown-source', '')]
 
-    The views of section 1 are checked also.
+    The views and the targets of section 1 are checked also.
 
     >>> view = ("spec.md", "copies are. (S-01 section 2)", "copies are. (S-08 section 2)")
     >>> brief(check_references(sample.load(view)))
     [('unknown-source', 'storage')]
+    >>> target = ("spec.md", "measures it. (S-02 section 4)", "measures it. (S-08 section 4)")
+    >>> brief(check_references(sample.load(target)))
+    [('unknown-source', 'restore drill')]
     """
     known = {s.get("id") for s in data["sources"]}
     out = []
@@ -345,7 +398,8 @@ def check_references(data):
     for name in FINDING_FIELDS:
         field = data["aspect"].get(name) or {"value": "", "items": []}
         rows += [(field, field["value"], name)] + [(i, i["text"], i["name"]) for i in field["items"]]
-    rows += [(d, d["text"], d["name"]) for d in data["risk_dimensions"] + data["views"]]
+    findings = data["risk_dimensions"] + data["views"] + data["targets"]
+    rows += [(d, d["text"], d["name"]) for d in findings]
     for row, cell, ident in rows:
         for sid in aspect.source_ids(cell):
             if sid not in known:
@@ -659,6 +713,75 @@ def check_skill(data):
     return out
 
 
+def check_trials(data):
+    """The record of the trials: each finding names a trial, a viewpoint, a route and a status.
+
+    >>> import sample
+    >>> check_trials(sample.load())
+    []
+    >>> def planted(old, new):
+    ...     row = sample.FINDING_F01
+    ...     return check_trials(sample.load(("trial.md", row, row.replace(old, new))))
+    >>> found = planted("| T-01 |", "| T-07 |")
+    >>> brief(found), found[0]["file"], found[0]["line"], found[0]["text"]
+    ([('trial-unknown', 'F-01')], 'trial.md', 13,
+     "The finding names the trial 'T-07'. The table Trials does not have this trial.")
+    >>> planted("| operations |", "| Operations |")[0]["text"]
+    "The viewpoint 'Operations' is not one of the seven viewpoints."
+    >>> planted("The plan has no step that examines the restored data.", "")[0]["text"]
+    'The finding of the trial has no text.'
+    >>> planted("| recipe |", "| research |")[0]["text"]
+    "The route 'research' is not permitted. Use recipe, tooling or implementation skill."
+
+    The status is "open", "corrected in" with a revision or a commit, or "declined:" with a reason.
+
+    >>> for status in ("open", "corrected in revision 2026-02", "done", "corrected in", "declined:", ""):
+    ...     print(repr(status), brief(planted("corrected in abc1235", status)))
+    'open' []
+    'corrected in revision 2026-02' []
+    'done' [('trial-status-unknown', 'F-01')]
+    'corrected in' [('trial-status-unknown', 'F-01')]
+    'declined:' [('trial-status-unknown', 'F-01')]
+    '' [('trial-status-unknown', 'F-01')]
+
+    A specification without a record of the trials has no such finding.
+
+    >>> data = sample.load()
+    >>> data["trials"] = data["trial_findings"] = []
+    >>> check_trials(data)
+    []
+    """
+    out = []
+    known = {t.get("id", "") for t in data["trials"]}
+    for row in data["trial_findings"]:
+        ident = row.get("id", "")
+        names = ("trial", "viewpoint", "finding", "route", "status")
+        cell = {name: row.get(name, "").strip() for name in names}
+        if cell["trial"] not in known:
+            out.append(finding("trial-unknown", row, ident, cell["trial"]))
+        if cell["viewpoint"] not in VIEWPOINTS:
+            out.append(finding("trial-viewpoint-unknown", row, ident, cell["viewpoint"]))
+        if not cell["finding"]:
+            out.append(finding("trial-finding-empty", row, ident))
+        if cell["route"] not in ROUTES:
+            out.append(finding("trial-route-unknown", row, ident, cell["route"]))
+        if not STATUS.fullmatch(cell["status"]):
+            out.append(finding("trial-status-unknown", row, ident, cell["status"]))
+    return out
+
+
+def open_findings(data):
+    """The findings of the trials that the owner did not decide yet, sorted.
+
+    >>> import sample
+    >>> open_findings(sample.load())
+    []
+    >>> open_findings(sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |")))
+    ['F-01']
+    """
+    return sorted(r.get("id", "") for r in data["trial_findings"] if r.get("status", "").strip() == "open")
+
+
 def live_items(data):
     """The items that are not retired.
 
@@ -784,7 +907,8 @@ def run_checks(data, previous_rows=None, words=()):
     >>> import sample
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
-    ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': []})
+    ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
+          'trial': []})
 
     What remains does not fail the check: a pending level, a pending vetting, a changed text.
 
@@ -804,12 +928,21 @@ def run_checks(data, previous_rows=None, words=()):
     >>> brief(found), remains["basics"]
     ([('view-without-basics', 'storage')], [])
 
+    A finding of a trial that is open remains. A finding with a defect fails the check.
+
+    >>> status = "| recipe | corrected in abc1235 |"
+    >>> found, remains = run_checks(sample.load(("trial.md", status, "| recipe | open |")))
+    >>> found, remains["trial"]
+    ([], ['F-01'])
+    >>> brief(run_checks(sample.load(("trial.md", status, "| recipe | later |")))[0])
+    [('trial-status-unknown', 'F-01')]
+
     The findings of all rules come in the order of the file and the line.
 
     >>> level, cell = ("spec.md", "| 2, operative |", "| high |"), ("spec.md", "| Example Journal |", "| |")
     >>> two = sample.load(level, cell)
     >>> [(f["line"], f["rule"]) for f in run_checks(two, None, ["program"])[0]]
-    [(27, 'source-cell-empty'), (59, 'level-unknown'), (62, 'product-word')]
+    [(29, 'source-cell-empty'), (61, 'level-unknown'), (64, 'product-word')]
     """
     support, waiting = check_support(data)
     basics, without_basics = check_basics(data)
@@ -824,6 +957,7 @@ def run_checks(data, previous_rows=None, words=()):
         + check_evidence(data)
         + check_other_sections(data)
         + check_skill(data)
+        + check_trials(data)
         + support
         + check_words(data, words)
     )
@@ -843,6 +977,7 @@ def run_checks(data, previous_rows=None, words=()):
         "waiting": waiting,
         "judgement": sorted(r["id"] for r in live if r.get("check", "").strip().lower() == "judgement"),
         "changed": changed,
+        "trial": open_findings(data),
     }
     return found, remains
 
@@ -896,7 +1031,7 @@ def report(data, found, remains, previous_given):
     ...     ("spec.md", "| judgement |", "| the review is in the record |"),
     ... )
     >>> print(report(data, *run_checks(data, data["checklist"]), previous_given=True))
-    FAIL unknown-source spec.md:59 C-02: The row cites 'S-09'. Section 2 does not list this source.
+    FAIL unknown-source spec.md:61 C-02: The row cites 'S-09'. Section 2 does not list this source.
     Failing checks: 1.
     Views, with the number of items on each level and the number of sources:
     - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4.
@@ -910,6 +1045,23 @@ def report(data, found, remains, previous_given):
     >>> data["views"] = []
     >>> print(report(data, [], run_checks(data, data["checklist"])[1], previous_given=True))
     No check fails.
+    Accepted: A. Person, 2026-01-15.
+
+    An open finding of a trial remains. A recipe without a trial remains also.
+
+    >>> data = sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |"))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[4:]))
+    What remains:
+    - Items that need judgement: C-04.
+    - Trial findings that are open: F-01.
+    Accepted: A. Person, 2026-01-15.
+    >>> folder = sample.folder()
+    >>> (folder / "trial.md").unlink()
+    >>> data = aspect.load(folder)
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[4:]))
+    What remains:
+    - Items that need judgement: C-04.
+    - The recipe has no trial.
     Accepted: A. Person, 2026-01-15.
 
     A view that waits for the levels is in the list of what remains.
@@ -932,6 +1084,8 @@ def report(data, found, remains, previous_given):
     if views:
         lines += [MESSAGES["views-head"], *views]
     rest = [MESSAGES[f"remains-{key}"].format(", ".join(ids)) for key, ids in remains.items() if ids]
+    if not data["trials"]:
+        rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):
         rest.append(MESSAGES["remains-accepted"])
     if rest:
@@ -1006,7 +1160,9 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'findings', 'previous', 'remains', 'views'], [('unknown-source', 'C-02')], True)
+    (['accepted', 'findings', 'previous', 'remains', 'trials', 'views'], [('unknown-source', 'C-02')], True)
+    >>> result["trials"], result["remains"]["trial"]
+    (['T-01'], [])
     >>> result["views"][1]
     {'items': 2, 'level 1': 1, 'level 2': 0, 'level 3': 1, 'not admitted': 0, 'pending': 0, 'sources': 2,
      'view': 'storage'}
@@ -1088,6 +1244,7 @@ def main(argv=None):
             "findings": found,
             "previous": previous is not None,
             "remains": remains,
+            "trials": sorted(t.get("id", "") for t in data["trials"]),
             "views": view_counts(data),
         }
         print(json.dumps(result, indent=2, sort_keys=True))

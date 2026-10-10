@@ -312,6 +312,24 @@ hook in the settings file of the project does.
 - [x] T094 In `.specify/memory/constitution.md`, principle III: the agent product enforces the limit of the reader of converted files (version 3.3.2)
 - [x] T095 Verify in a scratch project outside the repository, with the smallest model: the file reader reports the title on page 1 of a converted PDF source, and the hook refuses a file of the project
 
+## Phase 16: The trial of a recipe
+
+**Purpose**: FR-033 to FR-037. Two trials of a recipe on a real project gave a poor plan,
+while each check of the tooling passed: the plan built by hand what maintained components
+offer, built a construction for one project, and covered one point of view only. The factory
+had no step that tries a recipe on a project and feeds the findings back.
+
+- [x] T096 In `factory/sota-research/scripts/render.py`: add the option `--trial DIR`; refuse a folder in a git repository and the use with `--out`; do not ask for the acceptance; write a stamp that says that the file is a trial rendering
+- [x] T097 In `tests/test_repo.py`: the test of the stamps fails for a trial rendering in the repository
+- [x] T098 Write `factory/sota-research/prompts/plan-review.md`: the task of a reviewer that answers fixed questions from seven viewpoints with a file and a line, and ends with findings that each have a viewpoint and a route
+- [x] T099 In `factory/sota-research/scripts/aspect.py` and `sample.py`: read `trial.md` with the tables "Trials" and "Findings", and the field "Targets" of section 1; give the sample one trial, two findings and one target
+- [x] T100 In `factory/sota-research/scripts/check.py`: fail for a finding with an unknown trial, viewpoint or route, an empty text or a wrong status; list the open findings and a recipe without a trial under "What remains"
+- [x] T101 In `factory/sota-research/scripts/check.py`: fail for a field "Targets" without a target and without `(none found)`, and for a target without a source; do not examine the field with `--scope`
+- [x] T102 In `factory/sota-research/scripts/render.py`: put the targets into `SKILL.md`, and tell the agent to give in the plan the level of each target and what stops the next level
+- [x] T103 In `.specify/templates/overrides/aspect-spec-template.md`: add the field "Targets" to section 1 and `trial.md` to "Files beside this specification"
+- [x] T104 In `factory/sota-research/references/procedure.md`: add the part "The trial of a recipe" after phase 3, refer to it from phase 3 and from "The refresh", and find the targets in phase 2
+- [x] T105 In `docs/sota-research.md` and `CHANGELOG.md`: the trial, the review, the record of the trials and the measured targets
+
 ---
 
 ## Dependencies & Execution Order

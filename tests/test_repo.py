@@ -133,6 +133,9 @@ def test_each_stamp_of_a_rendered_skill_has_the_right_form():
             text = skill.read_text()
             if "Rendered from the specification" in text and not stamp.search(text):
                 wrong.append(str(skill.relative_to(ROOT)))
+            # A trial rendering is for a trial project outside the repository. It is not delivered.
+            if "Rendered from the specification" in text and "<!-- Trial rendering" in text:
+                wrong.append(str(skill.relative_to(ROOT)) + ": a trial rendering")
     assert not wrong
 
 

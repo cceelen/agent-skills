@@ -5,7 +5,7 @@
 # ///
 """Reader of the folder of one aspect specification. Standard library only.
 
-  load(folder)  reads spec.md, evidence.md and vetting.md into plain dictionaries and lists
+  load(folder)  reads spec.md, evidence.md, vetting.md and trial.md into plain dictionaries and lists
 
 A module for the programs in this folder; it needs Python 3.14.
 
@@ -348,6 +348,8 @@ def load(folder):
     ['operative', 'regulatory']
     >>> [v["name"] for v in data["views"]], [view_of(c) for c in data["checklist"]][:3]
     (['storage', 'operation'], ['storage', 'operation', 'storage'])
+    >>> [(t["name"], t["text"][:13]) for t in data["targets"]]
+    [('restore drill', 'three levels:')]
 
     Each table is found in its section, and each row knows its place.
 
@@ -364,14 +366,23 @@ def load(folder):
     >>> data["vetting_items"][0]["severity"], data["has_vetting"]
     ('3 (S-02 abstract)', True)
 
-    Only spec.md is necessary. An absent evidence record or vetting record gives empty data.
+    The record of the trials has the table of the trials and the table of their findings.
+
+    >>> [t["id"] for t in data["trials"]], data["trials"][0]["plan"]
+    (['T-01'], 'not kept')
+    >>> [(f["id"], f["trial"], f["viewpoint"], f["route"]) for f in data["trial_findings"]]
+    [('F-01', 'T-01', 'operations', 'recipe'), ('F-02', 'T-01', 'development', 'implementation skill')]
+    >>> data["trial_findings"][0]["_file"], data["trial_findings"][0]["_line"]
+    ('trial.md', 13)
+
+    Only spec.md is necessary. An absent evidence, vetting or trial record gives empty data.
 
     >>> folder = sample.folder()
-    >>> (folder / "evidence.md").unlink(), (folder / "vetting.md").unlink()
-    (None, None)
+    >>> [(folder / name).unlink() for name in ("evidence.md", "vetting.md", "trial.md")]
+    [None, None, None]
     >>> data = load(folder)
-    >>> data["evidence"], data["vetting_items"], data["has_vetting"]
-    ([], [], False)
+    >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
+    ([], [], False, [], [])
     >>> (folder / "spec.md").unlink()
     >>> load(folder)
     Traceback (most recent call last):
@@ -415,17 +426,25 @@ def load(folder):
         "vetting_sources": [],
         "vetting_items": [],
         "has_vetting": False,
+        "trials": [],
+        "trial_findings": [],
     }
     data["risk_dimensions"] = data["aspect"].get("risk dimensions", {}).get("items", [])
     data["views"] = data["aspect"].get("views", {}).get("items", [])
+    data["targets"] = data["aspect"].get("targets", {}).get("items", [])
     if (folder / "evidence.md").is_file():
         data["evidence"] = Doc(folder / "evidence.md").table((0, 10**9), "source")
-    if (folder / "vetting.md").is_file():
-        vetting = Doc(folder / "vetting.md")
-        data["has_vetting"] = True
-        for title_, key in (("Sources", "vetting_sources"), ("Items", "vetting_items")):
-            found = vetting.titled(title_)
-            data[key] = vetting.table(found[1]) if found else []
+    data["has_vetting"] = (folder / "vetting.md").is_file()
+    tables = {
+        "vetting.md": (("Sources", "vetting_sources"), ("Items", "vetting_items")),
+        "trial.md": (("Trials", "trials"), ("Findings", "trial_findings")),
+    }
+    for name, parts in tables.items():
+        if (folder / name).is_file():
+            record = Doc(folder / name)
+            for title_, key in parts:
+                found = record.titled(title_)
+                data[key] = record.table(found[1]) if found else []
     return data
 
 

@@ -1,7 +1,7 @@
 """Sample data for the examples of the research tooling. Standard library only.
 
-A small and correct aspect specification with its evidence record, its vetting record and the
-signal files of its two independent sources. The examples (doctests) of the programs in this
+A small and correct aspect specification with its evidence record, its vetting record, its
+record of the trials and the signal files of its two independent sources. The examples (doctests) of the programs in this
 folder use it: each program validates itself with the option --selftest, and needs no test
 file. The sources of the sample are invented.
 
@@ -38,6 +38,8 @@ A small specification for the tests of the tooling. Its sources are invented.
   - `operative`: Can a lost record be made again? Opinion: if not, go past level 1. (S-02 section 4)
   - `regulatory`: Is personal data in the backup? Opinion: if yes, aim for level 3. (S-01 section 5)
 - **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)
+- **Targets**: the measurable results that a project reaches when it applies the recipe.
+  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)
 - **Agreed with the owner on**: 2026-01-05; a recipe for backups of project data.
 
 ## 2. Sources
@@ -155,7 +157,24 @@ Rubric for sources: version 1. Rubric for items: version 1.
 | C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) | 1 (judgement) | 2 (judgement) | 0 (judgement) |  | 18 | 3 | 60 | yes | 1 |
 """
 
-FILES = {"spec.md": SPEC, "evidence.md": EVIDENCE, "vetting.md": VETTING}
+TRIAL = """\
+# Trial record: backups of project data
+
+## Trials
+
+| Id | Date | Project | Commit of the specification | Plan |
+|---|---|---|---|---|
+| T-01 | 2026-01-12 | a small web service | abc1234 | not kept |
+
+## Findings
+
+| Id | Trial | Viewpoint | Finding | Route | Status |
+|---|---|---|---|---|---|
+| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |
+| F-02 | T-01 | development | The plan does not tell a developer how to run the backup before a push. | implementation skill | declined: the documentation of the product tells it |
+"""
+
+FILES = {"spec.md": SPEC, "evidence.md": EVIDENCE, "vetting.md": VETTING, "trial.md": TRIAL}
 
 SIGNALS = {
     "S-03": {
@@ -220,6 +239,8 @@ SOURCE_ROW = "| S-01 | A copy | Example | 2020 | standard | public | full | u |\
 CONFIRMED_S03 = "| 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 CONFIRMED_S04 = "| 8 of 10 | 2026-01-10 | A. Person, 2026-01-15 |"
 APPLIES = "- **Applies**: the order of the work below; it judges C-04."
+TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)"
+FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 
 _KEEP = []
 
@@ -254,7 +275,7 @@ def folder(*edits, files=FILES):
 
     >>> path = folder(("spec.md", "| 2, operative |", "| pending |"))
     >>> sorted(p.name for p in path.iterdir())
-    ['evidence.md', 'spec.md', 'vetting.md']
+    ['evidence.md', 'spec.md', 'trial.md', 'vetting.md']
     >>> "| pending |" in (path / "spec.md").read_text(encoding="utf-8")
     True
     >>> folder(("spec.md", "no such text", ""))

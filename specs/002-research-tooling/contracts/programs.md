@@ -12,7 +12,8 @@ check.py SPEC [--previous FILE] [--words FILE] [--json]
 check.py SPEC --scope
 ```
 
-- Reads `SPEC/spec.md`, `SPEC/evidence.md` and, when present, `SPEC/vetting.md`.
+- Reads `SPEC/spec.md`, `SPEC/evidence.md` and, when present, `SPEC/vetting.md` and
+  `SPEC/trial.md`.
 - `--previous FILE`: an earlier revision of `spec.md`, for the check of stable identifiers.
   Without it, that check is skipped and the report says so.
 - `--words FILE`: the word list of products of the aspect, one word in each line.
@@ -23,11 +24,17 @@ check.py SPEC --scope
 - `--scope`: examines only the head line and section 1, for phase 1. The report says so.
 - Result code `1` when a check fails. Pending levels, pending vettings and a missing
   acceptance are listed as "remains" and do not fail the check.
+- A finding of `trial.md` with an unknown trial, viewpoint or route, an empty text or a wrong
+  status fails the check. Under "remains": `Trial findings that are open: <ids>.`, and
+  `The recipe has no trial.` when the specification has no trial.
+- Outside `--scope`, the field `Targets` of section 1 fails the check when it has no target
+  and not `(none found)`, and when a target names no source and no `judgement`.
 
 ## scripts/render.py
 
 ```text
 render.py SPEC --commit HASH [--branch NAME] [--out DIR] [--check]
+render.py SPEC --commit HASH --trial DIR [--branch NAME] [--check]
 ```
 
 - Runs the rules of `check.py` first. Renders nothing when a check fails or when the
@@ -39,6 +46,11 @@ render.py SPEC --commit HASH [--branch NAME] [--out DIR] [--check]
   in the head of `spec.md`.
 - `--check`: writes nothing. Result code `1` when a file differs from a fresh rendering, and
   the names of those files are printed.
+- `--trial DIR`: a trial rendering, only into `DIR`. `DIR` must be outside each git
+  repository, and `--out` is not permitted with it. The rules of `check.py` must pass and each
+  item must have a level, but the acceptance is not necessary. The stamp of each file says
+  that the file is a trial rendering. With `--check`, the files in `DIR` are compared with a
+  fresh trial rendering.
 
 ## scripts/place.py
 
