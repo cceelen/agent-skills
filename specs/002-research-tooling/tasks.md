@@ -355,6 +355,25 @@ and their concerns itself, and does not ask the owner for them.
 
 ---
 
+## Phase 18: A neutral environment, the seeds, and a skill that works alone
+
+**Purpose**: FR-043 to FR-047. Decision of the owner, 2026-10-10: the factory can use the
+personal environment of the owner and this repository; a skill that the factory creates must
+work alone; the repository must be able to set up a neutral environment of the factory again
+and to retrieve the seed documents and standards.
+
+- [x] T118 Add `factory/sota-research/references/seeds.md`: the table of the seeds, the table of the bodies of knowledge of each field, how to retrieve the seeds, how to read the SWEBOK Guide and how to add a row; move the row of `references/bodies-of-knowledge.md` into it and remove that file
+- [x] T119 Add `factory/sota-research/scripts/seed.py`: `list` prints the rows and fails for a malformed row; `get` retrieves each seed into a work folder outside each git repository, with `--file`, `--from`, `--today` and `--fresh`, reuses the functions of `pdf.py`, continues after a seed that fails, reports a changed digest and writes `seeds.json`
+- [x] T120 In `factory/sota-research/scripts/export.py`: the function `write` writes the files of a kit; add `references/viewpoints.txt` to the files that are left out
+- [x] T121 Add `factory/sota-research/scripts/init.py`: export the kit, write the marker `.factory-kit` with the commit, make the git repository, retrieve the seeds and print the next steps; `--again` removes only a folder with the marker and keeps the work folder
+- [x] T122 In `factory/sota-research/scripts/render.py`: write nothing when a rendered file refers to the factory, to this repository or to an absolute path, and give the file, the line and the text
+- [x] T123 Add `factory/sota-research/references/viewpoints.txt`; in `factory/sota-research/scripts/check.py`, read the names from it, skip the check of the viewpoint when the file is absent and list the findings under "What remains"; keep the names out of the examples of `check.py` and `aspect.py`
+- [x] T124 In `factory/sota-research/references/procedure.md`: `init.py` and `seed.py get` before the first run; the bodies of knowledge from the converted files through a file reader; `seed.py get --from --fresh` in the refresh; the trial project gets only the rendered skill folder, and its session starts in a clean environment
+- [x] T125 In `docs/sota-research.md` and `CHANGELOG.md`: the seeds, the setup of a neutral environment and the rule that a created skill works alone
+- [x] T126 Verify in a scratch folder outside each repository: `init.py` with the file of the SWEBOK Guide, `init.py --again`, and `seed.py get` a second time; the kit holds no file of the guide
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

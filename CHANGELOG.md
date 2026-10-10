@@ -23,6 +23,14 @@ reports are not comparable with new reports.
 - The check gives the number of answers of risk and reward with a source and by judgement.
 - The template of an aspect specification holds no example of a real concern.
 - `export.py` writes a neutral kit for a trial of the tooling.
+- `seed.py` retrieves the seed documents and standards of the factory into a work folder. The
+  manifest `references/seeds.md` names them. It replaces `references/bodies-of-knowledge.md`.
+- `init.py` sets up a neutral environment of the factory again: the kit, a git repository and
+  the seeds.
+- `render.py` renders nothing when a rendered file refers to the factory, to this repository or
+  to an absolute path. A created skill works alone.
+- The names of the viewpoints of the review are in `references/viewpoints.txt`. A neutral kit
+  does not hold this file. There, the check does not examine the viewpoint of a finding.
 
 ## 1.0.3
 

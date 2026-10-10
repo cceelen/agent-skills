@@ -397,6 +397,56 @@ specification whose check reports no failure other than "not accepted".
   fail the check, and MUST be in the JSON report. In the review, the owner MUST get this line
   with the checklist.
 
+**A neutral environment, the seeds, and a skill that works alone**
+
+Decision of the owner, 2026-10-10: the factory can use the personal environment of the owner
+and this repository. A skill that the factory creates must work alone. The repository must be
+able to set up a neutral environment of the factory again, and to retrieve the seed documents
+and standards.
+
+- **FR-043**: The tooling MUST hold a manifest of the seeds: the documents and standards that
+  the factory starts from. Each row names the identifier, the document, the issuer, the
+  version or the date, the kind, the address, the digest of the file, the terms of the issuer
+  and the date when the row was read. The kind is `pdf`, `page` or `owner file`. The digest
+  can be empty. The manifest MUST say which seeds are the bodies of knowledge of which field.
+  It MUST NOT hold the content of a seed. A row enters the manifest only from the page of the
+  issuer, read in the same turn, and after the owner accepts it. A program MUST print the
+  rows, sorted, and MUST fail for a row with an unknown kind, an address that is not `http` or
+  `https`, a digest that is not 64 hexadecimal characters, or an absent cell.
+- **FR-044**: A program MUST retrieve the seeds into a work folder outside each git
+  repository. For the kind `pdf`, it downloads the file with the limits and the rules of the
+  converter of FR-032, keeps it, and writes its text as that converter does. For the kind
+  `owner file`, it uses the file that the owner gives; without one, it reports that the owner
+  must give the file, with the address. For the kind `page`, it only records the seed. Given
+  the folder of an aspect specification, it MUST retrieve also each source of section 2 whose
+  address ends in `.pdf`. One seed that fails MUST NOT stop the program. The program MUST
+  write one sorted record with the state of each seed: `retrieved`, `owner must give the
+  file`, `recorded`, `failed: <reason>` or `changed`. The record holds no current time. When
+  the digest of a file is not the digest of the manifest or of the last run, the state MUST
+  be `changed`, the file MUST be converted, and the result code MUST be 1. Without a digest in
+  the manifest, the program MUST print the digest. A file that is in the work folder MUST NOT
+  be retrieved again, unless an option tells the program to download each file again.
+- **FR-045**: A program MUST set up a neutral environment of the factory from nothing, in two
+  folders outside each git repository, neither in the other. It writes the neutral kit of
+  FR-039, a marker file with the commit of this repository, a git repository in the kit with
+  the branch `main` and one commit, and the seeds of FR-044 in the work folder. Then it MUST
+  print what a person does next. Without the program `git`, it MUST say so and continue. With
+  an option, it MUST remove a kit that holds the marker file and make it again, and MUST keep
+  the work folder. It MUST NOT remove a folder without the marker file. The kit MUST NOT hold
+  a seed document or its converted text.
+- **FR-046**: A rendered skill MUST work alone, without the factory and without this
+  repository. The renderer MUST write nothing when a rendered file refers to a path that
+  starts with `factory/`, `specs/`, `.specify/`, `rules/` or `tests/`, uses the word
+  `constitution`, or holds an absolute path. It MUST give the file, the line and the text.
+  The rules of the kit are text in the skill. In a trial, the trial project MUST get only the
+  folder of the rendered skill, and the session of the trial MUST start in a clean
+  environment: no personal plugin, connector, skill or instruction file.
+- **FR-047**: The names of the viewpoints of the review MUST be in a data file that the
+  export of FR-039 leaves out, as it leaves out the task of the reviewer. No program that is
+  exported holds the list. When the file is absent, the check MUST NOT examine the viewpoint
+  of a finding, and MUST list under "What remains" the findings whose viewpoint was not
+  checked.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -424,6 +474,12 @@ specification whose check reports no failure other than "not accepted".
   the plan.
 - **Trial finding**: one defect of a plan that a reviewer found, with its viewpoint, its route
   and its status.
+- **Seed**: one document or standard that the factory starts from, with its issuer, version,
+  kind, address, digest and terms. The repository holds the row, not the document.
+- **Work folder**: a folder outside each git repository that holds the retrieved seeds, their
+  converted text and the record of their states.
+- **Kit**: a neutral copy of the tooling in a folder outside each git repository, with a
+  marker file that names the commit that it comes from.
 - **Recipe skill**: the rendered skill of one aspect, with its checklist as a reference file
   and its templates for agent files.
 - **Selection**: the checklist that a project commits: the answers of the risk assessment, the

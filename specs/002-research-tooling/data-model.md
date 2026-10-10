@@ -67,10 +67,41 @@ Two tables.
 | Table | Row | Fields | Rules that the check applies |
 |---|---|---|---|
 | Trials | one trial of the recipe on a project | id, date, project, commit of the specification, plan (where the plan is, or `not kept`) | |
-| Findings | one finding of the review of a plan | id, trial, viewpoint, finding, route, status | the trial is in the table "Trials"; the viewpoint is one of `architecture`, `operations`, `quality`, `development`, `security`, `product owner`, `views of the recipe`; the finding has a text; the route is `recipe`, `tooling` or `implementation skill`; the status is `open`, `corrected in <revision or commit>` or `declined: <reason>` |
+| Findings | one finding of the review of a plan | id, trial, viewpoint, finding, route, status | the trial is in the table "Trials"; the viewpoint is one of the names in `references/viewpoints.txt` (`architecture`, `operations`, `quality`, `development`, `security`, `product owner`, `views of the recipe`), and is not checked when that file is absent; the finding has a text; the route is `recipe`, `tooling` or `implementation skill`; the status is `open`, `corrected in <revision or commit>` or `declined: <reason>` |
 
 State of a finding: `open` → `corrected` or `declined` (by the owner). A finding that is open
-is listed under "what remains". A specification without a trial is listed there also.
+is listed under "what remains". A specification without a trial is listed there also. A
+finding whose viewpoint was not checked is listed there also.
+
+## Seeds (`references/seeds.md` in the tooling)
+
+Written by a session from the page of the issuer, accepted by the owner. Read by `seed.py`.
+Two tables.
+
+| Table | Row | Fields | Rules that `seed.py` applies |
+|---|---|---|---|
+| The seeds | one document or standard | id, document, issuer, version or date, kind, address, sha256, terms, row read on | each cell but sha256 is filled; the id uses lowercase letters, digits and hyphens and is unique; the kind is `pdf`, `page` or `owner file`; the address starts with `http://` or `https://`; sha256 is empty or 64 hexadecimal characters; row read on has a date |
+| Bodies of knowledge | one body of knowledge of one field | field, seed | the seed is an id of the first table |
+
+## Work folder (outside each git repository)
+
+Written by `seed.py get`, and by `pdf.py` and `vet.py` for their files. Not committed.
+
+| Path | Holds |
+|---|---|
+| `seeds/<id>.pdf` | the file of one seed, or of one PDF source of an aspect specification |
+| `converted/<id>.md` | the text of that file with one heading for each page, and the marker `.reader-may-read` beside it |
+| `seeds.json` | the date of `--today` or `null`, and for each seed: id, kind, file, converted, sha256, pages, state |
+
+State of a seed: `retrieved`, `recorded` (kind `page`), `owner must give the file`, `changed`
+(the digest is not the digest of the manifest or, without one, of the last run),
+`failed: <reason>`. Only `retrieved` and `recorded` give the result code 0.
+
+## Kit (outside each git repository)
+
+Written by `export.py` or `init.py`. The kit of `init.py` holds the marker `.factory-kit` with
+the commit of this repository, and is a git repository with the branch `main` and one commit.
+`init.py --again` removes only a folder that holds the marker.
 
 ## Rubrics (in the tooling)
 

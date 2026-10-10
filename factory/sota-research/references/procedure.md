@@ -30,15 +30,29 @@ Rules for all phases:
 
 ## Before the first run
 
-1. Run `uv run factory/sota-research/scripts/models.py apply`. It writes the agent files of
+1. For a new environment of the factory, run
+   `uv run factory/sota-research/scripts/init.py <kit folder> <work folder>`.
+   - Give two folders outside each git repository. Do not put one into the other.
+   - If the owner has the file of a seed, add `--file <id>=<path>`.
+   - To make a kit folder of this program again, add `--again`. Use the same work folder.
+   - Do the steps that the program prints. Then do the next steps of this part in the kit
+     folder.
+2. To retrieve the seeds again, run
+   `uv run factory/sota-research/scripts/seed.py get <work folder>`. `references/seeds.md`
+   names the seeds and tells how to retrieve each one.
+   - If a seed has the state `owner must give the file`, ask the owner for the file. Then
+     add `--file <id>=<path>`.
+   - If a seed has the state `changed` or `failed`, tell the owner. Do not use that seed
+     before the owner decides.
+3. Run `uv run factory/sota-research/scripts/models.py apply`. It writes the agent files of
    the three readers for your agent product. Two readers have web tools only. The third
    reader, `sota-file-reader`, has the read tool only. The program also installs the hook
    `scripts/guard.py` in the settings file of the project. The hook lets the third reader read
    only a converted file of the work folder.
-2. If the output has `"writes_agent_files": false` and the result code is 1, the agent product
+4. If the output has `"writes_agent_files": false` and the result code is 1, the agent product
    has no agent files. Stop. Tell the owner that the tools of a reader cannot be limited in
    this agent product. Do not read a source.
-3. If the output has `"reads_converted_files": false`, the agent product has no such hook, and
+5. If the output has `"reads_converted_files": false`, the agent product has no such hook, and
    the third reader is not written. Do not convert a PDF source. Record each PDF source under
    "not verified".
 
@@ -105,10 +119,21 @@ its reason and its date in section 7.
 
 1. **Place the aspect in its field.** Do this before you search for the aspect by its name.
    - Find the bodies of knowledge of the field: the documents that divide the whole field
-     into knowledge areas. `references/bodies-of-knowledge.md` names them and tells how to
-     read each one. If the field has no row there, search for its body of knowledge and add
-     the row.
-   - Let readers read them, as in step 5. Record each one as a source in section 2.
+     into knowledge areas. The table "Bodies of knowledge" of `references/seeds.md` names
+     the seed of each one. Run `uv run factory/sota-research/scripts/seed.py list` to see
+     them.
+   - If the field has no row there, search for its body of knowledge. Do the steps of "How
+     to add a row" of `references/seeds.md`.
+   - If the file `<work folder>/converted/<seed id>.md` is absent, run
+     `uv run factory/sota-research/scripts/seed.py get <work folder>`.
+   - Do not read a file of `<work folder>/converted/` yourself. Give the path of each body
+     of knowledge to one agent of the type `sota-file-reader`, with the task
+     `prompts/reader.md`.
+   - If a body of knowledge has the kind `page`, give its address to a web reader, as in
+     step 5.
+   - If the owner cannot give the file of a body of knowledge, do what `references/seeds.md`
+     tells for that seed.
+   - Record each body of knowledge as a source in section 2.
    - Find the knowledge areas that the aspect touches. Each one is a candidate for a view.
      Write the candidates into the field "Views" of section 1, each with its source.
    - Find the measurable targets of the aspect in the sources: a scale with levels, or a
@@ -160,6 +185,8 @@ its reason and its date in section 7.
      `uv run factory/sota-research/scripts/pdf.py <file or address> <work folder>/converted/<source id>.md`.
      The work folder is outside the repository. Keep only converted files in the folder
      `converted`.
+   - If section 2 has the sources already, retrieve and convert each PDF source in one step:
+     `uv run factory/sota-research/scripts/seed.py get <work folder> --from <folder of the specification>`.
    - Do not read the converted file yourself. Give its path to one agent of the type
      `sota-file-reader`, with the task `prompts/reader.md`.
    - If the conversion gives no text, record the source under "not verified".
@@ -249,19 +276,26 @@ For a trial of the tooling itself, do this step first: make the repository of th
 `uv run factory/sota-research/scripts/export.py <folder outside the repository>`. Do not make
 it as a copy of this repository. Then make a new repository in that folder with the branch
 `main` and one commit. To keep words out of the kit, write them into a file, one in each line,
-and add `--words <file>`.
+and add `--words <file>`. To get the kit, the repository and the seeds in one step, use
+`init.py`: see "Before the first run".
 
 1. Commit the specification on its branch. Get the commit: `git rev-parse --short HEAD`. Render
    for the trial:
    `uv run factory/sota-research/scripts/render.py <folder> --commit <commit> --trial <folder outside the repository>`.
-   Do not put a trial rendering into this repository.
+   Do not put a trial rendering into this repository. If the program reports that a skill
+   must work alone, correct the specification. Do not edit the rendered file.
 2. Make the trial project.
    - Ask the owner which project to use. Copy its files, without its history, into a new
      folder outside this repository.
    - Make a new repository in that folder, with one commit.
-   - Install the rendered skill in the trial project.
+   - Install the rendered skill in the trial project. Give the trial project only the
+     rendered skill folder. Do not give it a file of the factory, of the specification or of
+     this repository.
    - Do not give the trial session the address of the original project.
-3. Start a new session in the trial project. Tell it only to use the skill. Do not tell it
+3. Start a new session in the trial project. Start the session in a clean environment: no
+   personal plugin, connector, skill or instruction file. If this repository has the tooling
+   `factory/experiment-rigor`, run the session through it. Tell the session only to use the
+   skill. Do not tell it
    what the research found or what you expect. The skill tells the session to stop at the
    plan. Do not let the session apply the plan.
 4. Start a reviewer that did not see the research: a new agent with the task
@@ -319,6 +353,11 @@ The owner starts a refresh. Nothing runs on a schedule.
 
 1. Read the watch list in section 6. Find out which sources moved: a new version, a new date,
    a changed status.
+   - Run `uv run factory/sota-research/scripts/seed.py get <work folder> --from <folder of the
+     specification> --fresh`. Use the work folder of the last run.
+   - A seed or a source with the state `changed` moved. The program converted its new file.
+   - For a seed of `references/seeds.md` that changed, do the steps of "How to add a row" of
+     that file for its row.
 2. Read only those sources again, with the readers. For a finding of a trial with the route
    `recipe`, search and read for the view or the question of the finding, as in steps 4 to 7
    of phase 2.

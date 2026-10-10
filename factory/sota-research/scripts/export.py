@@ -15,7 +15,8 @@
 The program writes only what a session needs to do the procedure: the tooling, the template of an
 aspect specification, the rules of the kit, the two programs of the skill library-vetting that the
 tooling loads, and two instruction files that the program makes. It does not write the sample
-specification and the task of the reviewer of a plan. It writes no documentation, no test, no
+specification, the task of the reviewer of a plan and the list of the viewpoints of the review.
+It writes the manifest of the seeds, and no seed document. It writes no documentation, no test, no
 specification and no other skill: a text about a different subject must not become a finding of
 the research.
 
@@ -37,8 +38,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 TOOLING = "factory/sota-research"
 TEMPLATE = ".specify/templates/overrides/aspect-spec-template.md"
 # Files of the tooling that a session of the research does not get. Only the examples of the
-# programs use the sample. The task of the reviewer names the viewpoints of the review.
-LEFT_OUT = ("scripts/sample.py", "prompts/plan-review.md")
+# programs use the sample. The task of the reviewer and the list name the viewpoints of the review.
+LEFT_OUT = ("scripts/sample.py", "prompts/plan-review.md", "references/viewpoints.txt")
 # The programs of a different skill that the tooling loads when it runs.
 LOADED = (vet.COLLECTOR_PROGRAM, models.SHARED)
 
@@ -75,14 +76,27 @@ def kit(root=ROOT):
      'rules/evidence-before-action.md', 'skills/library-vetting/scripts/collect.py',
      'skills/library-vetting/scripts/models.py']
 
-    The kit holds the tooling without the sample, without the task of the reviewer and without
-    the files that Python makes when it runs.
+    The kit holds the tooling without the sample, without the task of the reviewer, without the
+    list of the viewpoints of the review and without the files that Python makes when it runs.
 
     >>> tooling = {path.removeprefix(TOOLING + "/") for path in files if path.startswith(TOOLING)}
     >>> sorted(tooling & {"SKILL.md", "references/procedure.md", "scripts/check.py", "scripts/export.py"})
     ['SKILL.md', 'references/procedure.md', 'scripts/check.py', 'scripts/export.py']
     >>> sorted(tooling & set(LEFT_OUT)), [path for path in files if "__pycache__" in path]
     ([], [])
+    >>> [(ROOT / TOOLING / path).is_file() for path in LEFT_OUT]
+    [True, True, True]
+    >>> "prompts/plan-review.md" in tooling, "references/viewpoints.txt" in tooling
+    (False, False)
+
+    No file of the kit holds the names of all viewpoints of the review. The kit holds the manifest
+    of the seeds.
+
+    >>> names = check.viewpoints()
+    >>> len(names), [path for path, (text, _) in files.items() if all(n.encode() in text for n in names)]
+    (7, [])
+    >>> "references/seeds.md" in tooling
+    True
 
     No program needs a file that is left out: the examples of the programs load the sample, and
     no line of a program does.
@@ -141,6 +155,24 @@ def words_in(files, words):
                 if re.search(rf"(?<!\w){re.escape(word)}(?!\w)", line, re.I):
                     out.append(MESSAGES["word"].format(path, word, number))
     return out
+
+
+def write(files, target):
+    """Write the files of the kit into the folder. Returns the written paths, sorted.
+
+    >>> import os, tempfile
+    >>> target = pathlib.Path(tempfile.mkdtemp(prefix="sota-export-")) / "kit"
+    >>> write({"b/run.py": (b"print(1)", True), "a.md": (b"text", False)}, target)
+    ['a.md', 'b/run.py']
+    >>> (target / "a.md").read_bytes(), [os.access(target / name, os.X_OK) for name in ("b/run.py", "a.md")]
+    (b'text', [True, False])
+    """
+    target = pathlib.Path(target)
+    for path, (content, runs) in sorted(files.items()):
+        (target / path).parent.mkdir(parents=True, exist_ok=True)
+        (target / path).write_bytes(content)
+        (target / path).chmod(0o755 if runs else 0o644)
+    return sorted(files)
 
 
 def main(argv=None):
@@ -229,10 +261,7 @@ def main(argv=None):
     if reasons:
         print("\n".join(reasons))
         sys.exit(1)
-    for path, (content, runs) in sorted(files.items()):
-        (target / path).parent.mkdir(parents=True, exist_ok=True)
-        (target / path).write_bytes(content)
-        (target / path).chmod(0o755 if runs else 0o644)
+    for path in write(files, target):
         print(MESSAGES["written"].format(path))
 
 

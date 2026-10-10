@@ -41,6 +41,10 @@ check.py SPEC --scope
 - A finding of `trial.md` with an unknown trial, viewpoint or route, an empty text or a wrong
   status fails the check. Under "remains": `Trial findings that are open: <ids>.`, and
   `The recipe has no trial.` when the specification has no trial.
+- The names of the viewpoints come from `references/viewpoints.txt`, one in each line. When
+  the file is absent, the viewpoint of a finding is not checked. Under "remains":
+  `Trial findings with a viewpoint that was not checked: <ids>. The list is absent.` With
+  `--json`: the key `viewpoints` in `remains`.
 - Outside `--scope`, the field `Targets` of section 1 fails the check when it has no target
   and not `(none found)`, and when a target names no source and no `judgement`.
 
@@ -65,6 +69,10 @@ render.py SPEC --commit HASH --trial DIR [--branch NAME] [--check]
   item must have a level, but the acceptance is not necessary. The stamp of each file says
   that the file is a trial rendering. With `--check`, the files in `DIR` are compared with a
   fresh trial rendering.
+- Renders nothing when a rendered file refers to a path that starts with `factory/`, `specs/`,
+  `.specify/`, `rules/` or `tests/`, uses the word `constitution`, or holds an absolute path
+  (`/home/` or a drive letter). Prints one line for each place:
+  `Nothing was rendered: a skill must work alone. The file <file> holds '<text>' in line <n>.`
 
 ## scripts/export.py
 
@@ -75,13 +83,64 @@ export.py DIR [--words FILE]
 - Writes a neutral kit for a trial of the tooling into `DIR`. `DIR` must be outside each git
   repository, and must be new or empty.
 - The kit holds `factory/sota-research/` without `scripts/sample.py`, without
-  `prompts/plan-review.md` and without the files that Python makes when it runs; the template
+  `prompts/plan-review.md`, without `references/viewpoints.txt` and without the files that
+  Python makes when it runs; the template
   `.specify/templates/overrides/aspect-spec-template.md`; the folder `rules/`;
   `skills/library-vetting/scripts/collect.py` and `models.py`; and an `AGENTS.md` and a
   `CLAUDE.md` that the program makes.
 - `--words FILE`: one word or phrase in each line. If an exported file holds one, the program
   writes nothing and prints the file and the line of each use.
 - Prints each exported file, sorted. Result code `1` when nothing was exported.
+
+## scripts/seed.py
+
+```text
+seed.py list [--manifest FILE]
+seed.py get WORK [--file ID=PATH ...] [--from SPEC] [--today DATE] [--fresh] [--manifest FILE]
+```
+
+- Reads `references/seeds.md`. `--manifest FILE` gives a different manifest, for tests.
+- `list`: prints one line for each seed, sorted: id, kind, version or date, address and
+  digest. Then one line for each body of knowledge of a field. A malformed row gives one line
+  with the file, the line and the id, and the result code `1`.
+- `get`: retrieves each seed into `WORK`, which must be outside each git repository. A file
+  is kept as `WORK/seeds/<id>.pdf`, and its text is written to `WORK/converted/<id>.md`
+  through the functions of `pdf.py`.
+  - Kind `pdf`: downloads the address through `pdf.py`. Kind `owner file`: uses the path of
+    `--file ID=PATH`, or the file in `WORK/seeds/`. Kind `page`: records only.
+  - `--from SPEC`: also each source of section 2 of `SPEC/spec.md` whose address ends in
+    `.pdf`, with the source id as the id.
+  - A file that is in `WORK/seeds/` is not retrieved again, and a text with the same digest is
+    not converted again. `--fresh` downloads each file of the kind `pdf` again.
+  - The digest of the file is compared with the digest of the manifest or, without one, with
+    the digest in the `WORK/seeds.json` of the last run. A different digest gives the state
+    `changed`; the new file is kept and converted.
+  - A seed of the manifest without a digest: the program prints the digest for the row.
+  - A seed that fails does not stop the program. Its reason is in the state.
+  - Writes `WORK/seeds.json`, with sorted keys and without a current time. `--today DATE`
+    gives its date.
+- Result code `0`: each seed is `retrieved` or `recorded`. `1`: a seed failed, changed or
+  waits for the owner. `2`: the manifest is malformed or cannot be read, or an argument is
+  wrong.
+
+## scripts/init.py
+
+```text
+init.py KIT WORK [--file ID=PATH ...] [--today DATE] [--again] [--manifest FILE]
+```
+
+- `KIT` and `WORK` must be outside each git repository, and neither can be in the other. `KIT`
+  must be new or empty.
+- In this order: writes the kit of `export.py` into `KIT`; writes `KIT/.factory-kit` with the
+  commit of this repository, or `not known`; makes `KIT` a git repository with the branch
+  `main` and one commit that names no person; retrieves the seeds into `WORK` as `seed.py get`
+  does; prints the next steps for a person.
+- Without the program `git`, or when a git command fails, the program says so and continues.
+- `--again`: removes a `KIT` that holds `.factory-kit`, and makes it again. `WORK` is kept. A
+  folder with files and without the marker is never removed; the program refuses it.
+- `--file`, `--today` and `--manifest` are the options of `seed.py get`.
+- Result code `0`: the kit is made and each seed is `retrieved` or `recorded`. `1`: the kit is
+  made, and a seed failed, changed or waits for the owner. `2`: nothing was made.
 
 ## scripts/place.py
 

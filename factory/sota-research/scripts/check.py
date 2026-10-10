@@ -35,9 +35,13 @@ names its stakeholders in the form "(stakeholders: a, b)". A stakeholder that is
 
 The file trial.md records each trial of the recipe on a project, and each finding of the review of
 the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
+The names of the viewpoints are in the file references/viewpoints.txt, one in each line. A kit
+that export.py made does not hold this file. Without the file, the viewpoint of a finding is not
+checked, and the list of what remains says so.
 """
 
 import json
+import pathlib
 import re
 import sys
 
@@ -54,15 +58,9 @@ ANSWERS = ("severity", "probability", "breadth", "adopt", "keep", "own risk")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 NOT_CONFIRMED = ("", "pending", "rejected")
 NONE_FOUND = "none found"
-VIEWPOINTS = (
-    "architecture",
-    "operations",
-    "quality",
-    "development",
-    "security",
-    "product owner",
-    "views of the recipe",
-)
+# The names of the viewpoints of the review of a plan, one in each line. A session of the
+# research must not see them: export.py does not put this file into a kit.
+VIEWPOINTS_FILE = pathlib.Path(__file__).resolve().parents[1] / "references/viewpoints.txt"
 ROUTES = ("recipe", "tooling", "implementation skill")
 STATUS = re.compile(r"open|corrected in \S.*|declined: \S.*")
 
@@ -146,6 +144,7 @@ MESSAGES = {
     "remains-judgement": "Items that need judgement: {0}.",
     "remains-changed": "Items with a changed text. Make sure that the meaning is the same: {0}.",
     "remains-trial": "Trial findings that are open: {0}.",
+    "remains-viewpoints": "Trial findings with a viewpoint that was not checked: {0}. The list is absent.",
     "remains-stakeholders": "Stakeholders that are in no view: {0}.",
     "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
@@ -909,7 +908,36 @@ def check_skill(data):
     return out
 
 
-def check_trials(data):
+def viewpoints(path=VIEWPOINTS_FILE):
+    r"""The names of the viewpoints of the review, or None if the file is absent.
+
+    >>> len(viewpoints()), len(set(viewpoints()))
+    (7, 7)
+    >>> import sample
+    >>> path = sample.folder() / "viewpoints.txt"
+    >>> viewpoints(path)
+    >>> _ = path.write_text("first name\n\n second \n", encoding="utf-8")
+    >>> viewpoints(path)
+    ['first name', 'second']
+    """
+    if not pathlib.Path(path).is_file():
+        return None
+    return [line.strip() for line in aspect.read_text(path).splitlines() if line.strip()]
+
+
+def unchecked_viewpoints(data, path=VIEWPOINTS_FILE):
+    """The findings of the trials whose viewpoint was not checked: the list of the viewpoints is absent.
+
+    >>> import sample
+    >>> unchecked_viewpoints(sample.load()), unchecked_viewpoints(sample.load(), "absent.txt")
+    ([], ['F-01', 'F-02'])
+    """
+    if viewpoints(path) is not None:
+        return []
+    return sorted(row.get("id", "") for row in data["trial_findings"])
+
+
+def check_trials(data, path=VIEWPOINTS_FILE):
     """The record of the trials: each finding names a trial, a viewpoint, a route and a status.
 
     >>> import sample
@@ -922,8 +950,16 @@ def check_trials(data):
     >>> brief(found), found[0]["file"], found[0]["line"], found[0]["text"]
     ([('trial-unknown', 'F-01')], 'trial.md', 13,
      "The finding names the trial 'T-07'. The table Trials does not have this trial.")
-    >>> planted("| operations |", "| Operations |")[0]["text"]
-    "The viewpoint 'Operations' is not one of the seven viewpoints."
+    >>> viewpoint = sample.load()["trial_findings"][0]["viewpoint"]
+    >>> planted(f"| {viewpoint} |", "| No Such Viewpoint |")[0]["text"]
+    "The viewpoint 'No Such Viewpoint' is not one of the seven viewpoints."
+
+    Without the list of the viewpoints, as in a kit that export.py made, the viewpoint is not checked.
+
+    >>> row = sample.FINDING_F01
+    >>> data = sample.load(("trial.md", row, row.replace(f"| {viewpoint} |", "| No Such Viewpoint |")))
+    >>> check_trials(data, "absent.txt")
+    []
     >>> planted("The plan has no step that examines the restored data.", "")[0]["text"]
     'The finding of the trial has no text.'
     >>> planted("| recipe |", "| research |")[0]["text"]
@@ -948,6 +984,7 @@ def check_trials(data):
     []
     """
     out = []
+    permitted = viewpoints(path)
     known = {t.get("id", "") for t in data["trials"]}
     for row in data["trial_findings"]:
         ident = row.get("id", "")
@@ -955,7 +992,7 @@ def check_trials(data):
         cell = {name: row.get(name, "").strip() for name in names}
         if cell["trial"] not in known:
             out.append(finding("trial-unknown", row, ident, cell["trial"]))
-        if cell["viewpoint"] not in VIEWPOINTS:
+        if permitted is not None and cell["viewpoint"] not in permitted:
             out.append(finding("trial-viewpoint-unknown", row, ident, cell["viewpoint"]))
         if not cell["finding"]:
             out.append(finding("trial-finding-empty", row, ident))
@@ -1097,14 +1134,14 @@ def compare_previous(data, previous_rows):
     return out, sorted(changed)
 
 
-def run_checks(data, previous_rows=None, words=()):
+def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FILE):
     """All findings, sorted, and what remains.
 
     >>> import sample
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
-          'trial': [], 'stakeholders': []})
+          'trial': [], 'viewpoints': [], 'stakeholders': []})
 
     What remains does not fail the check: a pending level, a pending vetting, a changed text.
 
@@ -1133,6 +1170,12 @@ def run_checks(data, previous_rows=None, words=()):
     >>> brief(run_checks(sample.load(("trial.md", status, "| recipe | later |")))[0])
     [('trial-status-unknown', 'F-01')]
 
+    Without the list of the viewpoints, the findings whose viewpoint was not checked remain.
+
+    >>> found, remains = run_checks(sample.load(), viewpoints_file="absent.txt")
+    >>> found, remains["viewpoints"]
+    ([], ['F-01', 'F-02'])
+
     The findings of all rules come in the order of the file and the line.
 
     >>> level, cell = ("spec.md", "| 2, operative |", "| high |"), ("spec.md", "| Example Journal |", "| |")
@@ -1154,7 +1197,7 @@ def run_checks(data, previous_rows=None, words=()):
         + check_evidence(data)
         + check_other_sections(data)
         + check_skill(data)
-        + check_trials(data)
+        + check_trials(data, viewpoints_file)
         + support
         + check_words(data, words)
     )
@@ -1175,6 +1218,7 @@ def run_checks(data, previous_rows=None, words=()):
         "judgement": sorted(r["id"] for r in live if r.get("check", "").strip().lower() == "judgement"),
         "changed": changed,
         "trial": open_findings(data),
+        "viewpoints": unchecked_viewpoints(data, viewpoints_file),
         "stakeholders": stakeholders_without_view(data),
     }
     return found, remains
@@ -1276,6 +1320,15 @@ def report(data, found, remains, previous_given):
     - Items that need judgement: C-04.
     - The recipe has no trial.
     Accepted: A. Person, 2026-01-15.
+
+    In a kit without the list of the viewpoints, one line says that the viewpoints were not checked.
+
+    >>> data = sample.load()
+    >>> found, remains = run_checks(data, viewpoints_file="absent.txt")
+    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[5:8]))
+    What remains:
+    - Items that need judgement: C-04.
+    - Trial findings with a viewpoint that was not checked: F-01, F-02. The list is absent.
 
     A view that waits for the levels is in the list of what remains.
 

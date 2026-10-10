@@ -23,7 +23,14 @@ The program writes SKILL.md, references/checklist.md and agent-templates/<name>.
 target folder, and docs/<name>.md. The target folder is the field "Target folder" of section 5,
 or skills/<name>/. It renders only a specification that passes its check and that the owner
 accepted. With --trial, it renders also a specification that the owner did not accept; the check
-must pass. Result code 0: done. Result code 1: nothing was rendered, or a file differs. Result
+must pass.
+
+A rendered skill must work alone, without the factory and without this repository. The program
+renders nothing when a rendered file refers to a path that starts with factory/, specs/,
+.specify/, rules/ or tests/, uses the word "constitution", or holds an absolute path. It gives
+the file, the line and the text.
+
+Result code 0: done. Result code 1: nothing was rendered, or a file differs. Result
 code 2: the input cannot be read.
 """
 
@@ -40,6 +47,14 @@ import check
 MAX_LINES = 500
 # The rules of the kit, with their marker lines. Each skill holds them.
 RULES_PROGRAM = pathlib.Path(__file__).resolve().parents[3] / "rules/apply.py"
+# What a rendered file must not hold: a path of the factory or of this repository, the word for
+# the principles of this repository, and an absolute path.
+NOT_ALONE = re.compile(
+    r"(?<![\w./-])(?:factory|specs|\.specify|rules|tests)/"
+    r"|\bconstitution\b"
+    r"|/home/|(?<![A-Za-z])[A-Za-z]:\\|(?<![A-Za-z])[A-Za-z]:/(?!/)",
+    re.I,
+)
 STAMP = re.compile(r"specification branch `([^`]*)`, commit `([^`]*)`, spec\.md sha256 `([0-9a-f]{64})`")
 
 MESSAGES = {
@@ -54,6 +69,7 @@ MESSAGES = {
     "bad-target": "Nothing was rendered: the target folder '{0}' must be a folder inside the repository.",
     "levels-pending": "Nothing was rendered: these items have no level. Run place.py: {0}.",
     "word": "Nothing was rendered: the file {0} uses the product word '{1}'.",
+    "not-alone": "Nothing was rendered: a skill must work alone. The file {0} holds '{2}' in line {1}.",
     "too-long": "Nothing was rendered: SKILL.md has {0} lines. The maximum is 500.",
     "trial-with-out": "Nothing was rendered: use --trial without --out. A trial has its own folder.",
     "trial-in-repository": "Nothing was rendered: the folder of --trial must be outside each git repository.",
@@ -643,6 +659,40 @@ def word_in(files, words):
     return None
 
 
+def not_alone(files):
+    r"""The message for each reference to the factory or to this repository in the rendered files.
+
+    A skill that the factory creates works alone: a user installs only its folder.
+
+    >>> import sample
+    >>> not_alone(render(sample.load(), "900-backups", "abc1234", "0" * 64))
+    []
+    >>> not_alone(render(sample.load(), "900-backups", "abc1234", "0" * 64, trial=True))
+    []
+    >>> files = {
+    ...     "b.md": "Read `factory/a/SKILL.md`.\nSee specs/001-a/spec.md and the Constitution.\n",
+    ...     "a.md": "The file /home/a/b.md.\nC:\\Users\\a and D:/work.\n.specify/x rules/x tests/x\n",
+    ...     "c.md": "The folder src/tests/ is not a path of the factory. See https://a.example/rules/a.\n"
+    ...             "A manufactory/ is not, and the reconstitution is not. Scale 1:/2.\n",
+    ... }
+    >>> print("\n".join(not_alone(files)))
+    Nothing was rendered: a skill must work alone. The file a.md holds '/home/' in line 1.
+    Nothing was rendered: a skill must work alone. The file a.md holds 'C:\' in line 2.
+    Nothing was rendered: a skill must work alone. The file a.md holds 'D:/' in line 2.
+    Nothing was rendered: a skill must work alone. The file a.md holds '.specify/' in line 3.
+    Nothing was rendered: a skill must work alone. The file a.md holds 'rules/' in line 3.
+    Nothing was rendered: a skill must work alone. The file a.md holds 'tests/' in line 3.
+    Nothing was rendered: a skill must work alone. The file b.md holds 'factory/' in line 1.
+    Nothing was rendered: a skill must work alone. The file b.md holds 'specs/' in line 2.
+    Nothing was rendered: a skill must work alone. The file b.md holds 'Constitution' in line 2.
+    """
+    out = []
+    for path, text in sorted(files.items()):
+        for number, line in enumerate(text.splitlines(), 1):
+            out += [MESSAGES["not-alone"].format(path, number, found) for found in NOT_ALONE.findall(line)]
+    return out
+
+
 def main(argv=None):
     r"""The command line. See the text at the start of this file.
 
@@ -712,6 +762,15 @@ def main(argv=None):
     >>> _ = words.write_text("restore\n", encoding="utf-8")
     >>> refused("--commit", "abc1234", "--words", words)
     (1, False, "Nothing was rendered: the file skills/backups/SKILL.md uses the product word 'restore'.")
+
+    A rendered skill works alone. A reference to the factory or to this repository stops the
+    rendering, and the program gives the file, the line and the text.
+
+    >>> order = "1. Find out which data cannot be made again."
+    >>> edit = ("spec.md", order, order + " See specs/900-backups/.")
+    >>> refused("--commit", "abc1234", edits=[edit])
+    (1, False, "Nothing was rendered: a skill must work alone. The file skills/backups/SKILL.md holds 'specs/'
+                in line 86.")
 
     The target folder of section 5 is used.
 
@@ -813,8 +872,10 @@ def main(argv=None):
         sys.exit(1)
     files = render(data, branch, commit, digest, trial is not None)
     skill_lines = next(len(t.splitlines()) for p, t in files.items() if p.endswith("SKILL.md"))
-    reason = word_in(files, words) or (
-        MESSAGES["too-long"].format(skill_lines) if skill_lines > MAX_LINES else None
+    reason = (
+        word_in(files, words)
+        or "\n".join(not_alone(files))
+        or (MESSAGES["too-long"].format(skill_lines) if skill_lines > MAX_LINES else None)
     )
     if reason:
         print(reason)

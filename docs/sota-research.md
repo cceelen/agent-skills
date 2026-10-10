@@ -91,6 +91,98 @@ you that a PDF source cannot be read in that agent product.
 - Install `uv`. The programs use the latest stable Python, and `uv` gets it.
 - Work on the branch of the specification. The folder `specs/` is not on the branch `main`.
 
+## The seeds of the factory
+
+A seed is a document or a standard that the factory starts from. An example is the body of
+knowledge of a field. The manifest `factory/sota-research/references/seeds.md` names each seed:
+the document, the issuer, the version, the kind, the address, the digest and the terms. The
+repository holds no seed document.
+
+| Kind | What `seed.py get` does |
+|---|---|
+| `pdf` | It downloads the file from its public address and converts it. |
+| `owner file` | It uses the file that you give with `--file <id>=<path>`, and converts it. |
+| `page` | It only records the seed. A web reader reads the page. |
+
+To see the seeds, run `seed.py list`. To retrieve them, run `seed.py get`:
+
+```text
+uv run factory/sota-research/scripts/seed.py list
+uv run factory/sota-research/scripts/seed.py get <work folder> [--file <id>=<path>] [--from <folder of a specification>] [--today <date>] [--fresh]
+```
+
+- The work folder must be outside each git repository. Do not commit it.
+- The program keeps each file in `<work folder>/seeds/`. It writes the text to
+  `<work folder>/converted/<id>.md`, with one heading for each page.
+- Do not read a converted file in your session. Give its path to an agent of the type
+  `sota-file-reader`.
+- The program writes `<work folder>/seeds.json`: for each seed the files, the digest, the
+  number of pages and the state.
+- If a file is in the work folder already, the program does not retrieve it again. To
+  download each file again, use `--fresh`.
+- With `--from`, the program retrieves also each source of section 2 of that specification
+  whose address ends in `.pdf`.
+- If one seed fails, the program records the reason and continues.
+- Obey the terms of each seed. Do not give a file or its converted text to a different person
+  if the terms do not permit it.
+
+| State | Meaning | What you do |
+|---|---|---|
+| `retrieved` | The file and its text are in the work folder. | Nothing. |
+| `recorded` | The seed is a web page. | Nothing. A web reader reads it. |
+| `owner must give the file` | The file is behind a form or a payment. | Get the file from the address. Run the program again with `--file`. |
+| `changed` | The digest is not the digest of the manifest or of the last run. The document has a new version, or it was altered. | Read the page of the issuer. Then correct the row of the manifest. |
+| `failed: <reason>` | The program did not get the file or its text. | Read the reason. Run the program again. |
+
+The result code is 0 when each seed is retrieved or recorded. It is 1 when a seed failed,
+changed or waits for you. It is 2 when the arguments are wrong.
+
+If the manifest has no digest for a seed, the program prints the digest. Write it into the row.
+
+To add a seed, your agent reads the page of the issuer and writes the row with the version and
+the date of that page. The agent does not write a row from memory. You accept each new row.
+
+## Set up the factory again
+
+`init.py` makes a neutral environment of the factory from nothing: a kit, a git repository in
+it, and the seeds.
+
+```text
+uv run factory/sota-research/scripts/init.py <kit folder> <work folder> [--file <id>=<path>] [--today <date>] [--again]
+```
+
+1. The program writes the neutral kit into the kit folder, as `export.py` does.
+2. It writes the marker file `.factory-kit` into the kit folder, with the commit of this
+   repository.
+3. It makes the kit folder a git repository with the branch `main` and one commit. The commit
+   names no person. If `git` is not installed, the program tells you and continues.
+4. It retrieves the seeds into the work folder, as `seed.py get` does.
+5. It prints your next steps.
+
+- The two folders must be outside each git repository. Do not put one into the other.
+- The kit folder must be new or empty.
+- To make a kit again, use `--again`. The program removes the kit folder only if it holds the
+  marker file. It does not remove a different folder.
+- `--again` keeps the work folder. The program does not download a seed two times.
+- The kit holds no seed document and no converted text.
+
+## A created skill works alone
+
+You can use your personal environment and this repository when you operate the factory. A
+skill that the factory creates must work without them: a user installs only the folder of the
+skill.
+
+- `render.py` renders nothing if a rendered file refers to a path that starts with `factory/`,
+  `specs/`, `.specify/`, `rules/` or `tests/`.
+- It renders nothing if a rendered file uses the word `constitution` or holds an absolute path.
+- The program gives the file, the line and the text. Correct the specification, then render
+  again.
+- The rules of the kit are text in each skill. The skill does not load them from this
+  repository.
+- In a trial, the trial project gets only the folder of the rendered skill.
+- Start the session of a trial in a clean environment: no personal plugin, connector, skill or
+  instruction file.
+
 ## Make sure that the programs are correct
 
 Each program holds its tests as examples in the program itself. No test files are necessary.
@@ -131,7 +223,7 @@ The report has two parts.
 - **What remains.** These points do not fail the check: an intent of the owner that was not
   asked, levels that are pending, vettings that are pending, items that rest only on such
   sources, items that need judgement, items with a changed text, findings of a trial that are
-  open, stakeholders that are in no view, a recipe without a trial, and a missing acceptance.
+  open, findings with a viewpoint that was not checked, stakeholders that are in no view, a recipe without a trial, and a missing acceptance.
 
 Between the two parts, the report gives one line for the answers of risk and reward:
 
@@ -264,7 +356,9 @@ recipe" in the procedure.
    ```
 
 3. The agent makes a copy of the project without its history, and installs the skill in it.
-4. A new session uses the skill in the copy. It writes a plan and stops.
+   The copy gets only the folder of the rendered skill.
+4. A new session uses the skill in the copy, in a clean environment. It writes a plan and
+   stops.
 5. A reviewer that did not see the research examines the plan. Its task is in
    `factory/sota-research/prompts/plan-review.md`.
 6. The agent writes the trial and the findings into `trial.md`, and gives you the findings.
@@ -294,14 +388,16 @@ uv run factory/sota-research/scripts/export.py <folder> [--words <file>]
   and the two programs of `library-vetting` that the tooling loads.
 - The program writes an `AGENTS.md` and a `CLAUDE.md` with these rules only: the language for
   the owner, the rule for commit messages, the rules of the kit, and where the procedure is.
-- The program does not write the sample specification, the task of the reviewer, the
-  documentation, the tests, the specifications or a different skill.
+- The program does not write the sample specification, the task of the reviewer, the list of
+  the viewpoints of the review, the documentation, the tests, the specifications or a
+  different skill.
+- The kit holds the manifest of the seeds. It holds no seed document.
 - The program prints each exported file.
 - To keep words out of the kit, write them into a file, one word or phrase in each line. Then
   use `--words <file>`. If an exported file holds a word, the program writes nothing. It gives
   the file and the line.
 - Make a new repository in the folder, with the branch `main` and one commit. Then start the
-  session there.
+  session there. `init.py` does the export, the repository and the seeds in one step.
 - The examples of the programs need the sample. Thus `--selftest` does not work in the kit.
 
 ### The viewpoints of the review
@@ -318,6 +414,10 @@ The reviewer answers fixed questions from seven viewpoints. Each answer is `yes`
 | `security` | The basic practices that the plan leaves out, and the reason. |
 | `product owner` | The decisions for the owner, the frameworks of governance, the measured targets, the effort against the risk. |
 | `views of the recipe` | The basic practices of each view, and the differences from the reference state. |
+
+The names of the viewpoints are in `factory/sota-research/references/viewpoints.txt`, one in
+each line. A neutral kit does not hold this file and the task of the reviewer: a session of
+the research must not see them.
 
 ### The record of the trials
 
@@ -351,6 +451,8 @@ The check fails in these cases:
 
 - A finding names a trial that the table "Trials" does not have.
 - A finding names a viewpoint that is not one of the seven viewpoints. Use lowercase letters.
+  In a neutral kit, the check does not examine the viewpoint. The list "What remains" then
+  says: `Trial findings with a viewpoint that was not checked: F-01. The list is absent.`
 - A finding has no text.
 - A finding names a route that is not one of the three routes.
 - A finding has a status that is not one of the three forms.

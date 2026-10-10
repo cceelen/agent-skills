@@ -100,9 +100,63 @@ stakeholders before the source:
   status of each finding.
 - `Plan` holds where the plan is, or `not kept`.
 - `Viewpoint` is `architecture`, `operations`, `quality`, `development`, `security`,
-  `product owner` or `views of the recipe`.
+  `product owner` or `views of the recipe`. The file `references/viewpoints.txt` of the
+  tooling holds these names, one in each line. A kit of `export.py` does not hold the file.
 - `Route` is `recipe`, `tooling` or `implementation skill`.
 - `Status` is `open`, `corrected in <revision or commit>` or `declined: <reason>`.
+
+## references/seeds.md
+
+```markdown
+## The seeds
+
+| Id | Document | Issuer | Version or date | Kind | Address | sha256 | Terms | Row read on |
+|---|---|---|---|---|---|---|---|---|
+| <id> | <document> | <issuer> | <version, date> | pdf | https://… | <64 characters, or empty> | <terms> | <date> |
+
+## Bodies of knowledge
+
+| Field | Seed |
+|---|---|
+| <field> | <id> |
+```
+
+- `Id` uses lowercase letters, digits and hyphens.
+- `Kind` is `pdf`, `page` or `owner file`.
+- `sha256` is the digest of the file when the row was written, or empty.
+
+## seeds.json of a work folder
+
+```json
+{
+  "date": "2026-10-10",
+  "seeds": [
+    {
+      "converted": "converted/<id>.md",
+      "file": "seeds/<id>.pdf",
+      "id": "<id>",
+      "kind": "owner file",
+      "pages": 411,
+      "sha256": "<64 characters>",
+      "state": "retrieved"
+    }
+  ]
+}
+```
+
+- The paths are relative to the work folder. `date` is `null` without `--today`.
+- `converted`, `file`, `pages` and `sha256` are `null` for a seed without a file.
+- `state` is `retrieved`, `recorded`, `owner must give the file`, `changed` or
+  `failed: <reason>`.
+
+## Marker of a kit
+
+The file `.factory-kit` in a kit that `init.py` made:
+
+```text
+This folder is a kit of the factory. The program init.py made it.
+Commit of the repository: <commit, or not known>
+```
 
 ## Stamp of a rendered file
 
@@ -136,7 +190,8 @@ owner accepted, the line is `Trial rendering of a specification. Not a delivered
 docs/<name>.md               # the documentation for the user, in Simplified Technical English
 ```
 
-`SKILL.md` names no product and stays below 500 lines.
+`SKILL.md` names no product and stays below 500 lines. No rendered file refers to the factory,
+to this repository or to an absolute path.
 
 ## Selection of a project
 

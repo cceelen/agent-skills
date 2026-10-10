@@ -418,8 +418,8 @@ def load(folder):
 
     >>> [t["id"] for t in data["trials"]], data["trials"][0]["plan"]
     (['T-01'], 'not kept')
-    >>> [(f["id"], f["trial"], f["viewpoint"], f["route"]) for f in data["trial_findings"]]
-    [('F-01', 'T-01', 'operations', 'recipe'), ('F-02', 'T-01', 'development', 'implementation skill')]
+    >>> [(f["id"], f["trial"], bool(f["viewpoint"]), f["route"]) for f in data["trial_findings"]]
+    [('F-01', 'T-01', True, 'recipe'), ('F-02', 'T-01', True, 'implementation skill')]
     >>> data["trial_findings"][0]["_file"], data["trial_findings"][0]["_line"]
     ('trial.md', 13)
 
