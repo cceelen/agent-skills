@@ -22,11 +22,11 @@ Found by the research, and reviewed by the owner with the other findings. Each l
 source, or says `(judgement)`. A use case is chosen only when the recipe is applied to a project.
 
 - **Views**: the points of view that the aspect brings together. A view is a set of concerns
-  of the aspect, for example for DevSecOps: operations, security, quality. The views come from
+  of the aspect, for example for backups of data: storage and operation. The views come from
   the sources in the research, not from the owner before the research. One line each: a short
   name, what the view is concerned with, and the source.
-  - `[operations]`: [what this view is concerned with] ([S-01 section 1])
-  - `[security]`: [what this view is concerned with] ([source])
+  - `[view]`: [what this view is concerned with] ([S-01 section 1])
+  - `[view]`: [what this view is concerned with] ([source])
 - **Contexts**: the values of each dimension that change the strategy. One line each.
   - `[use case]`: [values] ([S-01 section 2])
   - `[how the software reaches its users]`: [values] ([source])

@@ -126,7 +126,7 @@ To check only these, use `--scope`.
 ### The views of an aspect
 
 An aspect brings together some points of view. A view is a set of concerns of the aspect. For
-example, DevSecOps has the views operations, security and quality. The research finds the
+example, backups of data have the views storage and operation. The research finds the
 views in the sources and writes them into the field `Views` of section 1. You do not name them
 before the research. Each checklist item names one view in the column `View`.
 
