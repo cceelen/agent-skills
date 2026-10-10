@@ -21,6 +21,12 @@ case, no first user, nothing narrower.
 Found by the research, and reviewed by the owner with the other findings. Each line names its
 source, or says `(judgement)`. A use case is chosen only when the recipe is applied to a project.
 
+- **Views**: the points of view that the aspect brings together. A view is a set of concerns
+  of the aspect, for example for DevSecOps: operations, security, quality. The views come from
+  the sources in the research, not from the owner before the research. One line each: a short
+  name, what the view is concerned with, and the source.
+  - `[operations]`: [what this view is concerned with] ([S-01 section 1])
+  - `[security]`: [what this view is concerned with] ([source])
 - **Contexts**: the values of each dimension that change the strategy. One line each.
   - `[use case]`: [values] ([S-01 section 2])
   - `[how the software reaches its users]`: [values] ([source])
@@ -77,6 +83,8 @@ place.
 
 - **Why**: the risk that the item answers, in one line. A practice of the state of the art
   answers a specific result of a risk analysis.
+- **View**: one view name of section 1: the view that the item belongs to. Each view has an
+  item on level 1: the practices that are basic and not negotiable in that view.
 - **Level**: 1, 2 or 3, cumulative. The risk and reward calculation places the item: a good
   return at a low cost in each context is level 1, the basic practices. An item above level 1
   names the risk dimension of section 1 that calls for it, for example `2, regulatory`. The
@@ -88,9 +96,9 @@ place.
 - **Source**: the unit of a source by its identifier where it has one. No text of a source is
   copied here; the evidence record says what the source contributes.
 
-| Id | Item | Why | Level | Admitted by | Check | Source |
-|---|---|---|---|---|---|---|
-| C-01 | | | | | | [S-01 PW.4.1] |
+| Id | Item | Why | View | Level | Admitted by | Check | Source |
+|---|---|---|---|---|---|---|---|
+| C-01 | | | | | | | [S-01 PW.4.1] |
 
 **Selection.** The kit recommends; the user decides. The recipe skill leads the owner of the
 project through a risk analysis of their software, their market, their context, their users and

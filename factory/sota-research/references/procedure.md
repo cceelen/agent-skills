@@ -38,8 +38,8 @@ Rules for all phases:
 ## Phase 1: what to build
 
 Settle only the field and the thing to build. Do not narrow the aspect: do not ask for a use
-case, a first user, a reference project, contexts, risk dimensions or boundaries, and do not
-propose them. They come from the sources in phase 2, and the owner reviews them in phase 3. A
+case, a first user, a reference project, views, contexts, risk dimensions or boundaries, and
+do not propose them. They come from the sources in phase 2, and the owner reviews them in phase 3. A
 use case is chosen only when the finished recipe is applied to a project.
 
 Do not search and do not read a source in this phase.
@@ -63,7 +63,7 @@ Do not search and do not read a source in this phase.
      "Supersedes" if no earlier revision exists.
    - Write the date of today, the field and the thing to build into "Agreed with the owner
      on".
-   - Leave "Contexts", "Risk dimensions" and "Boundaries" as the template has them.
+   - Leave "Views", "Contexts", "Risk dimensions" and "Boundaries" as the template has them.
 6. Run the check for this phase:
    `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
    Correct each line that starts with `FAIL`.
@@ -90,46 +90,59 @@ and its date in section 7.
    `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
    `independent`. Mark a paid source that was read from its preview as `part`.
 4. **Vet** each independent source. See "The vetting of independent sources".
-5. **Distil.**
+5. **Name the views.** A view is a set of concerns that the aspect brings together.
+   - Name the views of the aspect from the sources. Write each view into the field "Views" of
+     section 1, with its source, or with `(judgement)`.
+   - For each view, search for sources that hold the state of the art of that view. Do not
+     search only for sources that carry the name of the aspect.
+   - Read these sources, record them and vet them, as in steps 2 to 4.
+   - If a view has no source of its own, record the view in section 7 as not verified.
+6. **Distil.**
    - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
      risk dimensions with their question and the opinion of the kit, and the boundaries to
      the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
      range of contexts that the sources show, from a single maintainer to a company.
    - A statement that holds across contexts becomes a checklist item: one short sentence that
      names no product. Its "Why" is the risk that it answers.
+   - Give each item its view: write one view name of section 1 into the cell "View".
+   - For each view, find the practices that are basic and not negotiable in that view. Make
+     each one a checklist item.
    - A statement that depends on context becomes a decision in section 3.3.
    - A statement about one product goes to the table of implementation skills in section 5.
    - Leave out what an agent can learn from the project or from the source itself.
    - Write where the sources disagree into section 3.4, with the two positions.
    - A practice from a different field states the problem that it solves there, and what
      shows that it does not work here.
-6. **Write the evidence record** `evidence.md`: one row for each source, with what it
+7. **Write the evidence record** `evidence.md`: one row for each source, with what it
    contributes in the words of this kit, where in the source that is, the rows that it
    supports, and the date. Keep a quote only where the wording itself is the point.
-7. **Let a second reader check it.** Give the rows to an agent of the type
+8. **Let a second reader check it.** Give the rows to an agent of the type
    `sota-second-reader`, with the task `prompts/second-reader.md`. Correct each finding in
    `evidence.md` and in each row of `spec.md` that says the same.
-8. **Place the items.** See "The calculation of risk and reward".
-9. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
+9. **Place the items.** See "The calculation of risk and reward".
+10. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
    suggested a judgement. Do not write a model name into the specification.
-10. **Run the check.** See "The check". Correct each failure.
-11. If a source cannot be reached, write what was not verified into section 7.
+11. **Run the check.** See "The check". Correct each failure.
+12. If a source cannot be reached, write what was not verified into section 7.
 
 ## Phase 3: review of the owner
 
 Stop. A model does not accept a recipe. Give the owner, in this order:
 
-1. The contexts, the risk dimensions and the boundaries that the research found, each with
+1. The views that the research found, each with its source, and the part "Views" of the
+   check, as it is. The owner can add, remove or rename a view.
+2. The contexts, the risk dimensions and the boundaries that the research found, each with
    its source. The owner sees them here for the first time and can correct each one.
-2. The strategy: the goals, the order of the work and the decisions that depend on context.
-3. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
-4. The points where the sources disagree, and how the recipe handles each.
-5. The independent sources with their signals and scores, for the confirmation.
-6. The list "What remains" of the check, as it is.
-7. What was not verified.
+3. The strategy: the goals, the order of the work and the decisions that depend on context.
+4. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
+5. The points where the sources disagree, and how the recipe handles each.
+6. The independent sources with their signals and scores, for the confirmation.
+7. The list "What remains" of the check, as it is.
+8. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
-change an item. When the owner accepts, the owner's name and the date go into the field
+change an item, change a view. If the owner adds a view, do step 5 of phase 2 for that view.
+If the owner removes or renames a view, change the cell "View" of each item of that view. When the owner accepts, the owner's name and the date go into the field
 `Accepted` of the head line and into section 7. Open the pull request of this step into the
 branch of the specification.
 
@@ -165,6 +178,9 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
 - In phase 1, add `--scope`: it examines only what is settled before the research.
 - Give the list "What remains" to the owner as it is.
+- The part "Views" gives, for each view, the number of items on each level and the number of
+  sources that its items cite. If a view has few items or few sources, do step 5 of phase 2
+  for that view again.
 - If an earlier revision exists, get it with `git show <commit>:<path of spec.md>`, write it
   to a file outside the repository, and add `--previous <file>`.
 - To find product names in the checklist, write the names into a file, one in each line, and

@@ -12,8 +12,8 @@ The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 | Phase | What occurs | Your part as the owner |
 |---|---|---|
 | 1. What to build | The agent settles only the field and the thing to build with you. | You name the field and the thing. |
-| 2. Research | Isolated readers read the sources. The agent finds the contexts, the risk dimensions and the boundaries, and distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
-| 3. Review | The agent stops and gives you the findings. | You correct the contexts, the risk dimensions and the boundaries, confirm the sources, correct the answers and accept the result. |
+| 2. Research | Isolated readers read the sources. The agent finds the views, the contexts, the risk dimensions and the boundaries, and distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
+| 3. Review | The agent stops and gives you the findings. | You correct the views, the contexts, the risk dimensions and the boundaries, confirm the sources, correct the answers and accept the result. |
 | 4. Rendering | A program renders the recipe skill. A pull request delivers it. | You review the pull request. |
 
 To start, tell your agent to read `factory/sota-research/SKILL.md` and to distil an aspect.
@@ -93,6 +93,26 @@ use `--words <file>`. To get the report as JSON, use `--json`.
 In phase 1 only the head line, the aspect, the field and the date of the agreement are written.
 To check only these, use `--scope`.
 
+### The views of an aspect
+
+An aspect brings together some points of view. A view is a set of concerns of the aspect. For
+example, DevSecOps has the views operations, security and quality. The research finds the
+views in the sources and writes them into the field `Views` of section 1. You do not name them
+before the research. Each checklist item names one view in the column `View`.
+
+The check fails in these cases:
+
+- Section 1 names no view, or a view does not name its concerns or its source.
+- An item that is not retired names no view, or names a view that section 1 does not have.
+- A view has no checklist item.
+- A view has no item on level 1, and no level is pending. Level 1 holds the basic practices.
+
+While a level is pending, a view without an item on level 1 is in the list "What remains".
+
+The report has a part "Views". For each view, it gives the number of items on each level and
+the number of sources that these items cite. Use it to find a view that has few items or few
+sources. In the review, you can add, remove or rename a view.
+
 ## Render a recipe skill
 
 Use `render.py` after the owner accepted an aspect specification. The owner accepts it in the
@@ -104,6 +124,8 @@ uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <c
 
 - The program writes `SKILL.md`, `references/checklist.md` and one agent template into the
   folder of the skill. It writes the documentation to `docs/<name>.md`.
+- The checklist shows the view of each item. The skill tells its agent to show a selection in
+  groups, one group for each view.
 - The folder of the skill is `skills/<name>/`. A different folder comes from the field
   `Target folder` in section 5 of the specification.
 - Each rendered file starts with a stamp: the branch, the commit and the digest of the

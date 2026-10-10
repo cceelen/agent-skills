@@ -29,6 +29,9 @@ A small specification for the tests of the tooling. Its sources are invented.
 
 - **Aspect**: backups of the data of a software project.
 - **Field and disciplines**: operations; it cuts across development and support.
+- **Views**: the points of view that the aspect brings together.
+  - `storage`: which data has a copy, and where the copies are. (S-01 section 2)
+  - `operation`: how a backup is made, restored and reviewed. (S-02 section 4)
 - **Contexts**: the size of the data; who operates the software; the place where the data
   is. (S-01 section 1)
 - **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
@@ -71,13 +74,13 @@ A lost record can be made again in the time that the project agreed on.
 
 ## 4. Checklist
 
-| Id | Item | Why | Level | Admitted by | Check | Source |
-|---|---|---|---|---|---|---|
-| C-01 | A backup of the data that cannot be made again exists. | Risk: a lost record stays lost. | 1 | authority (2) | the newest backup is younger than the agreed interval | S-01 section 2; S-02 abstract |
-| C-02 | A restore from the backup was done and recorded. | Risk: a backup that cannot be restored is found too late. | 2, operative | authority (1) | the record of the last restore has a date | S-02 section 4 |
-| C-03 | A copy of the backup is kept in a second place with a different access. | Risk: one event destroys the data and its backup. | 3, regulatory | authority (1) | the list of copies names two places | S-01 section 5 |
-| C-04 | Each restore drill ends with a written review. | Risk: the same restore error occurs again. | not admitted | practice | judgement | S-03 "After the drill" |
-| C-05 | The backup is made by a program, not by hand. | Risk: a person forgets the backup. | 1 | practice | the schedule of the program is in the repository | S-04 README; S-01 section 3 |
+| Id | Item | Why | View | Level | Admitted by | Check | Source |
+|---|---|---|---|---|---|---|---|
+| C-01 | A backup of the data that cannot be made again exists. | Risk: a lost record stays lost. | storage | 1 | authority (2) | the newest backup is younger than the agreed interval | S-01 section 2; S-02 abstract |
+| C-02 | A restore from the backup was done and recorded. | Risk: a backup that cannot be restored is found too late. | operation | 2, operative | authority (1) | the record of the last restore has a date | S-02 section 4 |
+| C-03 | A copy of the backup is kept in a second place with a different access. | Risk: one event destroys the data and its backup. | storage | 3, regulatory | authority (1) | the list of copies names two places | S-01 section 5 |
+| C-04 | Each restore drill ends with a written review. | Risk: the same restore error occurs again. | operation | not admitted | practice | judgement | S-03 "After the drill" |
+| C-05 | The backup is made by a program, not by hand. | Risk: a person forgets the backup. | operation | 1 | practice | the schedule of the program is in the repository | S-04 README; S-01 section 3 |
 
 **Selection.** The kit recommends; the user decides.
 

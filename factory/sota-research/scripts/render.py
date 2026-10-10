@@ -82,6 +82,9 @@ The kit recommends. The owner of the project decides.
   the reason.
 - Write `- [ ] <id> <item> (above the target level)` for an item above the target of its
   dimension.
+- Before the owner decides, show the proposed selection in groups: one group for each view of
+  the table below. In each group, show the items of level 1 first. Thus the owner sees that
+  each view has its basic practices.
 - If the owner asks for the selection, show the file. If the owner changes a decision, change
   the file and give the date of the review.
 - The distance of the project is the list of adopted items whose check fails. Report it after
@@ -218,6 +221,11 @@ def render_skill(data, name, mark):
      '## When to stop']
     >>> "| `regulatory` | Is personal data in the backup?" in text, ".agents/kit/backups.md" in text
     (True, True)
+
+    The selection is shown in groups, one for each view. The skill holds the views for that.
+
+    >>> "one group for each view" in text, "| `storage` | which data has a copy, and where the" in text
+    (True, True)
     >>> "S-0" in text or "standards.example" in text, len(lines) < MAX_LINES
     (False, True)
 
@@ -230,6 +238,7 @@ def render_skill(data, name, mark):
     """
     title = data["title"]
     dims = [[f"`{d['name']}`", without_source(d["text"])] for d in data["risk_dimensions"]]
+    views = [[f"`{v['name']}`", without_source(v["text"])] for v in data["views"]]
     decisions = [
         [r.get("decision", ""), r.get("depends on", ""), r.get("options", "")]
         for r in data["context_decisions"]
@@ -258,13 +267,14 @@ def render_skill(data, name, mark):
         "## Before you start\n",
         f"- Find out: {field(data, 'reads first')}",
         "- Read `references/checklist.md` when you select items or check them. It holds each item",
-        "  with its risk, its level and its check.",
+        "  with its risk, its view, its level and its check.",
         f"- Apply: {field(data, 'applies')}\n",
         "## Risk analysis\n",
         RISK_ANALYSIS,
         table(["Dimension", "Question, and the opinion of the kit"], dims),
         "## Selection\n",
         SELECTION.format(name=name),
+        table(["View", "What the view is concerned with"], views),
         "## Order of the work\n",
         data["order"] + "\n",
     ]
@@ -290,25 +300,31 @@ def render_skill(data, name, mark):
 
 
 def render_checklist(data, mark):
-    """The reference file with the checklist: each item with its risk, its level and its check.
+    """The reference file with the checklist: each item with its risk, its view, its level and its check.
 
     >>> import sample
     >>> text = render_checklist(sample.load(), "<stamp>")
-    >>> print("\\n".join(line[:44] for line in text.splitlines() if line.startswith("|")))
-    | Id | Item | Risk that it answers | Level |
-    |---|---|---|---|---|
-    | C-01 | A backup of the data that cannot be
-    | C-05 | The backup is made by a program, no
+    >>> print("\\n".join(line[:43] for line in text.splitlines() if line.startswith("|")))
+    | Id | Item | Risk that it answers | View |
+    |---|---|---|---|---|---|
+    | C-01 | A backup of the data that cannot b
+    | C-05 | The backup is made by a program, n
     | C-02 | A restore from the backup was done
-    | C-03 | A copy of the backup is kept in a s
+    | C-03 | A copy of the backup is kept in a
 
     The file has no cell for the sources, and no item that is not admitted.
 
     >>> "S-0" in text, "C-04" in text, text.startswith("<stamp>")
     (False, False, True)
+
+    Each row shows the view of its item.
+
+    >>> [line.split(" | ")[3] for line in text.splitlines() if line.startswith("| C-")]
+    ['storage', 'operation', 'operation', 'storage']
     """
     rows = [
-        [r.get("id", ""), r.get("item", ""), r.get("why", ""), r.get("level", ""), r.get("check", "")]
+        [r.get(k, "") for k in ("id", "item", "why")]
+        + [aspect.view_of(r), r.get("level", ""), r.get("check", "")]
         for r in rendered_items(data)
     ]
     return "\n".join(
@@ -316,8 +332,9 @@ def render_checklist(data, mark):
             mark,
             f"# Checklist: {data['title']}\n",
             "Each item is generic. Level 1 holds the basic practices. An item above level 1 names the",
-            "risk dimension that calls for it. A check of `judgement` needs a person or a review.\n",
-            table(["Id", "Item", "Risk that it answers", "Level", "Check"], rows),
+            "risk dimension that calls for it. A check of `judgement` needs a person or a review. The",
+            "view of an item is the set of concerns that the item belongs to.\n",
+            table(["Id", "Item", "Risk that it answers", "View", "Level", "Check"], rows),
         ]
     )
 

@@ -8,11 +8,11 @@ data below. No program writes `spec.md` except `place.py`, which fills the Level
 | Part | Fields | Rules that the check applies |
 |---|---|---|
 | Head | branch, research date, supersedes, accepted | accepted is a person and a date, or `pending` |
-| 1 Aspect | aspect, field, contexts, risk dimensions, boundaries, agreed on | each field is filled; agreed on has a date; each risk dimension is one line below the field, in the form `` - `name`: question and opinion `` |
+| 1 Aspect | aspect, field, views, contexts, risk dimensions, boundaries, agreed on | each field is filled; agreed on has a date; each view is one line below the field, has an item, and has an item on level 1 when no level is pending; each risk dimension is one line below the field, in the form `` - `name`: question and opinion `` |
 | 2 Sources | id, source, issuer, version or date, class, license, read, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
-| 4 Checklist | id, item, why, level, admitted by, check, source | see below |
+| 4 Checklist | id, item, why, view, level, admitted by, check, source | see below; the view is a view of section 1 |
 | 5 Skill set | name, target folder, goal, reads first, applies, delegates, stops when; rows of implementation skills | name obeys the rule for a skill name |
 | 6 Watch list | signal, where, cadence | one row or more |
 | 7 Decisions | date, decision, reason, revisit when | each row has a date |

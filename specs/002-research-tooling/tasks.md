@@ -284,6 +284,21 @@ a use case that belongs two steps later. The narrowing was built into the specif
 
 ---
 
+## Phase 14: Each view of an aspect has its basic practices
+
+**Purpose**: the trial for DevSecOps gave a checklist with 19 of 26 items for security, and no
+item for static analysis, coverage or fuzzing. Nothing found the views of the aspect or checked
+that each view has its basic practices (FR-031).
+
+- [x] T083 In `.specify/templates/overrides/aspect-spec-template.md`: add the field "Views" to section 1 and the column "View" to the checklist
+- [x] T084 In `factory/sota-research/scripts/aspect.py` and `sample.py`: read the views and the view of each item; give the sample two views
+- [x] T085 In `factory/sota-research/scripts/check.py`: fail for an item without a known view, a view without an item and a view without an item on level 1; report the items and the sources of each view
+- [x] T086 In `factory/sota-research/scripts/render.py`: show the view of each item in the checklist; tell the agent to show the selection in groups by view
+- [x] T087 In `factory/sota-research/scripts/place.py`: an example shows that `--write` keeps the column "View"
+- [x] T088 In `factory/sota-research/references/procedure.md` and `docs/sota-research.md`: name the views from the sources in phase 2, read sources for each view, and show the views to the owner first in phase 3
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

@@ -296,6 +296,16 @@ specification whose check reports no failure other than "not accepted".
 - **FR-030**: The tooling MUST obey the rules of `AGENTS.md` for a skill, for the programs
   and for the tests.
 
+**Views of an aspect**
+
+- **FR-031**: The skill MUST find the views of the aspect in the sources, and MUST read
+  sources that hold the state of the art of each view. A view is a set of concerns of the
+  aspect. Each item MUST name one view of section 1. The check MUST fail for an item without
+  a known view, for a view without an item, and for a view without an item on level 1 when no
+  level is pending. The check MUST report, for each view, the number of items on each level
+  and the number of sources that they cite. The rendered skill MUST show the view of each
+  item, and MUST tell its agent to show the selection in groups by view.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -309,6 +319,8 @@ specification whose check reports no failure other than "not accepted".
 - **Vetting record**: for each independent source, the signals, the score, the version of the
   rubric and the confirmation of the owner. For each item, the answers and the result of the
   calculation of risk and reward.
+- **View**: one set of concerns that an aspect brings together, with its source. Each
+  checklist item belongs to one view.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
 - **Recipe skill**: the rendered skill of one aspect, with its checklist as a reference file

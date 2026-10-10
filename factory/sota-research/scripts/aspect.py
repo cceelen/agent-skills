@@ -326,6 +326,15 @@ def level_of(cell):
     return (int(m.group(1)), m.group(2)) if m else (None, None)
 
 
+def view_of(row):
+    """The name of the view in the View cell of a checklist row, or "".
+
+    >>> view_of({"view": " `security` "}), view_of({"view": "quality"}), view_of({})
+    ('security', 'quality', '')
+    """
+    return row.get("view", "").strip().strip("`").strip()
+
+
 def load(folder):
     r"""Read the folder of one specification into plain dictionaries and lists.
 
@@ -337,6 +346,8 @@ def load(folder):
     'the size of the data; who operates the software; the place where the data is. (S-01 section 1)'
     >>> [d["name"] for d in data["risk_dimensions"]]
     ['operative', 'regulatory']
+    >>> [v["name"] for v in data["views"]], [view_of(c) for c in data["checklist"]][:3]
+    (['storage', 'operation'], ['storage', 'operation', 'storage'])
 
     Each table is found in its section, and each row knows its place.
 
@@ -406,6 +417,7 @@ def load(folder):
         "has_vetting": False,
     }
     data["risk_dimensions"] = data["aspect"].get("risk dimensions", {}).get("items", [])
+    data["views"] = data["aspect"].get("views", {}).get("items", [])
     if (folder / "evidence.md").is_file():
         data["evidence"] = Doc(folder / "evidence.md").table((0, 10**9), "source")
     if (folder / "vetting.md").is_file():
@@ -447,7 +459,7 @@ def set_cell(path, line_number, column, text):
     >>> for separator in (chr(0x2028), chr(0x2029), "\x0c", "\x0b", "\x85"):
     ...     folder = sample.folder(("spec.md", "A small spec", "A small" + separator + "spec"))
     ...     row = load(folder)["checklist"][3]
-    ...     done = set_cell(folder / "spec.md", row["_line"], 3, "pending")
+    ...     done = set_cell(folder / "spec.md", row["_line"], 4, "pending")
     ...     print(row["id"], done, load(folder)["checklist"][3]["level"])
     C-04 True pending
     C-04 True pending
@@ -459,7 +471,7 @@ def set_cell(path, line_number, column, text):
 
     >>> _ = (folder / "spec.md").write_bytes(sample.SPEC.replace("\n", "\r\n").encode("utf-8"))
     >>> row = load(folder)["checklist"][1]
-    >>> row["level"], set_cell(folder / "spec.md", row["_line"], 3, "pending")
+    >>> row["level"], set_cell(folder / "spec.md", row["_line"], 4, "pending")
     ('2, operative', True)
     >>> raw = (folder / "spec.md").read_bytes()
     >>> b"| pending |" in raw, raw.count(b"\r\n") == raw.count(b"\n")
@@ -496,7 +508,7 @@ def column_of(row, name):
     >>> import sample
     >>> row = sample.load()["checklist"][0]
     >>> column_of(row, "id"), column_of(row, "level"), column_of(row, "no such column"), column_of({}, "id")
-    (0, 3, -1, -1)
+    (0, 4, -1, -1)
     """
     header = row.get("_header", [])
     return header.index(name) if name in header else -1
