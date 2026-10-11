@@ -86,3 +86,11 @@ value below shows the effect of one change.
   that must move.
 - A run that gives a value for this file goes through `factory/experiment-rigor`.
 - One iteration changes one thing, or the row says why not.
+
+## Stage tests
+
+A stage test tries one stage on recorded input of an earlier trial. It has no reader agent.
+
+| Id | Date | Stage | Recorded input | Result | Folder |
+|---|---|---|---|---|---|
+| ST-1 | 2026-10-11 | the cell Serves of the register (iteration I-6) | 151 requirements of the trial I-4, the charter of DevSecOps | refuted, 3 runs: the row of the coverage and the row of fuzzing serve `none` in each run; 148 of 151 cells are the same in the three runs | `trials/ST-1-serves` |
