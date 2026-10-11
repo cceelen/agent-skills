@@ -35,7 +35,9 @@ reports are not comparable with new reports.
   sources. The check fails for an aspect specification without the field `Intent of the owner`.
 - The research finds the stakeholders of an aspect. Each view names its stakeholders. The check
   fails for an aspect specification without the field `Stakeholders`.
-- The check gives the number of answers of risk and reward with a source and by judgement.
+- A ladder gives each class of source one value. The value of an item is the highest value
+  of the sources that ask for it. `place.py` writes the level and the strongest source of
+  each item. No item is dropped: an item that the owner declines stays in the checklist.
 - The research records each requirement that a source states in the table `Requirements` of
   `vetting.md`. Each requirement goes to a checklist item, or leaves by one of three named
   exits. The check fails for an aspect specification without this table.

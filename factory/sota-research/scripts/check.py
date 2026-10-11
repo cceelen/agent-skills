@@ -26,9 +26,6 @@ the owner that was not asked and a missing acceptance remain; they do not fail t
 The intent of the owner is a field of section 1. It has one line for each answer of the owner: a
 quote with its date, or "(no answer)".
 
-The report gives one line for the answers of risk and reward in the table "Items" of vetting.md:
-how many name a source and how many say "judgement". This line is for the review. It fails nothing.
-
 Each item names one view of section 1. A view is a set of concerns of the aspect. Each view needs
 an item, and an item on level 1 when no level is pending. The report gives the items of each view.
 
@@ -51,7 +48,7 @@ With --index, each requirement line that a reader reported and that the index ho
 of the register with the same source and the same words, and each row needs such a line. Thus a
 requirement cannot be lost or added between the reports and the register.
 
-Each item that is not retired holds a requirement, or its cell "Admitted by" is "own rule". Each
+Each item that is not retired holds a requirement, or its cell "Strongest source" is "own rule". Each
 stakeholder of section 1 has a requirement. The report gives the requirements of each view by
 their exit. A view with more than half of its requirements at a boundary remains.
 
@@ -116,8 +113,6 @@ ONE_LINE_EACH = ("boundaries", "left-stakeholders")
 SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
 FINDING_FIELDS = ("contexts", "boundaries")
 NO_ANSWER = "(no answer)"
-# The answers of the calculation of risk and reward: the cells of the table "Items" of vetting.md.
-ANSWERS = ("severity", "probability", "breadth", "adopt", "keep", "own risk")
 DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 NOT_CONFIRMED = ("", "pending", "rejected")
 NONE_FOUND = "none found"
@@ -151,7 +146,6 @@ MESSAGES = {
     "item-without-view": "The item names no view of section 1.",
     "view-unknown": "The view '{0}' is not in section 1.",
     "view-without-item": "The view '{0}' has no checklist item.",
-    "view-without-basics": "The view '{0}' has no item on level 1.",
     "source-cell-empty": "The cell '{0}' of the source is empty.",
     "source-without-version": "The source has no version and no date.",
     "class-unknown": "The class '{0}' is not one of the six classes.",
@@ -258,16 +252,10 @@ MESSAGES = {
         "{0}: requirements: {1}, to an item: {2}, to an implementation skill: {3}, to a boundary: {4}, "
         "duplicates: {5}, a proposed boundary would take: {6}."
     ),
-    "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
-    "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
-    "answers-harm": (
-        "Items with a severity or a probability by judgement. Each one is a question for the owner: {0}."
-    ),
-    "answers-level": "Items whose level rests on judgement only: {0}.",
     "remains-head": "What remains:",
     "remains-intent": "The intent of the owner was not asked.",
     "remains-levels": "Levels that are pending: {0}.",
-    "remains-basics": "Views without an item on level 1, while levels are pending: {0}.",
+    "remains-basics": "Views without an item on level 1: {0}.",
     "remains-vettings": "Vettings that are pending: {0}.",
     "remains-waiting": "Items that rest only on sources with a pending vetting: {0}.",
     "remains-judgement": "Items that need judgement: {0}.",
@@ -465,34 +453,6 @@ def intent_asked(data):
     True
     """
     return not data["intent"] or not all(no_answer(line) for line in data["intent"])
-
-
-def answer_counts(data):
-    """How many answers of risk and reward name a source, and how many say "judgement".
-
-    The answers are the six cells of each row of the table "Items" of vetting.md. An answer with
-    a different note, or without a note, is counted as "other". An empty cell is not an answer.
-
-    >>> import sample
-    >>> answer_counts(sample.load())
-    {'judgement': 21, 'other': 0, 'source': 9}
-    >>> row = '| C-04 | 1 (S-03 "After the drill") | 1 (judgement) |'
-    >>> answer_counts(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | |")))
-    {'judgement': 20, 'other': 1, 'source': 8}
-    >>> answer_counts({"vetting_items": []})
-    {'judgement': 0, 'other': 0, 'source': 0}
-    """
-    counts = {"judgement": 0, "other": 0, "source": 0}
-    for row in data["vetting_items"]:
-        for name in ANSWERS:
-            cell = row.get(name, "").strip()
-            if aspect.source_ids(cell):
-                counts["source"] += 1
-            elif "judgement" in cell.lower():
-                counts["judgement"] += 1
-            elif cell:
-                counts["other"] += 1
-    return counts
 
 
 def check_scope_findings(data):
@@ -718,8 +678,8 @@ def check_items(data):
 
     >>> brief(check_items(sample.load(("spec.md", "| C-02 | A restore", "| C-01 | A restore"))))
     [('item-id-twice', 'C-01')]
-    >>> old = "| 2, operative | authority (1) | the record of the last restore has a date |"
-    >>> check_items(sample.load(("spec.md", old, "| retired | authority (1) | |")))
+    >>> old = "| 2, operative | research (S-02) | the record of the last restore has a date |"
+    >>> check_items(sample.load(("spec.md", old, "| retired | research (S-02) | |")))
     []
     >>> data = sample.load()
     >>> data["checklist"] = []
@@ -781,8 +741,10 @@ def check_views(data):
     >>> found = check_views(sample.load(("spec.md", storage, quality)))
     >>> brief(found), found[0]["line"], found[0]["text"]
     ([('view-without-item', 'quality')], 13, "The view 'quality' has no checklist item.")
-    >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| | retired | authority (2) |")
-    >>> c03 = ("spec.md", "| storage | 3, regulatory |", "| | retired |")
+    >>> was = "| storage | 1 | standard (S-01) | the newest"
+    >>> c01 = ("spec.md", was, "| | retired | standard (S-01) | the newest")
+    >>> was = "| storage | 1 | standard (S-01) | the list"
+    >>> c03 = ("spec.md", was, "| | retired | standard (S-01) | the list")
     >>> brief(check_views(sample.load(c01, c03)))
     [('view-without-item', 'storage')]
 
@@ -915,7 +877,7 @@ def view_counts(data):
     >>> for view in view_counts(sample.load()):
     ...     print(*view.values())
     operation 3 1 1 0 0 1 4 1 4
-    storage 2 1 0 1 0 0 2 1 2
+    storage 2 2 0 0 0 0 2 1 2
     >>> list(view)
     ['view', 'items', 'level 1', 'level 2', 'level 3', 'pending', 'not admitted', 'sources',
      'stakeholders', 'sources read for the view']
@@ -1228,14 +1190,14 @@ def check_boundaries(data):
     A row names a proposed boundary of section 1, and requirements of the register.
 
     >>> planted("| tests | R-03 |", "| quality | R-03 |", "vetting.md")[1]
-    ('proposed-row-unknown', 'quality', 'vetting.md', 39,
+    ('proposed-row-unknown', 'quality', 'vetting.md', 29,
      "The table 'Proposed boundaries' has a row for 'quality'. Section 1 does not have this boundary.")
     >>> planted("| tests | R-03 |", "| recovery | R-03 |", "vetting.md")[1]
-    ('proposed-row-decided', 'recovery', 'vetting.md', 39,
+    ('proposed-row-decided', 'recovery', 'vetting.md', 29,
      "The table 'Proposed boundaries' has a row for 'recovery'. The owner decided this boundary. Remove the
      row.")
     >>> planted("| tests | R-03 |", "| tests | R-03, R-19 |", "vetting.md")
-    [('proposed-requirement-unknown', 'tests', 'vetting.md', 39,
+    [('proposed-requirement-unknown', 'tests', 'vetting.md', 29,
       "The row of the boundary 'tests' names 'R-19'. The table Requirements does not have this row.")]
     """
     out = []
@@ -1374,7 +1336,8 @@ def check_requirements(data):
 
     A requirement that goes to a retired item has no exit.
 
-    >>> retired = ("spec.md", "| storage | 3, regulatory |", "| | retired |")
+    >>> was = "| storage | 1 | standard (S-01) | the list"
+    >>> retired = ("spec.md", was, "| | retired | standard (S-01) | the list")
     >>> found = check_requirements(sample.load(retired))
     >>> [(f["rule"], f["id"], f["text"]) for f in found]
     [('requirement-item-retired', 'R-02', "The requirement goes to 'C-03'. This item is retired.")]
@@ -1387,7 +1350,7 @@ def check_requirements(data):
     >>> [(f["rule"], f["id"], f["file"], f["line"], f["text"]) for f in found]
     [('item-without-requirement', 'C-03', 'spec.md', 69,
       'No requirement of the table Requirements goes to the item.')]
-    >>> own = ("spec.md", "| 3, regulatory | authority (1) |", "| 3, regulatory | own rule (IX) |")
+    >>> own = ("spec.md", "| 1 | standard (S-01) | the list", "| 1 | own rule (IX) | the list")
     >>> check_requirements(sample.load(other, own)), check_requirements(sample.load(other, retired))
     ([], [])
 
@@ -1445,7 +1408,7 @@ def check_requirements(data):
         if fault:
             out.append(finding(fault, row, ident, name))
     for row in live_items(data):
-        own = row.get("admitted by", "").strip().lower().startswith(OWN_RULE)
+        own = row.get("strongest source", "").strip().lower().startswith(OWN_RULE)
         if row.get("id") not in held and not own:
             out.append(finding("item-without-requirement", row, row.get("id", "")))
     for holder in data["stakeholders"]:
@@ -1506,36 +1469,21 @@ def views_emptied_by_boundaries(data):
 
 
 def check_basics(data):
-    r"""Each view needs its basic practices: an item on level 1.
+    r"""The views that have no item on level 1. The ladder gives the level, thus this fails nothing.
 
-    Returns the findings, and the views that wait while a level is pending. A view without an
-    item is the finding of check_views, not of this rule.
+    A view without an item is the finding of check_views, not of this rule.
 
     >>> import sample
     >>> check_basics(sample.load())
-    ([], [])
-    >>> c01, above = "| storage | 1 | authority (2) |", "| storage | 2, regulatory | authority (2) |"
-    >>> found, waiting = check_basics(sample.load(("spec.md", c01, above)))
-    >>> brief(found), found[0]["line"], found[0]["text"], waiting
-    ([('view-without-basics', 'storage')], 12, "The view 'storage' has no item on level 1.", [])
-
-    While a level is pending, the calculation can still give the view an item on level 1.
-
-    >>> check_basics(sample.load(("spec.md", c01, "| storage | pending | authority (2) |")))
+    []
+    >>> was = "| storage | 1 | standard (S-01) | the newest"
+    >>> c01 = ("spec.md", was, "| storage | pending | | the newest")
+    >>> was = "| storage | 1 | standard (S-01) | the list"
+    >>> c03 = ("spec.md", was, "| storage | 2, regulatory | | the list")
+    >>> check_basics(sample.load(c01)), check_basics(sample.load(c01, c03))
     ([], ['storage'])
-    >>> other = ("spec.md", "| 2, operative |", "| pending |")
-    >>> check_basics(sample.load(("spec.md", c01, above), other))
-    ([], ['storage'])
-    >>> storage = sample.VIEW_STORAGE
-    >>> quality = storage + "\n  - `quality`: how the copies are examined. (judgement)"
-    >>> check_basics(sample.load(("spec.md", storage, quality)))
-    ([], [])
     """
-    names = [c["view"] for c in view_counts(data) if c["items"] and not c["level 1"]]
-    if any(aspect.level_of(r.get("level"))[0] == "pending" for r in live_items(data)):
-        return [], names
-    places = {v["name"]: v for v in reversed(data["views"])}
-    return [finding("view-without-basics", places[name], name, name) for name in names], []
+    return [c["view"] for c in view_counts(data) if c["items"] and not c["level 1"]]
 
 
 def check_evidence(data):
@@ -1920,15 +1868,14 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains["levels"], remains["vettings"]
     ([], ['C-02'], ['S-04'])
 
-    A view without an item on level 1 remains while a level is pending. Then it fails the check.
+    A view without an item on level 1 remains. It does not fail the check.
 
-    >>> basic = ("spec.md", "| storage | 1 | authority (2) |", "| storage | 2, regulatory | authority (2) |")
-    >>> found, remains = run_checks(sample.load(basic, level))
+    >>> was = "| storage | 1 | standard (S-01) | the list"
+    >>> c03 = ("spec.md", was, "| storage | 3, regulatory | | the list")
+    >>> c01 = ("spec.md", "| storage | 1 | standard", "| storage | pending | standard")
+    >>> found, remains = run_checks(sample.load(c03, c01))
     >>> found, remains["basics"]
     ([], ['storage'])
-    >>> found, remains = run_checks(sample.load(basic))
-    >>> brief(found), remains["basics"]
-    ([('view-without-basics', 'storage')], [])
 
     A finding of a trial that is open remains. A finding with a defect fails the check.
 
@@ -1953,7 +1900,6 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     [(36, 'source-cell-empty'), (68, 'level-unknown'), (71, 'product-word')]
     """
     support, waiting = check_support(data)
-    basics, without_basics = check_basics(data)
     found = (
         check_scope(data)
         + check_scope_findings(data)
@@ -1965,7 +1911,6 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         + check_requirements(data)
         + check_boundaries(data)
         + check_reading(data)
-        + basics
         + check_evidence(data)
         + check_other_sections(data)
         + check_skill(data)
@@ -1982,7 +1927,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     live = live_items(data)
     remains = {
         "levels": sorted(r["id"] for r in live if aspect.level_of(r.get("level"))[0] == "pending"),
-        "basics": without_basics,
+        "basics": check_basics(data),
         "vettings": sorted(
             s["id"] for s in data["sources"] if s.get("class") == "independent" and s["id"] not in confirmed
         ),
@@ -2109,14 +2054,13 @@ def report(data, found, remains, previous_given):
     Views, with the number of items on each level, of sources and of stakeholders:
     - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
       sources read for the view: 4.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
+    - storage: level 1: 2, level 2: 0, level 3: 0, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
       duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
       duplicates: 0, a proposed boundary would take: 0.
-    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - Items that need judgement: C-04.
     Accepted: A. Person, 2026-01-15.
@@ -2133,22 +2077,20 @@ def report(data, found, remains, previous_given):
     Views, with the number of items on each level, of sources and of stakeholders:
     - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
       sources read for the view: 4.
-    - storage: level 1: 1, level 2: 0, level 3: 1, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
+    - storage: level 1: 2, level 2: 0, level 3: 0, pending: 0, not admitted: 0, sources: 2, stakeholders: 1,
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
       duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
       duplicates: 0, a proposed boundary would take: 0.
-    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - The owner did not accept the specification.
 
     When nothing remains, the report is short. A specification without a view has no such part.
-    A specification without answers of risk and reward has no line for them.
 
     >>> data = sample.load(("spec.md", "| judgement |", "| the review is in the record |"))
-    >>> data["views"] = data["stakeholders"] = data["vetting_items"] = data["requirements"] = []
+    >>> data["views"] = data["stakeholders"] = data["requirements"] = []
     >>> print(report(data, [], run_checks(data, data["checklist"])[1], previous_given=True))
     No check fails.
     Accepted: A. Person, 2026-01-15.
@@ -2163,7 +2105,7 @@ def report(data, found, remains, previous_given):
     FAIL stakeholder-without-requirement spec.md:30 auditors: The stakeholder 'auditors' has no requirement
     in the table Requirements.
     Failing checks: 1.
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[9:13]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:12]))
     What remains:
     - The intent of the owner was not asked.
     - Items that need judgement: C-04.
@@ -2181,12 +2123,13 @@ def report(data, found, remains, previous_given):
     >>> fourth = ("vetting.md", r05 + " C-05 |", r05 + " C-03 |")
     >>> fifth = ("vetting.md", "| duplicate: R-05 |", "| C-05 |")
     >>> sixth = ("vetting.md", '| S-03 "After the drill" | C-04 |', '| S-03 "After the drill" | C-02 |')
-    >>> own = ("spec.md", "| not admitted | practice |", "| not admitted | own rule, constitution IX |")
+    >>> was = "| not admitted | independent (S-03) |"
+    >>> own = ("spec.md", was, "| not admitted | own rule, constitution IX |")
     >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
     >>> edits = (("spec.md", sample.BOUNDARIES, named), away, second, third, fourth, fifth, sixth, own, whole)
     >>> data = sample.load(*edits)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join([lines[0], lines[6], *lines[8:]]))
+    >>> print("\n".join([lines[0], lines[6], *lines[7:]]))
     No check fails.
     - storage: requirements: 2, to an item: 0, to an implementation skill: 0, to a boundary: 2,
       duplicates: 0, a proposed boundary would take: 0.
@@ -2205,7 +2148,7 @@ def report(data, found, remains, previous_given):
     >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-01, R-02 | owners of the data |"))
     >>> data = sample.load(named, sample.PROPOSED_TABLE, more)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join([lines[0], *lines[5:7], *lines[8:]]))
+    >>> print("\n".join([lines[0], *lines[5:7], *lines[7:]]))
     No check fails.
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
       duplicates: 1, a proposed boundary would take: 1.
@@ -2221,7 +2164,7 @@ def report(data, found, remains, previous_given):
     An open finding of a trial remains. A recipe without a trial remains also.
 
     >>> data = sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[7:]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings that are open: F-01.
@@ -2229,7 +2172,7 @@ def report(data, found, remains, previous_given):
     >>> folder = sample.folder()
     >>> (folder / "trial.md").unlink()
     >>> data = aspect.load(folder)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[7:]))
     What remains:
     - Items that need judgement: C-04.
     - The recipe has no trial.
@@ -2239,7 +2182,7 @@ def report(data, found, remains, previous_given):
 
     >>> data = sample.load()
     >>> found, remains = run_checks(data, viewpoints_file="absent.txt")
-    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[8:11]))
+    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[7:10]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings with a viewpoint that was not checked: F-01, F-02. The list is absent.
@@ -2250,7 +2193,7 @@ def report(data, found, remains, previous_given):
     >>> left = ("vetting.md", sample.READING_S01, "| S-01 | S-01 | 6 | 1-2, 6 | 3-5 |")
     >>> data = sample.load(left)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join([*lines[:2], *lines[9:12]]))
+    >>> print("\n".join([*lines[:2], *lines[8:11]]))
     FAIL full-with-unread-pages spec.md:35 S-01: The source says 'full'. The table Reading names pages that
     no reader got: 3-5.
     Failing checks: 1.
@@ -2258,25 +2201,27 @@ def report(data, found, remains, previous_given):
     - Items that need judgement: C-04.
     - Sources with pages that no reader got: S-01 (3 pages).
     >>> data = sample.load(("vetting.md", "## Reading", "## Other"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:11]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[7:10]))
     What remains:
     - Items that need judgement: C-04.
     - The table Reading is absent. Run index.py unread with --write.
 
-    A view that waits for the levels is in the list of what remains.
+    A view without an item on level 1 is in the list of what remains.
 
-    >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| storage | pending | authority (2) |")
-    >>> data = sample.load(c01)
+    >>> was = "| storage | 1 | standard (S-01) | the newest"
+    >>> c01 = ("spec.md", was, "| storage | pending | | the newest")
+    >>> was = "| storage | 1 | standard (S-01) | the list"
+    >>> c03 = ("spec.md", was, "| storage | 3, regulatory | | the list")
+    >>> data = sample.load(c01, c03)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join(lines[2:4] + lines[7:11]))
+    >>> print("\n".join(lines[2:4] + lines[7:10]))
     - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
       sources read for the view: 4.
     - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1,
       sources read for the view: 2.
-    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - Levels that are pending: C-01.
-    - Views without an item on level 1, while levels are pending: storage.
+    - Views without an item on level 1: storage.
     """
     lines = [
         f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
@@ -2292,7 +2237,6 @@ def report(data, found, remains, previous_given):
     if counts:
         lines.append(MESSAGES["requirements-head"])
         lines += ["- " + MESSAGES["requirement-line"].format(*(c[k] for k in keys)) for c in counts]
-    lines += answer_lines(data)
     rest = [] if intent_asked(data) else [MESSAGES["remains-intent"]]
     for key, ids in remains.items():
         if key in ONE_LINE_EACH:
@@ -2313,66 +2257,6 @@ def report(data, found, remains, previous_given):
     if not previous_given:
         lines.append(MESSAGES["previous-skipped"])
     return "\n".join(lines)
-
-
-def by_judgement(data, names):
-    """The items of vetting.md that have no source for each named answer, and "judgement" for one or more.
-
-    >>> import sample
-    >>> by_judgement(sample.load(), ("severity", "probability")), by_judgement(sample.load(), ANSWERS)
-    ([], [])
-    >>> c04 = '| C-04 | 1 (S-03 "After the drill") |'
-    >>> data = sample.load(("vetting.md", c04, "| C-04 | 1 (judgement) |"))
-    >>> by_judgement(data, ("severity", "probability")), by_judgement(data, ANSWERS)
-    (['C-04'], ['C-04'])
-    >>> by_judgement({"vetting_items": []}, ANSWERS)
-    []
-    """
-    found = []
-    for row in data["vetting_items"]:
-        cells = [row.get(name, "") for name in names]
-        if not any(aspect.source_ids(c) for c in cells) and any("judgement" in c.lower() for c in cells):
-            found.append(row.get("item", ""))
-    return sorted(found)
-
-
-def answer_lines(data):
-    """The lines of the report for the answers of risk and reward. No answer gives no line.
-
-    An item has a line when its severity and its probability have no source: the harm that the item prevents
-    is then a question for the owner. An admitted item has a line when no answer has a source.
-
-    >>> import sample
-    >>> answer_lines(sample.load())
-    ['Answers of risk and reward: 9 with a source, 21 by judgement.']
-    >>> c04 = '| C-04 | 1 (S-03 "After the drill") |'
-    >>> line = answer_lines(sample.load(("vetting.md", c04, "| C-04 | 1 (judgement) |")))[1]
-    >>> line[:52], line[52:]
-    ('Items with a severity or a probability by judgement.', ' Each one is a question for the owner: C-04.')
-    >>> row = '| C-04 | 1 (S-03 "After the drill") | 1 (judgement) |'
-    >>> answer_lines(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | 1 |")))[1]
-    "Answers of risk and reward without a source and without 'judgement': 2."
-    >>> c05 = "| C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) |"
-    >>> answer_lines(sample.load(("vetting.md", c05, c05.replace("(S-04 README)", "(judgement)").replace(
-    ...     "(S-01 section 3)", "(judgement)"))))[-1]
-    'Items whose level rests on judgement only: C-05.'
-    >>> answer_lines({"vetting_items": []})
-    []
-    """
-    counts = answer_counts(data)
-    if not any(counts.values()):
-        return []
-    lines = [MESSAGES["answers"].format(counts["source"], counts["judgement"])]
-    if counts["other"]:
-        lines.append(MESSAGES["answers-other"].format(counts["other"]))
-    harm = by_judgement(data, ("severity", "probability"))
-    if harm:
-        lines.append(MESSAGES["answers-harm"].format(", ".join(harm)))
-    admitted = {r["id"] for r in live_items(data) if aspect.level_of(r.get("level"))[0] in (1, 2, 3)}
-    level = [i for i in by_judgement(data, ANSWERS) if i in admitted]
-    if level:
-        lines.append(MESSAGES["answers-level"].format(", ".join(level)))
-    return lines
 
 
 def scope_report(data):
@@ -2451,16 +2335,16 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'reading', 'remains', 'requirements',
+    (['accepted', 'findings', 'intent_asked', 'previous', 'reading', 'remains', 'requirements',
       'trials', 'views'], [('unknown-source', 'C-02')], True)
     >>> result["reading"]["table"], result["reading"]["sources"][1], result["remains"]["unread"]
     (True, {'document': 'S-02', 'not read': 0, 'pages': 2, 'source': 'S-02'}, [])
-    >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
-    ({'judgement': 21, 'other': 0, 'source': 9}, True, [])
+    >>> result["intent_asked"], result["remains"]["stakeholders"]
+    (True, [])
     >>> result["trials"], result["remains"]["trial"]
     (['T-01'], [])
     >>> result["views"][1]
-    {'items': 2, 'level 1': 1, 'level 2': 0, 'level 3': 1, 'not admitted': 0, 'pending': 0, 'sources': 2,
+    {'items': 2, 'level 1': 2, 'level 2': 0, 'level 3': 0, 'not admitted': 0, 'pending': 0, 'sources': 2,
      'sources read for the view': 2, 'stakeholders': 1, 'view': 'storage'}
     >>> result["requirements"][1]
     {'a proposed boundary would take': 0, 'duplicates': 0, 'requirements': 2, 'to a boundary': 0,
@@ -2576,7 +2460,6 @@ def main(argv=None):
     if as_json:
         result = {
             "accepted": is_accepted(data),
-            "answers": answer_counts(data),
             "findings": found,
             "intent_asked": intent_asked(data),
             "previous": previous is not None,

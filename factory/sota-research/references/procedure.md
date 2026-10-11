@@ -204,7 +204,7 @@ with their priority and the constraints of the owner. It is optional.
    - If the concerns of a stakeholder are in no view, record the stakeholder in section 7
      with the reason.
    - For each view, the requirements of its stakeholders are the candidates for checklist
-     items. The calculation of risk and reward decides on them. Do not drop a requirement:
+     items. The ladder of the source classes places them. Do not drop a requirement:
      do steps 9 and 10 for each one.
 3. **Compare the intent of the owner with the sources.**
    - Read the field "Intent of the owner" of section 1.
@@ -391,10 +391,8 @@ with their priority and the constraints of the owner. It is optional.
        cell "Stakeholders that it would leave with no requirement", or `none`.
      - Write into the cell "Reason" why you think that the neighbouring aspect owns the
        concern, with the source.
-   - If a requirement is basic in its view, make it a checklist item, also when its cost is
-     high. The calculation of risk and reward places the item or does not admit it.
    - Make sure that each checklist item holds a requirement. An item without a requirement
-     has `own rule` in the cell "Admitted by".
+     has `own rule` in the cell "Strongest source".
    - Write where the sources disagree into section 3.4, with the two positions.
    - A practice from a different field states the problem that it solves there, and what
      shows that it does not work here.
@@ -408,7 +406,7 @@ with their priority and the constraints of the owner. It is optional.
    "Where" of the row. Do not use the agent that read the source. Correct each finding in
    `evidence.md`, in each row of `spec.md` and in each row of the table "Requirements" that
    says the same.
-13. **Place the items.** See "The calculation of risk and reward".
+13. **Place the items.** See "The value and the level of an item".
 14. **Fill** sections 5 to 8. In section 7, record the roles of the models that made or
    suggested a judgement. Do not write a model name into the specification. If the glossary
    of section 8 has two names for one term, do the steps of "The synonyms of the search".
@@ -459,10 +457,11 @@ the checklist and from the check. Then give the owner, in this order:
    its state and its source. The owner sees them here for the first time and can correct
    each one.
 4. The strategy: the goals, the order of the work and the decisions that depend on context.
-5. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
-   Give the line "Answers of risk and reward" of the check, as it is.
-   - Give each item that is not admitted in a list of its own, with its score and its six
-     answers. The owner can admit an item: record the decision with its date in section 7.
+5. The checklist in the order of `place.py`, with the level and the strongest source of each
+   item. Give the ladder of `scripts/rubric-items.txt`, as it is.
+   - Settle the order with the owner. The owner can move an item to a different level, or
+     decline it: write the level or `not admitted` into the cell "Level". Record the decision
+     with its date in section 7. A declined item stays in the checklist.
 6. The points where the sources disagree, and how the recipe handles each.
 7. The independent sources with their signals and scores, for the confirmation.
 8. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
@@ -470,7 +469,7 @@ the checklist and from the check. Then give the owner, in this order:
 9. The list "What remains" of the check, as it is.
 10. What was not verified.
 
-Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
+Then do what the owner decides: change a level, remove a source,
 change an item, change a view, change a stakeholder, decide or decline a boundary.
 
 - If the owner decides a boundary, do these steps:
@@ -479,7 +478,7 @@ change an item, change a view, change a stakeholder, decide or decline a boundar
   2. Write `boundary: <name>` into the cell "Goes to" of each requirement that the boundary
      takes.
   3. Remove the row of the boundary from the table "Proposed boundaries".
-  4. Do the steps of "The calculation of risk and reward" again. Then run the check.
+  4. Do the steps of "The value and the level of an item" again. Then run the check.
   5. If the check reports an item without a requirement, give the item to the owner for a
      decision.
 - If the owner declines a boundary, remove the line of the boundary from section 1 and its
@@ -627,13 +626,6 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - Give the list "What remains" to the owner as it is.
 - The list says so if the intent of the owner was not asked. It names each stakeholder that
   is in no view.
-- The line "Answers of risk and reward" gives the number of answers with a source and the
-  number of answers by judgement. Give it to the owner as it is.
-- The line "Items with a severity or a probability by judgement" names the items whose harm
-  has no source. Give each one to the owner as a question. Record the answer of the owner with
-  its date in section 7. It is a decision, not a source.
-- The line "Items whose level rests on judgement only" names the admitted items without a
-  source for each answer. The rendered checklist marks their level.
 - The list names each finding of a trial that is open. It says so if the recipe has no trial.
 - If a row of `trial.md` fails, correct the cell. Do not change the sentence of a finding.
 - The part "Views" gives, for each view, the number of items on each level, the number of
@@ -759,15 +751,17 @@ Do this for each source with the class `independent`, before the source supports
 5. Remove a rejected source from the items that cite it. If an item then has no source, the
    check reports it.
 
-## The calculation of risk and reward
+## The value and the level of an item
 
 Do this after the checklist is distilled and before the stop for the owner.
 
-1. Read `prompts/risk-answers.md` and do its steps: record the six answers for each item in
-   the table "Items" of `vetting.md`.
-2. Run `uv run factory/sota-research/scripts/place.py <folder of the specification>`.
-3. Correct each item that is pending. Do not write a level by hand.
-4. Run the program with `--write`. It fills the Level cells of the checklist.
+1. Run `uv run factory/sota-research/scripts/place.py <folder of the specification>`.
+2. If an item is pending, give its sources a class in section 2 of `spec.md`.
+3. Run the program with `--write`. It fills the cells "Level" and "Strongest source" of the
+   checklist.
+4. Do not write a level by hand. Only a decision of the owner changes a level.
+5. Do not answer a question about harm, probability or cost for an item. The ladder uses
+   only the class of each source that asks for the item.
 
 ## The rendering and the delivery
 

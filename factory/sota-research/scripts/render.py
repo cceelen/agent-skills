@@ -43,6 +43,7 @@ import sys
 
 import aspect
 import check
+import place
 
 MAX_LINES = 500
 # The rules of the kit, with their marker lines. Each skill holds them.
@@ -227,29 +228,19 @@ def field(data, name):
 
 
 def rendered_items(data):
-    """The items of the recipe: admitted and not retired, by level, score and identifier.
+    """The items of the recipe: placed and not retired, by level, value and identifier.
 
-    C-04 of the sample is not admitted. C-01 has a higher score than C-05.
+    C-04 of the sample is not admitted by the owner. C-02 has a lower value than the others.
 
     >>> import sample
     >>> [(r["id"], r["level"]) for r in rendered_items(sample.load())]
-    [('C-01', '1'), ('C-05', '1'), ('C-02', '2, operative'), ('C-03', '3, regulatory')]
-
-    Without the scores of vetting.md, the identifier decides the order in a level.
-
-    >>> data = sample.load(("spec.md", "| 2, operative |", "| retired |"))
-    >>> data["vetting_items"] = [{"item": "C-01", "score": ""}]
-    >>> [r["id"] for r in rendered_items(data)]
-    ['C-01', 'C-05', 'C-03']
+    [('C-01', '1'), ('C-03', '1'), ('C-05', '1'), ('C-02', '2, operative')]
     """
-    scores = {}
-    for row in data["vetting_items"]:
-        if re.fullmatch(r"-?\d+", row.get("score", "")):
-            scores[row.get("item")] = int(row["score"])
+    rubric = place.read_rubric(pathlib.Path(__file__).with_name("rubric-items.txt"))
+    values = {r["id"]: r.get("value", 0) for r in place.place(data, rubric)}
 
     def level_order(row):
-        level, _ = aspect.level_of(row.get("level"))
-        return (level if isinstance(level, int) else 9, -scores.get(row.get("id"), 0), row.get("id", ""))
+        return (aspect.level_of(row.get("level"))[0], -values.get(row.get("id"), 0), row.get("id", ""))
 
     keep = [r for r in data["checklist"] if aspect.level_of(r.get("level"))[0] in (1, 2, 3)]
     return sorted(keep, key=level_order)
@@ -425,9 +416,9 @@ def render_checklist(data, mark):
     | Id | Item | Risk that it answers | View |
     |---|---|---|---|---|---|---|
     | C-01 | A backup of the data that cannot b
+    | C-03 | A copy of the backup is kept in a
     | C-05 | The backup is made by a program, n
     | C-02 | A restore from the backup was done
-    | C-03 | A copy of the backup is kept in a
 
     The file has no cell for the sources, and no item that is not admitted.
 
@@ -437,28 +428,19 @@ def render_checklist(data, mark):
     Each row shows the view of its item.
 
     >>> [line.split(" | ")[3] for line in text.splitlines() if line.startswith("| C-")]
-    ['storage', 'operation', 'operation', 'storage']
-
-    A level that rests on no source has a mark.
-
-    >>> c05 = "| C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) |"
-    >>> none = c05.replace("(S-04 README)", "(judgement)").replace("(S-01 section 3)", "(judgement)")
-    >>> text = render_checklist(sample.load(("vetting.md", c05, none)), "<stamp>")
-    >>> [line.split(" | ")[4] for line in text.splitlines() if line.startswith("| C-")]
-    ['1', '1 (judgement)', '2, operative', '3, regulatory']
+    ['storage', 'storage', 'operation', 'operation']
 
     The last cell of a row names the regulation and the governance that ask for the item.
 
     >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
     >>> text = render_checklist(law, "<stamp>")
     >>> [line.split(" | ")[6].strip(" |") for line in text.splitlines() if line.startswith("| C-")]
-    ['Guide to backups', 'Guide to backups', '', 'Guide to backups']
+    ['Guide to backups', 'Guide to backups', 'Guide to backups', '']
     """
-    unsupported = set(check.by_judgement(data, check.ANSWERS))
     binding = binding_sources(data)
     rows = [
         [r.get(k, "") for k in ("id", "item", "why")]
-        + [aspect.view_of(r), r.get("level", "") + (" (judgement)" if r.get("id") in unsupported else "")]
+        + [aspect.view_of(r), r.get("level", "")]
         + [r.get("check", ""), "; ".join(binding.get(r.get("id"), []))]
         for r in rendered_items(data)
     ]
@@ -466,12 +448,12 @@ def render_checklist(data, mark):
         [
             mark,
             f"# Checklist: {data['title']}\n",
-            "Each item is generic. Level 1 holds the basic practices. An item above level 1 names the",
-            "risk dimension that calls for it. A check of `judgement` needs a person or a review. The",
-            "view of an item is the set of concerns that the item belongs to. A level with the mark",
-            "`(judgement)` rests on no source: the research found none for its risk or its cost. The",
-            "last cell names the regulation and the governance that ask for the item. If one of them",
-            "binds the project, the item is necessary for the project.\n",
+            "Each item is generic. The level says how early the skill does the item: level 1 in the",
+            "first iteration, then level 2, then level 3. An item that is not done stays in the list.",
+            "A level above 1 can name the risk dimension that calls for the item. A check of",
+            "`judgement` needs a person or a review. The view of an item is the set of concerns that",
+            "the item belongs to. The last cell names the regulation and the governance that ask for",
+            "the item. If one of them binds the project, the item is necessary for the project.\n",
             table(["Id", "Item", "Risk that it answers", "View", "Level", "Check", BINDING_HEAD], rows),
         ]
     )
@@ -520,9 +502,8 @@ def render_docs(data, name, mark):
     >>> print(text[text.index("| Level |") : text.index("## Your selection")])
     | Level | Number of items |
     |---|---|
-    | 1 | 2 |
+    | 1 | 3 |
     | 2 | 1 |
-    | 3 | 1 |
     <BLANKLINE>
     <BLANKLINE>
     """
@@ -635,7 +616,7 @@ def refuse(data, words, trial=False):
     'Nothing was rendered: the owner did not accept the specification.'
     >>> refuse(sample.load(("spec.md", "| S-02 section 4 |", "| S-09 section 4 |")), [])
     'Nothing was rendered: the check of the specification fails. Run check.py.'
-    >>> refuse(sample.load(("spec.md", "| 3, regulatory |", "| pending |")), [])
+    >>> refuse(sample.load(("spec.md", "| 1 | standard (S-01) | the list", "| pending | | the list")), [])
     'Nothing was rendered: these items have no level. Run place.py: C-03.'
     >>> refuse(sample.load(("spec.md", "# Aspect specification:", "# Feature Specification:")), [])
     'The file spec.md is not an aspect specification.'
@@ -647,7 +628,8 @@ def refuse(data, words, trial=False):
     >>> refuse(sample.load(pending, vetting), [], trial=True)
     >>> refuse(sample.load(pending, ("spec.md", "| S-02 section 4 |", "| S-09 section 4 |")), [], trial=True)
     'Nothing was rendered: the check of the specification fails. Run check.py.'
-    >>> refuse(sample.load(pending, ("spec.md", "| 3, regulatory |", "| pending |")), [], trial=True)
+    >>> c03 = ("spec.md", "| 1 | standard (S-01) | the list", "| pending | | the list")
+    >>> refuse(sample.load(pending, c03), [], trial=True)
     'Nothing was rendered: these items have no level. Run place.py: C-03.'
 
     The name of the skill comes from section 5 and obeys the rule for a skill name.
@@ -802,7 +784,8 @@ def main(argv=None):
     (1, False, 'The commit must be 4 to 40 characters of 0 to 9 and a to f.')
     >>> refused("--commit", "abc1234", "--branch", "a`b -->")
     (1, False, 'The name of the branch has a character that is not permitted.')
-    >>> refused("--commit", "abc1234", edits=[("spec.md", "| 3, regulatory |", "| pending |")])
+    >>> c03 = ("spec.md", "| 1 | standard (S-01) | the list", "| pending | | the list")
+    >>> refused("--commit", "abc1234", edits=[c03])
     (1, False, 'Nothing was rendered: these items have no level. Run place.py: C-03.')
     >>> words = good.parent / "words.txt"
     >>> _ = words.write_text("restore\n", encoding="utf-8")

@@ -74,31 +74,33 @@ the skill is rendered again.
 
 ---
 
-### User Story 3 - Place each item with a calculation of risk and reward (Priority: P3)
+### User Story 3 - Place each item with a ladder of the source classes (Priority: P3)
 
-For each checklist item, the research session records answers to a fixed set of questions
-about risk and reward. A program computes from the answers whether the item is admitted, its
-position in the order, and its level (1, 2 or 3). Level 1 holds the basic practices. An item
-above level 1 names the risk dimension of the aspect that calls for it. The owner sees the
-answers and the result, and can correct an answer.
+A ladder gives each class of source one value. A regulation and a framework of governance
+have the highest value. A program computes the value of each item from the sources that ask
+for it, and from the value its position in the order and its level (1, 2 or 3). A skill does
+level 1 in its first iteration. No item is dropped. The session settles the order with the
+owner, and the owner can change a level or decline an item.
 
-**Why this priority**: Today the level of each item is "pending". The owner decided that a
-calculation places an item, and that a model does not assign a level by feel.
+**Why this priority**: The owner decided that static values from the class of the source are
+sufficient for the triage, and that it is more important to keep each pending item than to
+compute a perfect order. Six stage tests of a calculation from six answers of a model brought
+no gain (iteration I-22).
 
-**Independent Test**: Give the program a fixture of recorded answers. The computed admission,
-order and level are the same as the expected values, each time.
+**Independent Test**: Give the program a fixture with sources, requirements and items. The
+computed value, order and level are the same as the expected values, each time.
 
 **Acceptance Scenarios**:
 
-1. **Given** recorded answers for each item, **When** the calculation runs, **Then** each
-   item has an admission result, a position and a level, and the record shows how the answers
-   gave that result.
-2. **Given** an item with a missing answer, **When** the calculation runs, **Then** the item
-   stays "pending" and the report names the missing answer.
-3. **Given** a corrected answer from the owner, **When** the calculation runs again, **Then**
-   the result changes only for the items that the answer touches.
-4. **Given** a changed set of questions or weights, **When** the calculation runs, **Then**
-   the record carries the new version of the rubric.
+1. **Given** the classes of the sources and the requirement rows, **When** the program runs,
+   **Then** each item has a value, a position and a level, and the record shows the class and
+   the sources that gave the value.
+2. **Given** an item whose sources have no class, **When** the program runs, **Then** the
+   item stays "pending" and the report names it.
+3. **Given** an item that the owner declined, **When** the program runs again, **Then** the
+   item keeps the state `not admitted` and stays in the checklist.
+4. **Given** a changed value or limit of the ladder, **When** the program runs, **Then** the
+   record carries the new version of the ladder.
 
 ---
 
@@ -225,24 +227,21 @@ specification whose check reports no failure other than "not accepted".
 - **FR-010**: A test of the repository MUST fail when a committed recipe skill differs from a
   fresh rendering.
 
-**Calculation of risk and reward (C-18)**
+**Value and level of an item (C-18)**
 
-- **FR-011**: The calculation MUST compute admission, order and level (1, 2 or 3, cumulative)
-  of each item from recorded answers to a fixed set of questions. The item with the best
-  return at the lowest cost is on level 1.
-- **FR-012**: The record MUST hold, for each item, the answers, the result and the version of
-  the rubric, and MUST keep the level apart from the quality of the evidence.
-- **FR-013**: An item with a missing answer MUST stay "pending".
-- **FR-014**: Each item MUST name the risk that it answers. The questions MUST cover the
-  reward (how bad the harm is that the item prevents, how strongly regulations and standards ask for the item, in how many contexts the item
-  applies), the cost (the number of elements that a project changes to adopt the item and to
-  keep it; not an estimate of time) and the risk of the item
-  itself. Each answer is on a fixed scale and names its source. The research session records
-  the answers, and the owner corrects them.
-- **FR-014a**: An item with a good return at a low cost in each context MUST be on level 1.
-  An item whose return depends on the risk of a project MUST be above level 1 and MUST name
-  the risk dimension that calls for it. The calculation does not assess a project: the recipe
-  skill does that with the owner of the project (FR-008).
+- **FR-011**: A program MUST compute the value, the order and the level (1, 2 or 3,
+  cumulative) of each item from a ladder that gives each class of source one value. The value
+  of an item is the highest value of the sources whose requirements go to the item or that
+  the item cites. The classes `regulation` and `governance` MUST have the highest value.
+- **FR-012**: The checklist MUST hold, for each item, the level and the class and the sources
+  that gave the value. The record MUST hold the version of the ladder.
+- **FR-013**: An item whose sources have no class MUST stay "pending".
+- **FR-014**: The program MUST NOT remove an item. An item that the owner declines keeps the
+  state `not admitted` and stays in the checklist. A model MUST NOT answer a question about
+  harm, probability or cost to place an item.
+- **FR-014a**: An item above level 1 MAY name the risk dimension that calls for it. The
+  ladder does not assess a project: the recipe skill does that with the owner of the project
+  (FR-008). The session MUST settle the order with the owner in the review.
 
 **Vetting of independent sources (C-20)**
 
@@ -386,64 +385,16 @@ specification whose check reports no failure other than "not accepted".
   duty for it. Section 1 MUST name each stakeholder with its concerns and its source. The
   skill MUST aggregate the concerns into the views, and each view MUST name its stakeholders
   in a form that a program reads. The requirements of the stakeholders of a view are the
-  candidates for its items; the calculation of risk and reward decides on them. FR-048
+  candidates for its items; the ladder of the source classes places them. FR-048
   gives the exits of a requirement and supersedes the row in section 7 for a requirement
-  that was dropped before the calculation. Outside
+  that was dropped before the placing. Outside
   the check of phase 1, the check MUST fail when section 1 names no stakeholder, when a
   stakeholder names no concern or no source, when a view names no stakeholder, and when a
   view names a stakeholder that section 1 does not have. The check MUST list under "What
   remains" each stakeholder that is in no view, and MUST give the number of stakeholders of
   each view. The rendered skill MUST show the stakeholders of each view. In the review, the
   owner can add, remove or rename a stakeholder.
-- **FR-042**: The check MUST report, in one line, how many answers of risk and reward in the
-  table "Items" of `vetting.md` name a source and how many say `judgement`. The line MUST NOT
-  fail the check, and MUST be in the JSON report. In the review, the owner MUST get this line
-  with the checklist.
-
-**A register of the requirements, and sources of the own field of a view**
-
-Iteration I-3, 2026-10-11. The registered trial of I-2 was refuted, and its registration
-fixed this change: how the research finds the basic practices of each view. The session
-dropped requirements of the sources before the calculation, one requirement of the evidence
-record became no item, and one view had no source of its own field.
-
-- **FR-048**: `vetting.md` MUST hold a table "Requirements" with one row for each requirement
-  that a source states for a stakeholder: the identifier `R-<nn>`, the requirement in one
-  sentence, the stakeholder, the view, the source with its location, and the cell "Goes to".
-  The reader of a source MUST report each requirement of the source as its own point, with
-  the group of persons that it serves and the location. The session MUST record each one
-  without a judgement. The cell "Goes to" MUST have one of four forms: `C-<nn>`, a checklist
-  item; `5`, an implementation skill; `boundary: <name>`, a boundary of section 1;
-  `duplicate: R-<nn>`, a row that is not a duplicate. No other exit is permitted. A
-  requirement MUST NOT go to a decision of section 3.3. A requirement that is basic in its
-  view becomes an item also when its cost is high, and the calculation places it. The check
-  MUST fail, outside
-  the check of phase 1, when the table is absent or empty; when a cell is empty; when an
-  identifier is used two times; when the cell "Goes to" has no such form or names a row that
-  does not exist or an item that is retired; when a stakeholder or a view is not in section
-  1; when the source is not in section 2; when an item that is not retired holds no
-  requirement and is not admitted by `own rule`; and when a stakeholder of section 1 has no
-  requirement. The report MUST give, for each view, the number of requirements and the number
-  for each exit, also in the JSON report. The check MUST list under "What remains" each view
-  with more than half of its requirements at a boundary. In the review, the owner MUST get
-  this part with the views.
-- **FR-049**: Each source of section 2 MUST name, in the cell `Views`, the views that it was
-  read for, or `all` for a body of knowledge. For each view, the skill MUST find and read the
-  references of the field of that view: the standards and references that the body of
-  knowledge names for the knowledge areas of the view, and the results of a search in the
-  words of the view. The check MUST fail when the cell names a view that section 1 does not
-  have, and when the cell is present and empty. A specification without the cell MUST NOT
-  fail for it. The check MUST list under "What remains" each view with fewer than two sources
-  that were read in full or in part for it and do not say `all`, and MUST give this number in
-  the part "Views".
-
-**A neutral environment, the seeds, and a skill that works alone**
-
-Decision of the owner, 2026-10-10: the factory can use the personal environment of the owner
-and this repository. A skill that the factory creates must work alone. The repository must be
-able to set up a neutral environment of the factory again, and to retrieve the seed documents
-and standards.
-
+- **FR-042**: Removed in iteration I-22 with the answers of risk and reward.
 - **FR-043**: The tooling MUST hold a manifest of the seeds: the documents and standards that
   the factory starts from. Each row names the identifier, the document, the issuer, the
   version or the date, the kind, the address, the digest of the file, the terms of the issuer
@@ -610,15 +561,8 @@ sent each requirement of one concern to a boundary that it wrote itself.
   for the conversion when a page came back empty or in part, or when its words must be
   examined. (The stage test ST-13 found no more requirement lines from the text than from
   the web tool.)
-- **FR-061**: A source of an answer of risk and reward MUST be a source of the aspect
-  specification with its location. A context, a view or a risk dimension is not a source. The
-  check MUST name each item whose severity and probability have no source: each one is a
-  question for the owner. A decision of the owner is recorded with its date and is not a
-  source. The rendered checklist MUST mark each level that rests on no source.
-- **FR-062**: The answer `probability` MUST come from the requirement rows of the item: a row
-  of a regulation, a framework of governance or a standard that requires the item gives 3; a
-  row of one of these that recommends it, or a row of a specification of a foundation that
-  asks for it, gives 2; no such row gives 1.
+- **FR-061**: Removed in iteration I-22 with the answers of risk and reward.
+- **FR-062**: Removed in iteration I-22. FR-011 gives the value of an item.
 - **FR-063**: The research MUST search for the regulation, the governance and the public
   recommendations of the aspect, in the words of each view and of each stakeholder, and MUST
   give each one that it finds to a reader. The source is the text of the issuer.
@@ -638,8 +582,7 @@ sent each requirement of one concern to a boundary that it wrote itself.
 - **Evidence record**: for each source, the summary of what it contributes, the location, the
   rows it supports and the date read.
 - **Vetting record**: for each independent source, the signals, the score, the version of the
-  rubric and the confirmation of the owner. For each item, the answers and the result of the
-  calculation of risk and reward.
+  rubric and the confirmation of the owner.
 - **Intent of the owner**: the answers of the owner to three questions before the research,
   each as a quote with its date.
 - **Stakeholder**: one group of persons that has an interest in the result or carries a duty

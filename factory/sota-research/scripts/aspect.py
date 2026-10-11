@@ -538,15 +538,15 @@ def load(folder):
     >>> [s["id"] for s in data["sources"]], data["sources"][0]["version or date"]
     (['S-01', 'S-02', 'S-03', 'S-04'], '2.0, 2025-03')
     >>> [c["level"] for c in data["checklist"]]
-    ['1', '2, operative', '3, regulatory', 'not admitted', '1']
+    ['1', '2, operative', '1', 'not admitted', '1']
     >>> [len(data[k]) for k in ("context_decisions", "disagreement", "watch", "decisions", "glossary")]
     [1, 1, 1, 2, 1]
     >>> data["skill_name"], data["skill"]["goal"]["value"][:11], data["goals"][:13], data["order"][:11]
     ('backups', 'Each record', 'A lost record', '1. Find out')
     >>> [e["source"] for e in data["evidence"]], [v["source"] for v in data["vetting_sources"]]
     (['S-01', 'S-02', 'S-03', 'S-04'], ['S-03', 'S-04'])
-    >>> data["vetting_items"][0]["severity"], data["has_vetting"]
-    ('3 (S-02 abstract)', True)
+    >>> data["has_vetting"]
+    True
 
     The table "Requirements" of vetting.md has one row for each requirement that a source states.
     The cell "Goes to" names the one exit of the requirement. Each source names the views that it
@@ -597,8 +597,8 @@ def load(folder):
     >>> [(folder / name).unlink() for name in ("evidence.md", "vetting.md", "trial.md")]
     [None, None, None]
     >>> data = load(folder)
-    >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
-    ([], [], False, [], [])
+    >>> data["evidence"], data["has_vetting"], data["trials"], data["trial_findings"]
+    ([], False, [], [])
     >>> data["requirements"], data["proposed_boundaries"], data["reading"], data["has_reading"]
     ([], [], [], False)
     >>> (folder / "spec.md").unlink()
@@ -642,7 +642,6 @@ def load(folder):
         "glossary": spec.table(spec.section("8"), "term"),
         "evidence": [],
         "vetting_sources": [],
-        "vetting_items": [],
         "requirements": [],
         "proposed_boundaries": [],
         "reading": [],
@@ -671,7 +670,6 @@ def load(folder):
     tables = {
         "vetting.md": (
             ("Sources", "vetting_sources"),
-            ("Items", "vetting_items"),
             ("Requirements", "requirements"),
             ("Proposed boundaries", "proposed_boundaries"),
             ("Reading", "reading"),

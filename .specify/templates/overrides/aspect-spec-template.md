@@ -113,19 +113,19 @@ place.
   answers a specific result of a risk analysis.
 - **View**: one view name of section 1: the view that the item belongs to. Each view has an
   item on level 1: the practices that are basic and not negotiable in that view.
-- **Level**: 1, 2 or 3, cumulative. The risk and reward calculation places the item: a good
-  return at a low cost in each context is level 1, the basic practices. An item above level 1
-  names the risk dimension of section 1 that calls for it, in the form
-  `2, [risk dimension]`. The risk of a project on each dimension decides how far the project
-  goes past level 1.
-- **Admitted by**: `authority` (a fast-lane source states it; name how many agree), `practice`
-  (vetted independent sources demonstrate it) or `own rule` (a rule of this kit, with its
-  principle).
+- **Level**: 1, 2 or 3, cumulative. The program `place.py` writes it from the ladder of the
+  source classes. A skill does level 1 in its first iteration, then level 2, then level 3.
+  An item above level 1 can name the risk dimension of section 1 that calls for it, in the
+  form `2, [risk dimension]`. If the owner declines an item, the cell is `not admitted` and
+  the item stays in the list.
+- **Strongest source**: the program `place.py` writes the class with the highest value of
+  the ladder and its sources, for example `regulation (S-04)`. For an item without a
+  requirement, write `own rule` (a rule of this kit, with its principle).
 - **Check**: the cheap, deterministic check that shows the item is met, or `judgement`.
 - **Source**: the unit of a source by its identifier where it has one. No text of a source is
   copied here; the evidence record says what the source contributes.
 
-| Id | Item | Why | View | Level | Admitted by | Check | Source |
+| Id | Item | Why | View | Level | Strongest source | Check | Source |
 |---|---|---|---|---|---|---|---|
 | C-01 | | | | | | | [S-01 unit] |
 
@@ -198,7 +198,7 @@ Terms that mean different things in the sources. One preferred form per meaning.
   Simplified Technical English and in the words of this kit. A second reader compares each
   line with the source. A quote stays only where the wording itself is the point.
 - `vetting.md`: for each independent source the measured signals, the result of the rubric and
-  the owner's confirmation; for each item the answers of the risk and reward calculation.
+  the owner's confirmation.
   - The table "Requirements" has one row for each requirement that a source states for a
     stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
   - The cell "Goes to" has one of these forms: `C-<nn>`, `5`, `boundary: <name>` or
@@ -209,7 +209,7 @@ Terms that mean different things in the sources. One preferred form per meaning.
     `(proposed)`. Its columns are Boundary, Requirements that it would take, Stakeholders that
     it would leave with no requirement, and Reason. The cell of the requirements holds
     identifiers of the table "Requirements", or `none`.
-  - Each checklist item holds a requirement, or its cell "Admitted by" is `own rule`.
+  - Each checklist item holds a requirement, or its cell "Strongest source" is `own rule`.
 - `trial.md`: the record of the trials of the recipe on a project. This file is optional.
   - The table "Trials" has one row for each trial. Its columns are Id, Date, Project, Commit
     of the specification, and Plan. The cell "Plan" holds where the plan is, or `not kept`.

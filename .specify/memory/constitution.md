@@ -27,9 +27,11 @@ read. What an established and authorized issuer states enters without deep evalu
 when several sources agree. Such issuers are standards bodies and regulators, open foundations,
 a platform vendor on its own platform, peer-reviewed research and recognized books, and
 recorded data sources marked as trusted. A smaller independent source is vetted first, with measured signals
-and a scripted rubric, and the owner confirms the result. A calculation of risk and reward
-decides whether an item is admitted, its order and its level. Programs compute these results; a
-model does not assign one by feel.
+and a scripted rubric, and the owner confirms the result. A ladder gives each class of source
+one value, and a regulation or a framework of governance has the highest value. The value of
+an item is the highest value of the sources that ask for it, and it gives the order and the
+level of the item. A program computes these results; a model does not assign one by feel. No
+item is dropped: an item that the owner declines stays in the list with its state.
 
 ### III. A critical lens
 
@@ -168,4 +170,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.4.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-11
+**Version**: 4.0.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-12

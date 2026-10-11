@@ -231,23 +231,6 @@ The report has two parts.
   of an aspect". A source with pages that no reader got and an absent table "Reading" are in this
   list also: see "The pages that the readers got".
 
-Between the two parts, the report gives one line for the answers of risk and reward:
-
-```text
-Answers of risk and reward: 11 with a source, 169 by judgement.
-```
-
-- The line counts the answers in the table "Items" of `vetting.md`.
-- An answer by judgement is an answer of a model without a source. Examine these answers in
-  the review.
-- The line does not fail the check. With `--json`, the numbers are in the key `answers`.
-- A second line names each item whose severity and probability have no source. Decide the
-  harm of each such item. Your decision is recorded with its date. It is not a source.
-- A third line names each admitted item that has no source for each answer. The rendered
-  checklist shows `(judgement)` after the level of such an item.
-- The cost of an item is a count of elements: the settings, the steps, the files and the
-  integrations that a project changes. It is not an estimate of time.
-
 To compare with an earlier revision, give that file to the program:
 
 ```text
@@ -334,7 +317,7 @@ The cell `Goes to` holds the one exit of the requirement:
 
 | Form | Meaning |
 |---|---|
-| `C-<nn>` | The checklist item that holds the requirement. The calculation places the item. |
+| `C-<nn>` | The checklist item that holds the requirement. The ladder places the item. |
 | `5` | The requirement is knowledge of one product, for an implementation skill. |
 | `boundary: <name>` | A neighbouring aspect owns the requirement. The name is a boundary of section 1 that you decided. |
 | `duplicate: R-<nn>` | A second source states the same requirement. The row that it names is not a duplicate. |
@@ -348,7 +331,7 @@ The check fails in these cases:
 - The cell `Goes to` has a different text, or names a row that does not exist.
 - A requirement goes to a retired item.
 - A stakeholder, a view or a source of a requirement is not in the specification.
-- No requirement goes to an item, and the cell `Admitted by` of the item is not `own rule`.
+- No requirement goes to an item, and the cell `Strongest source` of the item is not `own rule`.
 - A stakeholder of section 1 has no requirement.
 
 The report has a part "Requirements". For each view, it gives the number of requirements and
@@ -579,41 +562,35 @@ The check fails in these cases:
 The list "What remains" names the findings that are open: `Trial findings that are open: F-01.`
 If the specification has no trial, the list says: `The recipe has no trial.`
 
-## Place the items with the calculation of risk and reward
+## Place the items with the ladder
 
-Use `place.py` to get the admission, the order and the level of each item. A model does not
-assign a level.
+Use `place.py` to get the value, the order and the level of each item. A model does not assign
+a level, and it answers no question about harm or cost.
 
-1. Record six answers for each item in the table "Items" of `vetting.md`. The questions and
-   the scales are in `factory/sota-research/scripts/rubric-items.txt`.
-2. Write each answer as a number with its source: `3 (S-02 section 4)`.
-   For the answer "Probability", name the requirement row of a regulation, a framework of
-   governance, a standard or a foundation that asks for the item: `3 (R-0123, S-04 page 26)`.
-   Give a law or a regulation the class `regulation`, and a framework of governance or of
-   audit the class `governance`. The checklist of the recipe names them for each item.
-3. If the return of an item depends on the risk of a project, write its risk dimension in the
-   cell Dimension.
-4. Run the program:
+1. Give each source its class in section 2 of `spec.md`. Give a law or a regulation the class
+   `regulation`, and a framework of governance or of audit the class `governance`.
+2. Run the program:
 
    ```text
    uv run factory/sota-research/scripts/place.py specs/<number>-<name>
    ```
 
-5. Correct each item that the program reports as pending. Then run the program with `--write`.
+3. Run the program with `--write`. It fills the cells `Level` and `Strongest source`.
 
-The program computes `return = severity x probability x breadth`, `cost = adopt + keep`, and
-`score = (return x 10) // cost - 5 x own risk`.
+The ladder is in `factory/sota-research/scripts/rubric-items.txt`. It gives each class of
+source one value. A source asks for an item when one of its requirements goes to the item. The
+value of an item is the highest value of these sources.
 
 | Result | Condition |
 |---|---|
-| admitted | The score is at or above the admission threshold. |
-| level 1 | The breadth is 3, and the score is at or above the level 1 threshold. |
-| level 2 | The item is not on level 1, and the cost is at or below the cost limit. |
-| level 3 | The item is not on level 1, and the cost is above the cost limit. |
+| level 1 | The value is at or above the limit of level 1. |
+| level 2 | The value is below that limit and at or above the limit of level 2. |
+| level 3 | The value is below the limit of level 2. |
 
-The thresholds and the cost limit are in the rubric file. If you change the rubric, increase
-its version. As the owner, you can correct each answer in `vetting.md`. Then run the program
-again.
+A skill does level 1 in its first iteration, then level 2, then level 3. The program removes no
+item. As the owner, you can change the level of an item or decline it in the review. The cell
+`Level` then holds your level or `not admitted`, and the item stays in the checklist. If you
+change the ladder, increase its version.
 
 ## Vet an independent source
 
