@@ -67,7 +67,8 @@ source, or says `(judgement)`. A use case is chosen only when the recipe is appl
 
 No single source gates the recipe: the recipe is the fixed side, and each source supports the
 items that cite it. **Class** decides the route of admission. The fast lane: `standard`
-(standards bodies and regulators), `foundation` (open foundations), `vendor` (a platform vendor
+(standards bodies and public authorities), `regulation` (laws and regulations), `governance`
+(frameworks of governance and of audit, rules of an industry), `foundation` (open foundations), `vendor` (a platform vendor
 on its own platform), `research` (peer-reviewed research and recognized books), `trusted-data`
 (a recorded data source marked as trusted). Every other source is `independent` and passes the
 source vetting first. **Read**: full, part or no. A paid source is cited from its official

@@ -295,8 +295,11 @@ with their priority and the constraints of the owner. It is optional.
    - If the program names a line without the form, give the report back to the reader one
      time. Save the corrected report into the same file and run the command again.
 6. **Record the sources** in section 2, each with its class. The classes of the fast lane are
-   `standard`, `foundation`, `vendor`, `research` and `trusted-data`. Each other source is
-   `independent`. Mark a paid source that was read from its preview as `part`. Write the
+   `standard`, `regulation`, `governance`, `foundation`, `vendor`, `research` and
+   `trusted-data`. Each other source is `independent`. A law, a regulation, a directive or an
+   order of a state is a `regulation`. A framework of governance or of audit, or a rule of an
+   industry, is `governance`. A recommendation or a guidance of a public authority is a
+   `standard`. Mark a paid source that was read from its preview as `part`. Write the
    views that the source was read for into the cell `Views`, with a comma between two names.
    Write `all` for a body of knowledge. For a converted source, write `full` into the cell
    `Read` only if `index.py unread <work folder> <document id>` gives the result code 0.

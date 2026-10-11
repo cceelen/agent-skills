@@ -616,12 +616,16 @@ sent each requirement of one concern to a boundary that it wrote itself.
   question for the owner. A decision of the owner is recorded with its date and is not a
   source. The rendered checklist MUST mark each level that rests on no source.
 - **FR-062**: The answer `probability` MUST come from the requirement rows of the item: a row
-  of a regulation or a standard that requires the item gives 3; a row of a regulation or a
-  standard that recommends it, or a row of a specification of a foundation that asks for it,
-  gives 2; no such row gives 1.
+  of a regulation, a framework of governance or a standard that requires the item gives 3; a
+  row of one of these that recommends it, or a row of a specification of a foundation that
+  asks for it, gives 2; no such row gives 1.
 - **FR-063**: The research MUST search for the regulation, the governance and the public
   recommendations of the aspect, in the words of each view and of each stakeholder, and MUST
   give each one that it finds to a reader. The source is the text of the issuer.
+- **FR-064**: A source MAY have the class `regulation` or `governance`. The rendered checklist
+  MUST name, for each item, the sources of these two classes whose requirement rows go to the
+  item. The rendered skill MUST ask the owner of a project which regulation and which
+  governance bind the project: an item that names one of them is necessary for that project.
 
 ### Key Entities
 

@@ -104,17 +104,21 @@ TRIAL_NOTE = {
     True: "Trial rendering of a specification. Not a delivered skill.",
 }
 
+BINDING_HEAD = "Regulation and governance"
+
 RISK_ANALYSIS = """\
 A practice of the state of the art answers a specific result of a risk analysis. Thus do the
 risk analysis first, together with the owner of the project.
 
 1. Find out the contexts of the project. Read the project before you ask.
-2. For each risk dimension in the table, ask the owner the question. Ask about their software,
+2. Ask the owner which regulation and which governance bind the project. Each item of the
+   checklist that names one of them is necessary for the project.
+3. For each risk dimension in the table, ask the owner the question. Ask about their software,
    their market, their context, their users and their data.
-3. Give the opinion of the kit for the answer, with its reason.
-4. Propose a target level for each dimension. Level 1 holds the basic practices. Go past it
+4. Give the opinion of the kit for the answer, with its reason.
+5. Propose a target level for each dimension. Level 1 holds the basic practices. Go past it
    only where the risk of the project calls for it.
-5. Let the owner decide each target level. Record the answers and the targets in the selection.
+6. Let the owner decide each target level. Record the answers and the targets in the selection.
 """
 
 SELECTION = """\
@@ -391,6 +395,27 @@ def render_skill(data, name, mark):
     return "\n".join(parts)
 
 
+def binding_sources(data):
+    """For each item, the regulation and the governance that ask for it: the names of the sources.
+
+    The requirement rows of the register give them. The sample has no such source.
+
+    >>> import sample
+    >>> binding_sources(sample.load())
+    {}
+    >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
+    >>> binding_sources(law)
+    {'C-01': ['Guide to backups'], 'C-03': ['Guide to backups'], 'C-05': ['Guide to backups']}
+    """
+    names = {s["id"]: s.get("source", "") for s in data["sources"] if s.get("class") in check.BINDING}
+    found = {}
+    for row in data["requirements"]:
+        for ident in aspect.source_ids(row.get("source", "")):
+            if ident in names:
+                found.setdefault(row.get("goes to", "").strip(), set()).add(names[ident])
+    return {item: sorted(found[item]) for item in sorted(found)}
+
+
 def render_checklist(data, mark):
     """The reference file with the checklist: each item with its risk, its view, its level and its check.
 
@@ -398,7 +423,7 @@ def render_checklist(data, mark):
     >>> text = render_checklist(sample.load(), "<stamp>")
     >>> print("\\n".join(line[:43] for line in text.splitlines() if line.startswith("|")))
     | Id | Item | Risk that it answers | View |
-    |---|---|---|---|---|---|
+    |---|---|---|---|---|---|---|
     | C-01 | A backup of the data that cannot b
     | C-05 | The backup is made by a program, n
     | C-02 | A restore from the backup was done
@@ -421,12 +446,20 @@ def render_checklist(data, mark):
     >>> text = render_checklist(sample.load(("vetting.md", c05, none)), "<stamp>")
     >>> [line.split(" | ")[4] for line in text.splitlines() if line.startswith("| C-")]
     ['1', '1 (judgement)', '2, operative', '3, regulatory']
+
+    The last cell of a row names the regulation and the governance that ask for the item.
+
+    >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
+    >>> text = render_checklist(law, "<stamp>")
+    >>> [line.split(" | ")[6].strip(" |") for line in text.splitlines() if line.startswith("| C-")]
+    ['Guide to backups', 'Guide to backups', '', 'Guide to backups']
     """
     unsupported = set(check.by_judgement(data, check.ANSWERS))
+    binding = binding_sources(data)
     rows = [
         [r.get(k, "") for k in ("id", "item", "why")]
         + [aspect.view_of(r), r.get("level", "") + (" (judgement)" if r.get("id") in unsupported else "")]
-        + [r.get("check", "")]
+        + [r.get("check", ""), "; ".join(binding.get(r.get("id"), []))]
         for r in rendered_items(data)
     ]
     return "\n".join(
@@ -436,8 +469,10 @@ def render_checklist(data, mark):
             "Each item is generic. Level 1 holds the basic practices. An item above level 1 names the",
             "risk dimension that calls for it. A check of `judgement` needs a person or a review. The",
             "view of an item is the set of concerns that the item belongs to. A level with the mark",
-            "`(judgement)` rests on no source: the research found none for its risk or its cost.\n",
-            table(["Id", "Item", "Risk that it answers", "View", "Level", "Check"], rows),
+            "`(judgement)` rests on no source: the research found none for its risk or its cost. The",
+            "last cell names the regulation and the governance that ask for the item. If one of them",
+            "binds the project, the item is necessary for the project.\n",
+            table(["Id", "Item", "Risk that it answers", "View", "Level", "Check", BINDING_HEAD], rows),
         ]
     )
 
@@ -781,7 +816,7 @@ def main(argv=None):
     >>> edit = ("spec.md", order, order + " See specs/900-backups/.")
     >>> refused("--commit", "abc1234", edits=[edit])
     (1, False, "Nothing was rendered: a skill must work alone. The file skills/backups/SKILL.md holds 'specs/'
-                in line 86.")
+                in line 88.")
 
     The target folder of section 5 is used.
 

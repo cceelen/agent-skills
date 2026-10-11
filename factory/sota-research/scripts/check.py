@@ -92,7 +92,9 @@ import sys
 
 import aspect
 
-CLASSES = ("standard", "foundation", "vendor", "research", "trusted-data", "independent")
+# A source of one of these classes binds the projects in its scope.
+BINDING = ("regulation", "governance")
+CLASSES = ("standard", *BINDING, "foundation", "vendor", "research", "trusted-data", "independent")
 READ = ("full", "part", "no")
 SOURCE_CELLS = ("id", "source", "issuer", "version or date", "class", "license", "read", "url")
 # The cell Views of a source: the views that the source was read for, or "all".

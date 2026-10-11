@@ -21,7 +21,10 @@ reports are not comparable with new reports.
   item and to keep it. It is not an estimate of time.
 - The answer "Probability" of a checklist item says how strongly regulations and standards ask
   for the item. The requirement rows of the item give the answer. The rubric for items has the
-  version 3.
+  version 4.
+- A source can have the class `regulation` or `governance`. The checklist of a recipe names
+  the regulation and the governance that ask for each item. The recipe asks you which of them
+  bind your project.
 - The research searches also for the regulation, the governance and the public recommendations
   of an aspect.
 - The check names each item whose harm has no source. The rendered checklist marks a level

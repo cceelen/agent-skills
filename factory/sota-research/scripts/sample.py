@@ -147,7 +147,7 @@ EVIDENCE = """\
 VETTING = """\
 # Vetting record: backups of project data
 
-Rubric for sources: version 1. Rubric for items: version 3.
+Rubric for sources: version 1. Rubric for items: version 4.
 
 ## Sources
 

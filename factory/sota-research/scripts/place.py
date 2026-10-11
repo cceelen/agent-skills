@@ -63,7 +63,7 @@ def read_rubric(path):
     >>> path = pathlib.Path(__file__).with_name("rubric-items.txt")
     >>> rubric = read_rubric(path)
     >>> [rubric[k] for k in ("version", "threshold admission", "threshold level-1", "limit cost-level-2")]
-    [3, 20, 40, 4]
+    [4, 20, 40, 4]
     >>> rubric["scales"]
     {'severity': (1, 3), 'probability': (1, 3), 'breadth': (1, 3), 'adopt': (1, 3), 'keep': (1, 3),
      'own risk': (0, 2)}
@@ -322,7 +322,7 @@ def main(argv=None):
     C-03: return 12, cost 6, score 20, admitted yes, level 3, regulatory, position 4.
     C-04: return 2, cost 5, score -1, not admitted.
     C-05: return 18, cost 3, score 60, admitted yes, level 1, position 2.
-    Rubric version 3. Items placed: 5. Items pending: 0.
+    Rubric version 4. Items placed: 5. Items pending: 0.
     <BLANKLINE>
 
     The same input gives the same output. Without --write no file changes.
@@ -340,7 +340,7 @@ def main(argv=None):
     >>> code, out.splitlines()[1]
     (1, "C-02: pending. The answer 'probability' is missing.")
     >>> out.splitlines()[-1]
-    'Rubric version 3. Items placed: 4. Items pending: 1.'
+    'Rubric version 4. Items placed: 4. Items pending: 1.'
 
     The owner corrects an answer in vetting.md and runs the program again.
 
@@ -378,7 +378,7 @@ def main(argv=None):
 
     >>> rubric = good.parent / "rubric.txt"
     >>> text = aspect.read_text(pathlib.Path(__file__).with_name("rubric-items.txt"))
-    >>> _ = rubric.write_text(text.replace("version: 3", "version: 7"), encoding="utf-8")
+    >>> _ = rubric.write_text(text.replace("version: 4", "version: 7"), encoding="utf-8")
     >>> folder = sample.folder()
     >>> sample.run(main, folder, "--write", "--rubric", rubric)[1].splitlines()[-2]
     'Rubric version 7. Items placed: 5. Items pending: 0.'
