@@ -234,7 +234,7 @@ specification whose check reports no failure other than "not accepted".
   the rubric, and MUST keep the level apart from the quality of the evidence.
 - **FR-013**: An item with a missing answer MUST stay "pending".
 - **FR-014**: Each item MUST name the risk that it answers. The questions MUST cover the
-  reward (how bad the harm is that the item prevents, how probable that harm is without the item, in how many contexts the item
+  reward (how bad the harm is that the item prevents, how strongly regulations and standards ask for the item, in how many contexts the item
   applies), the cost (the number of elements that a project changes to adopt the item and to
   keep it; not an estimate of time) and the risk of the item
   itself. Each answer is on a fixed scale and names its source. The research session records
@@ -615,6 +615,10 @@ sent each requirement of one concern to a boundary that it wrote itself.
   check MUST name each item whose severity and probability have no source: each one is a
   question for the owner. A decision of the owner is recorded with its date and is not a
   source. The rendered checklist MUST mark each level that rests on no source.
+- **FR-062**: The answer `probability` MUST come from the requirement rows of the item: a row
+  of a regulation or a standard that requires the item gives 3; a row of a regulation or a
+  standard that recommends it, or a row of a specification of a foundation that asks for it,
+  gives 2; no such row gives 1.
 
 ### Key Entities
 

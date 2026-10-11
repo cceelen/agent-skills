@@ -587,6 +587,8 @@ assign a level.
 1. Record six answers for each item in the table "Items" of `vetting.md`. The questions and
    the scales are in `factory/sota-research/scripts/rubric-items.txt`.
 2. Write each answer as a number with its source: `3 (S-02 section 4)`.
+   For the answer "Probability", name the requirement row of a regulation, a standard or a
+   foundation that asks for the item: `3 (R-0123, S-04 page 26)`.
 3. If the return of an item depends on the risk of a project, write its risk dimension in the
    cell Dimension.
 4. Run the program:

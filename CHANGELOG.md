@@ -18,7 +18,10 @@ reports are not comparable with new reports.
   the plan from eight viewpoints, and the check reports the findings that are open. One
   viewpoint is the integrity of each asset, from the source to the system of the user.
 - The cost of a checklist item is the number of elements that a project changes to adopt the
-  item and to keep it. It is not an estimate of time. The rubric for items has the version 2.
+  item and to keep it. It is not an estimate of time.
+- The answer "Probability" of a checklist item says how strongly regulations and standards ask
+  for the item. The requirement rows of the item give the answer. The rubric for items has the
+  version 3.
 - The check names each item whose harm has no source. The rendered checklist marks a level
   that rests on no source.
 - An aspect specification names the measured targets of its aspect. The check fails for an

@@ -14,7 +14,7 @@ values of the scale.
 | Cell | Question |
 |---|---|
 | Severity | How bad is the harm that the item prevents? |
-| Probability | How probable is that harm in a project that does not have the item? |
+| Probability | How strongly do regulations and standards ask for the item? |
 | Breadth | In how many contexts does the item apply? |
 | Adopt | How many elements does a project add or change to adopt the item? |
 | Keep | How many elements does a project change to keep the item? |
@@ -26,6 +26,11 @@ values of the scale.
   `evidence.md` in this turn to find the source. Do not use a summary of it or your memory.
 - A source is a row of section 2 of `spec.md`, with the location in that source. A context, a
   view, a risk dimension or a different part of the specification is not a source.
+- For Probability, read each row of the table "Requirements" of `vetting.md` that names the
+  item in its last cell. A row gives the answer when it asks for the item and its source has
+  the class `standard` or `foundation` in section 2 of `spec.md`. A source of the class
+  `standard` is a regulation or a standard. Words such as "shall" and "must" require. Words
+  such as "should" recommend. Write the row and its source: `3 (R-0123, S-04 page 26)`.
 - For Adopt and Keep, count the elements: the settings, the steps, the files and the
   integrations. Take them from a source that shows them, for example a sample of a maintained
   component that does the item. Do not estimate a time. Do not use a statement of a source
