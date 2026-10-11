@@ -1,0 +1,10 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/case/patterns.md": "e5b50cc7b2e286f43d46483e333c09e5a0960c0309d7c55ca56810dc90ac9c3b",
+    "prompts/group.md": "584c829aa1cce6860972b9fccbfc8526c5c8420efa11282f2ee4d18099f053a7",
+    "registration.md": "394d0ce53fea38ef14c3930f8ce11f328ca0459ebd22fff523631da37272d14a"
+  },
+  "seal": "c87be8c53726d9fe858c712e617a6ffc3117b00d15a33f0c8371d0bfd7a0b5ee"
+}
