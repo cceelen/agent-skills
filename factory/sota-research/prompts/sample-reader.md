@@ -42,6 +42,8 @@ project.
      For a principle: the reason that the project gives. If the project gives no reason,
      write `no reason given`.
    - The location: the line number, or the name of the part of the file or the page.
+   - A line has five cells, for a principle also:
+     `USE | principle | <rule> | <reason> | <location>`. Do not add a sixth cell.
    - Report a principle as the project states it. Do not judge it. Do not say whether a
      standard agrees.
    - Report each thing one time. Do not select.
