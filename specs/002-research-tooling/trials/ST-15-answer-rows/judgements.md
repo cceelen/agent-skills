@@ -1,0 +1,14 @@
+| Code | Criterion | Answer | Evidence |
+|---|---|---|---|
+| P-2645d439c8 | C-2 | no | files/vetting.md Items table: count 3 of 5 needed. Rows counted: C-21 (R-0864, line 55), C-27 (R-0494, line 56), C-31 (R-0764, line 57). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-2645d439c8 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
+| P-2a1fa4fe01 | C-2 | no | files/vetting.md Items table: count 1 of 5 needed. Rows counted: C-21 (S-04 page 21, line 55; evidence.md line 10). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-2a1fa4fe01 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
+| P-6ffa9bc4b2 | C-2 | no | files/vetting.md Items table: count 2 of 5 needed. Rows counted: C-21 (R-0864, line 55), C-31 (R-0764, line 57). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-6ffa9bc4b2 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
+| P-7355b64fd4 | C-2 | no | files/vetting.md Items table: count 1 of 5 needed. Rows counted: C-21 (S-04 page 21, line 55; evidence.md line 10). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-7355b64fd4 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
+| P-c4a0111ce4 | C-2 | no | files/vetting.md Items table: count 1 of 5 needed. Rows counted: C-21 (S-04 page 21, line 55; evidence.md line 10). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-c4a0111ce4 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
+| P-ce96737738 | C-2 | no | files/vetting.md Items table: count 4 of 5 needed. Rows counted: C-08 (R-0686, line 53), C-21 (R-0864, line 55), C-27 (R-0494, line 56), C-31 (R-0764, line 57). R rows at lines 86 (R-0494), 118 (R-0686), 142 (R-0764), 156 (R-0864) of files/vetting.md. All other Severity cells are (judgement). |
+| P-ce96737738 | C-3 | no | files/vetting.md Items table lines 50-59: count 0 of 3 needed. No Probability cell names an R-n or an S-n; all read (judgement). Rows counted: none. |
