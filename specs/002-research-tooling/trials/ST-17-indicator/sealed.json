@@ -1,0 +1,19 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/new/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/new/risk-answers.md": "5704b4067bd83ef7d035a14e9800303485e150876e3deb9b6db2297a91efc257",
+    "inputs/new/scripts/rubric-items.txt": "25c0a6e7d9643b27013a76ead3618b1f40e51ddabdd5f24024c7e28aef5c6c15",
+    "inputs/new/spec.md": "bc227eb5cbd249ad550acd8edaac6e1ca8c7de26831c62bb8316f1e24c330920",
+    "inputs/new/vetting.md": "03f675c6621103b7f0cca0a155dce7bbd3cda2590f9efeb2da4c92ad80a7f4c7",
+    "inputs/old/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/old/risk-answers.md": "a4f5d901d2f4d84b767f7eddfc02f9ca45788b3103366648cd91967067aeec86",
+    "inputs/old/scripts/rubric-items.txt": "1f9480ccab99829b312eb1bddf7d2c2a2148d548e169076defe83f1affad81f4",
+    "inputs/old/spec.md": "bc227eb5cbd249ad550acd8edaac6e1ca8c7de26831c62bb8316f1e24c330920",
+    "inputs/old/vetting.md": "03f675c6621103b7f0cca0a155dce7bbd3cda2590f9efeb2da4c92ad80a7f4c7",
+    "prompts/task.md": "09f141e8382568b9c36b78dd3c501eb6107a92368666d45994761af192a1df48",
+    "registration.md": "d7ad007fbcd20eae4819e694cb5fad1745276f3c9443ade76d38723969e5ccf8"
+  },
+  "seal": "e9e385fb57d9c154f2177f9dd26c569463c98bcaa864d529146f58bc5812b761"
+}
