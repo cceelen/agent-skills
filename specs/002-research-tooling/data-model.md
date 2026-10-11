@@ -1,8 +1,8 @@
 # Data model: research tooling
 
 The Markdown files of a specification are the store. `aspect.py` reads them into the plain
-data below. No program writes `spec.md` except `place.py`, which fills the Level cells. No
-program writes `trial.md`.
+data below. No program writes `spec.md` except `place.py`, which fills the cells Level and
+"Placed by". No program writes `trial.md` or `charter.md`.
 
 ## Aspect specification (`spec.md`)
 
@@ -13,7 +13,7 @@ program writes `trial.md`.
 | 2 Sources | id, source, issuer, version or date, class, license, read, views, url | each cell is filled; class is one of six values; read is `full`, `part` or `no`; ids are unique; views holds views of section 1 or `all`, and a table without this cell is permitted |
 | 3.3 Decisions by context | decision, depends on, options, sources | each source id is known |
 | 3.4 Disagreement | question, positions, handling, sources | the section is present; `none found` is permitted |
-| 4 Checklist | id, item, why, view, level, admitted by, check, source | see below; the view is a view of section 1 |
+| 4 Checklist | id, item, why, view, level, admitted by, check, source, placed by | see below; the view is a view of section 1 |
 | 5 Skill set | name, target folder, goal, reads first, applies, delegates, stops when; rows of implementation skills | name obeys the rule for a skill name |
 | 6 Watch list | signal, where, cadence | one row or more |
 | 7 Decisions | date, decision, reason, revisit when | each row has a date |
@@ -30,10 +30,43 @@ program writes `trial.md`.
 | admitted by | `authority (n)`, `practice`, `own rule (<principle>)`, with an optional `, vetting pending` | |
 | check | a check, or `judgement` | not empty |
 | source | one or more of `S-nn <unit>` or `constitution <principle>` | each id is known; each cited source has an evidence row that names the item |
+| placed by | the id of a line of the charter, or `calculation` | written by `place.py`; with a charter, the cell agrees with the result of the function `charter_rules`; an item with a pending level is not examined; the renderer does not use the cell |
 
 An item **rests on** a source when it cites it. The check fails for an item whose sources are
 all read `no`, or all independent and rejected. An item whose sources are all independent and
 not confirmed yet is listed under "what remains": only the owner can end that state.
+
+## Charter (`charter.md`)
+
+Optional. Written in phase 1 from the words of the owner, or a file of the owner. Only the
+owner changes it. `aspect.py` reads it; a specification without the file has no charter, and
+no rule of the charter applies. The format is in `contracts/files.md`.
+
+| Part | Fields | Rules that the check applies |
+|---|---|---|
+| Head | state | `draft`, or `reviewed by the owner on <YYYY-MM-DD>` with a valid date |
+| Target | id `T-<n>`, part of the target, level of the scale, level of the recipe | the id is unique; the level of the recipe is 1, 2 or 3 |
+| Principles | priority, id `P-<n>`, principle, comes from, effect | the id is unique; the priority is a whole number that no other principle has; the effect has a permitted form |
+| Constraints | id `K-<n>`, constraint, comes from, effect | the id is unique; the effect has a permitted form |
+
+A table can have more columns. A program reads a column by its name.
+
+Effect of a line: one or more of `level <n>`, `no exit: 3.3`, `no exit: boundary` and
+`no exit: not admitted`, with a semicolon between two forms; or `none`; or
+`none: rule of the factory`. A target part has the effect `level <n>` of its cell "Level of
+the recipe". A requirement serves a line when its cell "Serves" names the id of the line. A
+duplicate has the exit of its row.
+
+State of the charter: `draft` (written by the session) → `reviewed` (by the owner, with the
+date). While the state is `draft`, a line that no requirement serves is listed under "what
+remains". After the review, such a line fails the check. A line with
+`none: rule of the factory` is not examined.
+
+Placement of an item: the lines that the requirements of the item serve decide. A line with a
+level admits the item, and the level of the item is the lower one of the lowest such level
+and the level of the calculation. A line with `no exit: not admitted` admits the item. The
+line that placed the item is the line with the lowest level, when the item is on that level:
+a constraint before a target part, a target part before a principle, then the lowest id.
 
 ## Evidence record (`evidence.md`)
 
@@ -50,7 +83,7 @@ the table "Reading". Five tables, formats in `contracts/files.md`.
 |---|---|---|
 | Sources | one independent source | source id, kind (`repository` or `page`), gate result, signals, answers with their URL, score, rubric version, date, confirmed by |
 | Items | one checklist item | item id, the six answers with their source, return, cost, score, admitted, level, rubric version |
-| Requirements | one requirement that a source states for a stakeholder | id `R-<nn>`, requirement, stakeholder, view, source with its location, goes to |
+| Requirements | one requirement that a source states for a stakeholder | id `R-<nn>`, requirement, stakeholder, view, source with its location, serves (ids of lines of the charter, or `none`; necessary only with a charter), goes to |
 | Proposed boundaries | one boundary of section 1 with the state `proposed` | boundary, requirements that it would take (ids of the table "Requirements", or `none`), stakeholders that it would leave with no requirement, reason |
 | Reading | one converted document of one source of section 2 | source id, document id or `none`, pages, given to readers (ranges or `none`), not read (ranges or `none`) |
 

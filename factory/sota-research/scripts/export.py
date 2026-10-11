@@ -13,7 +13,8 @@
                 file holds one, the program writes nothing and gives the file and the line.
 
 The program writes only what a session needs to do the procedure: the tooling, the template of an
-aspect specification, the rules of the kit, the two programs of the skill library-vetting that the
+aspect specification, the template of a charter, the rules of the kit, the two programs of the
+skill library-vetting that the
 tooling loads, and two instruction files that the program makes. It does not write the sample
 specification, the task of the reviewer of a plan and the list of the viewpoints of the review.
 It writes the manifest of the seeds, and no seed document. It writes no documentation, no test, no
@@ -37,6 +38,7 @@ import vet
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 TOOLING = "factory/sota-research"
 TEMPLATE = ".specify/templates/overrides/aspect-spec-template.md"
+CHARTER_TEMPLATE = ".specify/templates/overrides/charter-template.md"
 # Files of the tooling that a session of the research does not get. Only the examples of the
 # programs use the sample. The task of the reviewer and the list name the viewpoints of the review.
 LEFT_OUT = ("scripts/sample.py", "prompts/plan-review.md", "references/viewpoints.txt")
@@ -72,9 +74,10 @@ def kit(root=ROOT):
 
     >>> files = kit()
     >>> [path for path in sorted(files) if not path.startswith(TOOLING)]
-    ['.specify/templates/overrides/aspect-spec-template.md', 'AGENTS.md', 'CLAUDE.md', 'rules/apply.py',
-     'rules/evidence-before-action.md', 'skills/library-vetting/scripts/collect.py',
-     'skills/library-vetting/scripts/models.py']
+    ['.specify/templates/overrides/aspect-spec-template.md',
+     '.specify/templates/overrides/charter-template.md', 'AGENTS.md', 'CLAUDE.md', 'rules/apply.py',
+     'rules/evidence-before-action.md',
+     'skills/library-vetting/scripts/collect.py', 'skills/library-vetting/scripts/models.py']
 
     The kit holds the tooling without the sample, without the task of the reviewer, without the
     list of the viewpoints of the review and without the files that Python makes when it runs.
@@ -113,8 +116,21 @@ def kit(root=ROOT):
     Each file that a program of the tooling loads from outside its folder is in the kit.
 
     >>> needed = [render.RULES_PROGRAM, vet.COLLECTOR_PROGRAM, models.SHARED, ROOT / TEMPLATE]
+    >>> needed.append(ROOT / CHARTER_TEMPLATE)
     >>> [path.relative_to(ROOT).as_posix() in files for path in needed]
-    [True, True, True, True]
+    [True, True, True, True, True]
+
+    The template of a charter has one line in each table, and a placeholder in each cell that a
+    program reads: the kit holds no line of the charter of an aspect.
+
+    >>> import tempfile
+    >>> folder = pathlib.Path(tempfile.mkdtemp(prefix="sota-charter-"))
+    >>> _ = (folder / aspect.CHARTER_FILE).write_bytes(files[CHARTER_TEMPLATE][0])
+    >>> charter = aspect.read_charter(folder)
+    >>> charter["state"], [(line["id"], line["text"]) for line in charter["lines"]]
+    ('draft', [('T-1', '[part of the target]'), ('P-1', '[principle]'), ('K-1', '[constraint]')])
+    >>> check.brief(check.check_charter({"charter": charter}))
+    [('charter-level-unknown', 'T-1'), ('charter-effect-unknown', 'P-1'), ('charter-effect-unknown', 'K-1')]
 
     A program keeps its mode. The instruction files hold the rules of the kit and no other rule
     of this repository.
@@ -133,7 +149,7 @@ def kit(root=ROOT):
     sources = [p for p in sources if "__pycache__" not in p.parts]
     rules = root / render.RULES_PROGRAM.parent.relative_to(ROOT)
     sources += [p for p in sorted(rules.iterdir()) if p.is_file()]
-    sources += [root / TEMPLATE, *(root / p.relative_to(ROOT) for p in LOADED)]
+    sources += [root / TEMPLATE, root / CHARTER_TEMPLATE, *(root / p.relative_to(ROOT) for p in LOADED)]
     files = {}
     for path in sources:
         files[path.relative_to(root).as_posix()] = (path.read_bytes(), bool(path.stat().st_mode & 0o100))
@@ -190,8 +206,8 @@ def main(argv=None):
     >>> code, err, out.splitlines() == [f"Exported: {path}" for path in sorted(kit())]
     (0, '', True)
     >>> out.splitlines()[:3]
-    ['Exported: .specify/templates/overrides/aspect-spec-template.md', 'Exported: AGENTS.md',
-     'Exported: CLAUDE.md']
+    ['Exported: .specify/templates/overrides/aspect-spec-template.md',
+     'Exported: .specify/templates/overrides/charter-template.md', 'Exported: AGENTS.md']
 
     The folder holds the files of the kit and nothing more. A program can be run.
 

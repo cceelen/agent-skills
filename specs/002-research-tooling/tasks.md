@@ -438,6 +438,25 @@ session writes section 1.
 
 ---
 
+## Phase 23: The charter of the owner governs the triage (iteration I-6)
+
+**Purpose**: FR-058. In the trial of I-4 the requirements reached the register and were lost
+at the triage: one left through a decision that depends on context, and one was folded into an
+item that the calculation put on level 2. No decision of the triage referred to what the owner
+wants.
+
+- [x] T162 In `.specify/templates/overrides/charter-template.md`: the template of a charter, with the state, the tables "Target", "Principles" and "Constraints", and the forms of the cell "Effect" in general words. In `aspect-spec-template.md`: the column "Placed by" of the checklist, the file `charter.md`, and the cell "Serves" of a requirement
+- [x] T163 In `factory/sota-research/scripts/aspect.py`: read `charter.md` when it is there: the state, each line with its kind, its priority and its effect; the cell "Serves" of a requirement. In `scripts/sample.py`: a small charter, the cell "Serves" and the cell "Placed by" in the sample; `charter=False` gives a sample without a charter
+- [x] T164 In `factory/sota-research/scripts/check.py`: the function `charter_rules` that `place.py` uses also; the rules `charter-state-unknown`, `charter-without-line`, `charter-id-unknown`, `charter-id-twice`, `charter-priority-missing`, `charter-priority-twice`, `charter-effect-unknown`, `charter-level-unknown`, `charter-line-unserved`, `requirement-serves-unknown`, `requirement-exit-closed`, `item-not-admitted-against-charter`, `item-above-charter-level` and `placed-by-differs`; the part "Charter" of the report; the lines under what remains; the same with `--json`; the form of the charter with `--scope`
+- [x] T165 In `factory/sota-research/scripts/place.py`: the charter places an item before the calculation; the cell "Placed by" with `--write`; a specification without a charter behaves as before
+- [x] T166 In `factory/sota-research/scripts/export.py`: the kit holds the template of a charter
+- [x] T167 In `factory/sota-research/references/procedure.md`: the charter in phase 1; the cell "Serves" when a requirement is recorded; the closed exits in the step "Distil"; the rule of the charter in the calculation; the charter first in phase 3; the part "A change of the charter"; the charter in the refresh and in the check
+- [x] T168 In `docs/sota-research.md` and `CHANGELOG.md`: the charter of an aspect
+- [x] T169 In `specs/002-research-tooling/`: FR-058 in `spec.md`; the charter, the cell "Serves" and the cell "Placed by" in `data-model.md` and `contracts/`; the row of I-6 in `iterations.md`; the cells "Effect" in `charter-draft/devsecops.md`
+- [x] T170 Verify in a copy of the specification of the trial I-4 outside each repository, with the charter of `charter-draft/devsecops.md`: the check fails for each requirement that serves P-1 and goes to a decision; `place.py --write` puts the item of a requirement that serves P-2 on level 1; the check of the unchanged specification has no new failure; a kit of `export.py` holds the template of a charter and the new text of the procedure
+
+---
+
 ## Dependencies & Execution Order
 
 - **Phase 1 → Phase 2 → US1**: in this order. US1 is the MVP.

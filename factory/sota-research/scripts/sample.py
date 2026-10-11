@@ -1,12 +1,13 @@
 """Sample data for the examples of the research tooling. Standard library only.
 
-A small and correct aspect specification with its evidence record, its vetting record with the
-register of the requirements and the table of the pages that the readers got, its record of the
-trials and the signal files of its two independent sources. The examples (doctests) of the
-programs in this folder use it: each program validates itself with the option --selftest, and needs no test
-file. The sources of the sample are invented.
+A small and correct aspect specification with its charter, its evidence record, its vetting
+record with the register of the requirements and the table of the pages that the readers got, its
+record of the trials and the signal files of its two independent sources. The examples (doctests)
+of the programs in this folder use it: each program validates itself with the option --selftest,
+and needs no test file. The sources and the charter of the sample are invented.
 
-  folder(edits)    writes the sample into a new temporary folder and returns the path
+  folder(edits)    writes the sample into a new temporary folder and returns the path;
+                   charter=False leaves out the charter
   load(edits)      the same, read by aspect.load
   work(changes)    writes the signal files into a new temporary folder and returns the path
   converted(pages) writes the converted documents into a new work folder and returns the path
@@ -86,13 +87,13 @@ A lost record can be made again in the time that the project agreed on.
 
 ## 4. Checklist
 
-| Id | Item | Why | View | Level | Admitted by | Check | Source |
-|---|---|---|---|---|---|---|---|
-| C-01 | A backup of the data that cannot be made again exists. | Risk: a lost record stays lost. | storage | 1 | authority (2) | the newest backup is younger than the agreed interval | S-01 section 2; S-02 abstract |
-| C-02 | A restore from the backup was done and recorded. | Risk: a backup that cannot be restored is found too late. | operation | 2, operative | authority (1) | the record of the last restore has a date | S-02 section 4 |
-| C-03 | A copy of the backup is kept in a second place with a different access. | Risk: one event destroys the data and its backup. | storage | 3, regulatory | authority (1) | the list of copies names two places | S-01 section 5 |
-| C-04 | Each restore drill ends with a written review. | Risk: the same restore error occurs again. | operation | not admitted | practice | judgement | S-03 "After the drill" |
-| C-05 | The backup is made by a program, not by hand. | Risk: a person forgets the backup. | operation | 1 | practice | the schedule of the program is in the repository | S-04 README; S-01 section 3 |
+| Id | Item | Why | View | Level | Admitted by | Check | Source | Placed by |
+|---|---|---|---|---|---|---|---|---|
+| C-01 | A backup of the data that cannot be made again exists. | Risk: a lost record stays lost. | storage | 1 | authority (2) | the newest backup is younger than the agreed interval | S-01 section 2; S-02 abstract | calculation |
+| C-02 | A restore from the backup was done and recorded. | Risk: a backup that cannot be restored is found too late. | operation | 2, operative | authority (1) | the record of the last restore has a date | S-02 section 4 | T-2 |
+| C-03 | A copy of the backup is kept in a second place with a different access. | Risk: one event destroys the data and its backup. | storage | 3, regulatory | authority (1) | the list of copies names two places | S-01 section 5 | calculation |
+| C-04 | Each restore drill ends with a written review. | Risk: the same restore error occurs again. | operation | not admitted | practice | judgement | S-03 "After the drill" | calculation |
+| C-05 | The backup is made by a program, not by hand. | Risk: a person forgets the backup. | operation | 1 | practice | the schedule of the program is in the repository | S-04 README; S-01 section 3 | T-1 |
 
 **Selection.** The kit recommends; the user decides.
 
@@ -168,16 +169,16 @@ Rubric for sources: version 1. Rubric for items: version 1.
 
 ## Requirements
 
-| Id | Requirement | Stakeholder | View | Source | Goes to |
-|---|---|---|---|---|---|
-| R-01 | Make a backup of the data that cannot be made again. | owners of the data | storage | S-01 section 2 | C-01 |
-| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |
-| R-03 | Do a restore from the backup as a test. | operators | operation | S-02 section 4 | C-02 |
-| R-04 | Write a review after each restore drill. | operators | operation | S-03 "After the drill" | C-04 |
-| R-05 | Make the backup with a program. | operators | operation | S-01 section 3 | C-05 |
-| R-06 | Start the backup program by a schedule. | operators | operation | S-04 README | duplicate: R-05 |
-| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | 3.3: How frequently to make a backup |
-| R-08 | Keep the schedule in the settings file of the backup tool. | operators | operation | S-04 README | 5 |
+| Id | Requirement | Stakeholder | View | Source | Serves | Goes to |
+|---|---|---|---|---|---|---|
+| R-01 | Make a backup of the data that cannot be made again. | owners of the data | storage | S-01 section 2 | none | C-01 |
+| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | none | C-03 |
+| R-03 | Do a restore from the backup as a test. | operators | operation | S-02 section 4 | T-2, P-1 | C-02 |
+| R-04 | Write a review after each restore drill. | operators | operation | S-03 "After the drill" | none | C-04 |
+| R-05 | Make the backup with a program. | operators | operation | S-01 section 3 | T-1, P-2, K-1 | C-05 |
+| R-06 | Start the backup program by a schedule. | operators | operation | S-04 README | none | duplicate: R-05 |
+| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | none | 3.3: How frequently to make a backup |
+| R-08 | Keep the schedule in the settings file of the backup tool. | operators | operation | S-04 README | none | 5 |
 
 ## Reading
 
@@ -187,6 +188,37 @@ The program `index.py unread --write` writes this table. Do not change it by han
 |---|---|---|---|---|
 | S-01 | S-01 | 6 | 1-6 | none |
 | S-02 | S-02 | 2 | 1-2 | none |
+"""
+
+CHARTER = """\
+# Charter: backups of project data
+
+**State**: reviewed by the owner on 2026-01-06
+
+A small charter for the tests of the tooling. Its lines are invented.
+
+## Target
+
+| Id | Part of the target | Level of the scale | Level of the recipe |
+|---|---|---|---|
+| T-1 | a backup is made without a person | no drill | 1 |
+| T-2 | a restore from the backup is proven | one drill | 2 |
+
+## Principles
+
+A principle with a lower number wins when two principles disagree.
+
+| Priority | Id | Principle | Comes from | Effect |
+|---|---|---|---|---|
+| 1 | P-1 | A restore is proven before it is necessary. | "a restore that works" (2026-01-05) | no exit: 3.3 |
+| 2 | P-2 | The making of a backup stays in the aspect. | "A copy of each record" (2026-01-05) | no exit: boundary |
+
+## Constraints
+
+| Id | Constraint | Comes from | Effect |
+|---|---|---|---|
+| K-1 | A backup is not traded against its cost. | "each record that we cannot make again" (2026-01-05) | no exit: not admitted |
+| K-2 | A statement rests on a source that was read. | the rules of the kit | none: rule of the factory |
 """
 
 TRIAL = """\
@@ -206,7 +238,8 @@ TRIAL = """\
 | F-02 | T-01 | development | The plan does not tell a developer how to run the backup before a push. | implementation skill | declined: the documentation of the product tells it |
 """
 
-FILES = {"spec.md": SPEC, "evidence.md": EVIDENCE, "vetting.md": VETTING, "trial.md": TRIAL}
+FILES = {"spec.md": SPEC, "charter.md": CHARTER, "evidence.md": EVIDENCE, "vetting.md": VETTING}
+FILES["trial.md"] = TRIAL
 
 SIGNALS = {
     "S-03": {
@@ -289,8 +322,14 @@ STAKEHOLDER_OWNERS = (
     "  - `owners of the data`: they must know where each copy of their data is. (S-01 section 2)"
 )
 TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)"
-REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |"
-REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a backup |"
+REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | none | C-03 |"
+REQUIREMENT_R07 = "| operation | S-01 section 3 | none | 3.3: How frequently to make a backup |"
+# The texts of the charter and of the register that the examples change.
+CHARTER_STATE = "**State**: reviewed by the owner on 2026-01-06"
+CHARTER_DRAFT = ("charter.md", CHARTER_STATE, "**State**: draft")
+SERVES_R03 = "| S-02 section 4 | T-2, P-1 | C-02 |"
+SERVES_R04 = '| S-03 "After the drill" | none | C-04 |'
+SERVES_R05 = "| S-01 section 3 | T-1, P-2, K-1 | C-05 |"
 BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
 # A specification with named boundaries: one that the owner decided and two that are proposed.
 # A boundary line without a state is proposed.
@@ -371,15 +410,20 @@ def _remove_folders():
     _KEEP.clear()
 
 
-def folder(*edits, files=FILES):
+def folder(*edits, files=FILES, charter=True):
     """Write the sample into a new temporary folder. Each edit is (file, old text, new text).
+
+    charter=False gives a specification without a charter: the file charter.md is left out.
+
+    >>> sorted(p.name for p in folder(charter=False).iterdir())
+    ['evidence.md', 'spec.md', 'trial.md', 'vetting.md']
 
     The old text must be in the file exactly one time, so that an example cannot pass because
     its edit did nothing.
 
     >>> path = folder(("spec.md", "| 2, operative |", "| pending |"))
     >>> sorted(p.name for p in path.iterdir())
-    ['evidence.md', 'spec.md', 'trial.md', 'vetting.md']
+    ['charter.md', 'evidence.md', 'spec.md', 'trial.md', 'vetting.md']
     >>> "| pending |" in (path / "spec.md").read_text(encoding="utf-8")
     True
     >>> folder(("spec.md", "no such text", ""))
@@ -395,19 +439,22 @@ def folder(*edits, files=FILES):
     path = _new_folder() / "spec"
     path.mkdir()
     for name, text in texts.items():
-        (path / name).write_text(text, encoding="utf-8", newline="")
+        if charter or name != "charter.md":
+            (path / name).write_text(text, encoding="utf-8", newline="")
     return path
 
 
-def load(*edits):
+def load(*edits, charter=True):
     """The sample as the reader of the tooling gives it, after the edits of folder().
 
     >>> load()["title"], load(("spec.md", "Backups of project data", "Backups"))["title"]
     ('Backups of project data', 'Backups')
+    >>> load()["charter"]["state"], load(charter=False)["charter"]
+    ('reviewed', None)
     """
     import aspect
 
-    return aspect.load(folder(*edits))
+    return aspect.load(folder(*edits, charter=charter))
 
 
 def work(**changes):

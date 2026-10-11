@@ -5,11 +5,20 @@
 # ///
 """Reader of the folder of one aspect specification. Standard library only.
 
-  load(folder)  reads spec.md, evidence.md, vetting.md and trial.md into plain dictionaries and lists
+  load(folder)  reads spec.md, charter.md, evidence.md, vetting.md and trial.md into plain
+                dictionaries and lists
+
+The file charter.md is the charter of the aspect: the target, the principles with their priority
+and the constraints of the owner. It has a head line with the state, and three tables: "Target",
+"Principles" and "Constraints". Each row is one line of the charter. The identifier of a target
+part is T-<n>, of a principle P-<n> and of a constraint K-<n>. The cell "Effect" of a principle
+and of a constraint tells what the line does in the triage. A target part has the effect of its
+cell "Level of the recipe". The file is optional.
 
 The file vetting.md has five tables: "Sources", "Items", "Requirements", "Proposed boundaries"
 and "Reading". The table "Requirements" has one row for each requirement that a source states
-for a stakeholder. The table "Proposed boundaries" has one row for each boundary of section 1
+for a stakeholder. Its cell "Serves" names the lines of the charter that the requirement serves.
+The table "Proposed boundaries" has one row for each boundary of section 1
 that the owner did not decide, with the requirements that the boundary would take.
 The table "Reading" has one row for each converted document of a source, with the pages that
 the readers got and the pages that no reader got. The program index.py writes it.
@@ -19,7 +28,7 @@ A module for the programs in this folder; it needs Python 3.14.
 The Markdown files are the only store. A section is found by its number, a table by its place
 in the section. Each row is a dictionary: the header names in lowercase are the keys, and
 "_line" (starts at 1) and "_file" tell where the row is. A file that is absent gives empty data;
-only a missing spec.md is an error.
+only a missing spec.md is an error. An absent charter.md gives None for the charter.
 """
 
 import datetime
@@ -57,6 +66,29 @@ EXITS = (
     ("boundary", re.compile(r"boundary:\s*(\S.*)")),
     ("duplicate", re.compile(r"duplicate:\s*(R-\d+)")),
 )
+# The charter: the title of each table, the kind of its lines and the letter of their identifiers.
+CHARTER_FILE = "charter.md"
+CHARTER_TABLES = (
+    ("Target", "target", "T"),
+    ("Principles", "principle", "P"),
+    ("Constraints", "constraint", "K"),
+)
+# The order of the kinds when two lines of the charter give the same level to an item.
+KIND_ORDER = ("constraint", "target", "principle")
+CHARTER_ID = re.compile(r"([TPK])-(\d+)")
+DRAFT, REVIEWED = "draft", "reviewed"
+REVIEWED_ON = re.compile(r"reviewed by the owner on (\d{4}-\d{2}-\d{2})(?!\d)")
+# The forms of the cell "Effect" of a line of the charter. A cell holds one form or more, with a
+# semicolon between two forms, or "none". FACTORY_RULE marks a line that is a rule for the
+# factory and not for the content: no requirement must serve such a line.
+NO_EFFECT = "none"
+FACTORY_RULE = "none: rule of the factory"
+LEVEL_EFFECT = re.compile(r"level\s+(\S+)")
+NO_EXIT_EFFECT = re.compile(r"no exit:\s*(\S.*)")
+NO_EXITS = ("3.3", "boundary", "not admitted")
+# The exits of a requirement that an effect "no exit" closes, by the kind of the exit.
+CLOSED_EXITS = {"decision": "3.3", "boundary": "boundary"}
+CALCULATION = "calculation"
 
 
 class Unreadable(Exception):
@@ -470,6 +502,181 @@ def boundary_state(text):
     return ("undated" if found[0].startswith(DECIDED_START) else None), found[0]
 
 
+def effect_of(cell):
+    """The effect of a line of the charter in the triage, from its cell "Effect".
+
+    The result is a dictionary. "level": the level of the recipe that the line gives, or None.
+    "no exit": the exits that the line closes, sorted. "factory": the line is a rule for the
+    factory. "unknown": each part of the cell that is none of the forms. "wrong levels": each
+    level that is not 1, 2 or 3.
+
+    >>> effect_of("level 1; no exit: not admitted")
+    {'level': 1, 'no exit': ['not admitted'], 'factory': False, 'unknown': [], 'wrong levels': []}
+    >>> effect_of("`no exit: 3.3`; no exit: boundary")["no exit"], effect_of("none")["no exit"]
+    (['3.3', 'boundary'], [])
+    >>> effect_of("none: rule of the factory")["factory"], effect_of("none")["factory"]
+    (True, False)
+
+    Two levels in one cell give the lowest one.
+
+    >>> effect_of("level 3; level 2")["level"]
+    2
+
+    A text that is none of the forms is not an effect. An empty cell is not an effect.
+
+    >>> cells = ("level 4", "level one; level 2", "first claim on level 1", "no exit: 5", "none; level 1")
+    >>> for cell in (*cells, "", None):
+    ...     found = effect_of(cell)
+    ...     print(found["level"], found["unknown"], found["wrong levels"])
+    None [] ['4']
+    2 [] ['one']
+    None ['first claim on level 1'] []
+    None ['no exit: 5'] []
+    1 ['none'] []
+    None [''] []
+    None [''] []
+    """
+    cell = (cell or "").strip().strip("`").strip()
+    out = {"level": None, "no exit": [], "factory": cell == FACTORY_RULE, "unknown": [], "wrong levels": []}
+    if cell in (NO_EFFECT, FACTORY_RULE):
+        return out
+    levels, closed = [], set()
+    for part in (p.strip().strip("`").strip() for p in cell.split(";")):
+        level, no_exit = LEVEL_EFFECT.fullmatch(part), NO_EXIT_EFFECT.fullmatch(part)
+        if level and level.group(1) in ("1", "2", "3"):
+            levels.append(int(level.group(1)))
+        elif level:
+            out["wrong levels"].append(level.group(1))
+        elif no_exit and no_exit.group(1) in NO_EXITS:
+            closed.add(no_exit.group(1))
+        else:
+            out["unknown"].append(part)
+    out["level"], out["no exit"] = min(levels, default=None), sorted(closed)
+    return out
+
+
+def charter_state(text):
+    """(state, date) of the head line of a charter. The state is "draft", "reviewed" or None.
+
+    The owner reviews the charter. The state "reviewed" needs the date of the review. A sentence
+    can follow the state.
+
+    >>> charter_state("draft"), charter_state("reviewed by the owner on 2026-01-06")
+    (('draft', None), ('reviewed', '2026-01-06'))
+    >>> charter_state("reviewed by the owner on 2026-01-06. The owner confirmed the order.")
+    ('reviewed', '2026-01-06')
+    >>> for text in ("reviewed", "reviewed by the owner on 2026-13-40", "drafted", "done", "", None):
+    ...     print(charter_state(text))
+    (None, None)
+    (None, None)
+    (None, None)
+    (None, None)
+    (None, None)
+    (None, None)
+    """
+    text = (text or "").strip().strip("`").strip()
+    if re.match(r"draft\b", text):
+        return DRAFT, None
+    on = REVIEWED_ON.match(text)
+    try:
+        return (REVIEWED, datetime.date.fromisoformat(on.group(1)).isoformat()) if on else (None, None)
+    except ValueError:
+        return None, None
+
+
+def charter_key(ident):
+    """The key that puts the identifiers of the lines of a charter in order: the number counts.
+
+    >>> sorted(["P-10", "P-2", "K-1", "other"], key=charter_key)
+    ['K-1', 'P-2', 'P-10', 'other']
+    """
+    found = CHARTER_ID.fullmatch(ident or "")
+    return (0, found.group(1), int(found.group(2)), "") if found else (1, "", 0, ident or "")
+
+
+def serves_of(cell):
+    """The lines of the charter that the cell "Serves" of a requirement names. "none" gives no line.
+
+    A comma is between two identifiers.
+
+    >>> serves_of("P-2, `K-1`"), serves_of("none"), serves_of(" `none` "), serves_of(""), serves_of(None)
+    (['P-2', 'K-1'], [], [], [], [])
+    >>> serves_of("the first principle; T-1")
+    ['the first principle', 'T-1']
+    """
+    names = names_of(cell)
+    return [] if names == [NO_EFFECT] else names
+
+
+def read_charter(folder):
+    r"""The charter of a specification: the file charter.md beside spec.md. None without the file.
+
+    The result has the state, the date of the review, and one dictionary for each line of the
+    charter, in the order of the file. A line has its identifier, its kind, its text, its
+    priority and its effect.
+
+    >>> import sample
+    >>> charter = read_charter(sample.folder())
+    >>> charter["state"], charter["date"], charter["_line"], charter["_file"]
+    ('reviewed', '2026-01-06', 3, 'charter.md')
+    >>> for line in charter["lines"]:
+    ...     effect = line["effect"]
+    ...     print(line["id"], line["kind"], line["priority"], effect["level"], effect["no exit"])
+    T-1 target None 1 []
+    T-2 target None 2 []
+    P-1 principle 1 None ['3.3']
+    P-2 principle 2 None ['boundary']
+    K-1 constraint None None ['not admitted']
+    K-2 constraint None None []
+    >>> charter["lines"][0]["text"], charter["lines"][5]["effect"]["factory"], charter["lines"][5]["_line"]
+    ('a backup is made without a person', True, 28)
+
+    A target part has the effect of its cell "Level of the recipe". A level that is not 1, 2 or 3
+    is a wrong level.
+
+    >>> wrong = ("charter.md", "| no drill | 1 |", "| no drill | high |")
+    >>> read_charter(sample.folder(wrong))["lines"][0]["effect"]["wrong levels"]
+    ['high']
+
+    A file without a head line and without a table gives no state and no line.
+
+    >>> folder = sample.folder()
+    >>> _ = (folder / "charter.md").write_text("A text.\n", encoding="utf-8")
+    >>> charter = read_charter(folder)
+    >>> charter["state"], charter["state text"], charter["lines"]
+    (None, '', [])
+    >>> (folder / "charter.md").unlink()
+    >>> read_charter(folder) is None
+    True
+    """
+    path = pathlib.Path(folder) / CHARTER_FILE
+    if not path.is_file():
+        return None
+    doc = Doc(path)
+    head = doc.head()
+    state, date = charter_state(head.get("state"))
+    lines = []
+    for title, kind, _ in CHARTER_TABLES:
+        found = doc.titled(title)
+        for row in doc.table(found[1]) if found else []:
+            effect, text = effect_of(row.get("effect")), row.get(kind, "")
+            if kind == "target":
+                level = row.get("level of the recipe", "").strip().strip("`").strip()
+                effect, text = effect_of(NO_EFFECT), row.get("part of the target", "")
+                effect |= {"level": int(level)} if level in ("1", "2", "3") else {"wrong levels": [level]}
+            line = {"id": row.get("id", "").strip().strip("`").strip(), "kind": kind, "table": title}
+            line |= {"text": text, "priority": row.get("priority"), "effect": effect}
+            lines.append(line | {"_line": row["_line"], "_file": CHARTER_FILE})
+    return {
+        "state": state,
+        "date": date,
+        "state text": head.get("state", ""),
+        "lines": sorted(lines, key=lambda line: line["_line"]),
+        "_line": head["_line"],
+        "_file": CHARTER_FILE,
+    }
+
+
 def stakeholders_of(text):
     """The stakeholders that the line of a view names, in the form "(stakeholders: a, b)".
 
@@ -558,6 +765,15 @@ def load(folder):
     >>> data["requirements"][0]["_file"], [names_of(s["views"]) for s in data["sources"]][1:3]
     ('vetting.md', [['storage', 'operation'], ['operation']])
 
+    The cell "Serves" of a requirement names the lines of the charter that the requirement
+    serves, or "none". The charter is the file charter.md. A specification without the file has
+    no charter.
+
+    >>> [serves_of(r["serves"]) for r in data["requirements"]][1:5], data["charter"]["state"]
+    ([[], ['T-2', 'P-1'], [], ['T-1', 'P-2', 'K-1']], 'reviewed')
+    >>> load(sample.folder(charter=False))["charter"] is None
+    True
+
     Each boundary of section 1 has a state. A boundary line without a state is proposed. The
     table "Proposed boundaries" of vetting.md has one row for each proposed boundary.
 
@@ -593,13 +809,15 @@ def load(folder):
     Only spec.md is necessary. An absent evidence, vetting or trial record gives empty data.
 
     >>> folder = sample.folder()
-    >>> [(folder / name).unlink() for name in ("evidence.md", "vetting.md", "trial.md")]
-    [None, None, None]
+    >>> [(folder / name).unlink() for name in ("evidence.md", "vetting.md", "trial.md", "charter.md")]
+    [None, None, None, None]
     >>> data = load(folder)
     >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
     ([], [], False, [], [])
     >>> data["requirements"], data["proposed_boundaries"], data["reading"], data["has_reading"]
     ([], [], [], False)
+    >>> data["charter"] is None
+    True
     >>> (folder / "spec.md").unlink()
     >>> load(folder)
     Traceback (most recent call last):
@@ -647,6 +865,7 @@ def load(folder):
         "reading": [],
         "has_reading": False,
         "has_vetting": False,
+        "charter": read_charter(folder),
         "trials": [],
         "trial_findings": [],
     }

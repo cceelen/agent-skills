@@ -13,13 +13,14 @@
   --words FILE     the product words of the aspect, one in each line; an item must not use one
   --json           print one JSON object in place of the text report
   --scope          check only what is settled before the research: the head line, the aspect,
-                   the field, the intent of the owner and the date of the agreement. Use this in
-                   phase 1.
+                   the field, the intent of the owner, the date of the agreement and the form of
+                   the charter. Use this in phase 1.
 
 The report lists each failing rule with its place, then what remains. Result code 0: no rule
 fails. Result code 1: a rule fails. Result code 2: the input cannot be read. Pending levels,
 pending vettings, changed items, open findings of a trial, a recipe without a trial, an intent of
-the owner that was not asked and a missing acceptance remain; they do not fail the check.
+the owner that was not asked, a specification without a charter, a charter that the owner did not
+review and a missing acceptance remain; they do not fail the check.
 
 The intent of the owner is a field of section 1. It has one line for each answer of the owner: a
 quote with its date, or "(no answer)".
@@ -57,6 +58,35 @@ the reason. A proposed boundary without a row fails. A row for a boundary that s
 have or that the owner decided fails. A row that names a requirement that the register does not
 have fails. Each proposed boundary remains, with the number of requirements that it would take.
 Each stakeholder that a proposed boundary would leave with no requirement in the aspect remains.
+
+The file charter.md beside spec.md is the charter of the aspect: the target, the principles with
+their priority and the constraints of the owner. It governs the triage. The file is optional: a
+specification without it remains, and no rule of the charter applies. The head line of the charter
+has the state: "draft", or "reviewed by the owner on <YYYY-MM-DD>". Each row of the tables "Target",
+"Principles" and "Constraints" is one line of the charter, with the identifier T-<n>, P-<n> or
+K-<n>. Each principle has a priority: a whole number that no other principle has. The cell "Effect"
+of a principle and of a constraint has one or more of these forms, with a semicolon between two
+forms, and no other:
+
+  level <n>               each item that holds a requirement that serves the line is admitted,
+                          and is on level n of the recipe or on a lower level; n is 1, 2 or 3
+  no exit: 3.3            a requirement that serves the line does not go to a decision of 3.3
+  no exit: boundary       a requirement that serves the line does not go to a boundary
+  no exit: not admitted   an item that holds a requirement that serves the line is admitted
+  none                    the line has no effect that a program examines
+  none: rule of the factory   the line is a rule for the factory and not for the content; no
+                          requirement must serve it
+
+A target part has the effect "level <n>" through its cell "Level of the recipe". With a charter,
+the cell "Serves" of each requirement names the lines of the charter that the requirement serves,
+with a comma between two identifiers, or "none". A duplicate has the exit of its row. The level of
+an item is not higher than the lowest level that such a line gives. The cell "Placed by" of an
+item names the line that placed it, or "calculation": place.py writes it. A line places an item
+when the item is on the level that the line gives. The calculation of risk and reward places an
+item on a lower level. A line that no
+requirement serves remains while the charter is a draft, and fails after the review of the owner.
+The report gives, for each line, the number of requirements that serve it and the number of items
+that it placed. --scope examines only the form of the charter.
 
 The cell "Views" of a source in section 2 names the views that the source was read for, or "all"
 for a body of knowledge. A specification of an earlier revision has no such cell: this fails
@@ -224,6 +254,42 @@ MESSAGES = {
     "item-without-requirement": "No requirement of the table Requirements goes to the item.",
     "stakeholder-without-requirement": "The stakeholder '{0}' has no requirement in the table Requirements.",
     "checklist-empty": "The checklist of section 4 has no item.",
+    "charter-state-unknown": (
+        "The state '{0}' of the charter is not permitted. "
+        "Use 'draft' or 'reviewed by the owner on <YYYY-MM-DD>'."
+    ),
+    "charter-without-line": "The charter has no line. Write the tables Target, Principles and Constraints.",
+    "charter-id-unknown": "The identifier '{0}' is not permitted in the table '{1}'. Use '{2}-<n>'.",
+    "charter-id-twice": "The identifier of the line of the charter is used two times.",
+    "charter-priority-missing": "The principle has no priority. Write a whole number.",
+    "charter-priority-twice": (
+        "The priority '{0}' is used two times. Give each principle a different priority."
+    ),
+    "charter-effect-unknown": (
+        "The effect '{0}' is not permitted. Use 'level <n>', 'no exit: 3.3', 'no exit: boundary', "
+        "'no exit: not admitted', 'none' or 'none: rule of the factory'."
+    ),
+    "charter-level-unknown": "The level '{0}' of the line of the charter is not permitted. Use 1, 2 or 3.",
+    "charter-line-unserved": "No requirement serves the line '{0}' of the charter.",
+    "requirement-serves-unknown": (
+        "The requirement serves '{0}'. The charter does not have this line. "
+        "Write identifiers of the charter with a comma between them, or 'none'."
+    ),
+    "requirement-exit-closed": (
+        "The requirement serves '{0}'. This line of the charter does not permit the exit '{1}'. "
+        "Give the requirement a different exit."
+    ),
+    "item-not-admitted-against-charter": (
+        "The item is not admitted. It holds '{0}', which serves '{1}'. "
+        "This line of the charter does not permit that. Run place.py with --write."
+    ),
+    "item-above-charter-level": (
+        "The level of the item is '{0}'. The line '{1}' of the charter gives it level {2} or a lower level. "
+        "Run place.py with --write."
+    ),
+    "placed-by-differs": (
+        "The cell 'Placed by' is '{0}'. The program place.py computes '{1}'. Run place.py with --write."
+    ),
     "product-word": "The item uses the product word '{0}'.",
     "id-removed": "The earlier revision has this item. Keep the row and set its level to 'retired'.",
     "id-reused": "The earlier revision retired this identifier. Use a new identifier.",
@@ -249,10 +315,19 @@ MESSAGES = {
         "{0}: requirements: {1}, to an item: {2}, to a decision: {3}, to an implementation skill: {4}, "
         "to a boundary: {5}, duplicates: {6}, a proposed boundary would take: {7}."
     ),
+    "charter-head": (
+        "Charter, with the number of requirements that serve each line and of items that it placed:"
+    ),
+    "charter-line": "{0}: requirements: {1}, items placed: {2}.",
     "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
     "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
     "remains-head": "What remains:",
     "remains-intent": "The intent of the owner was not asked.",
+    "remains-no-charter": "The specification has no charter.",
+    "remains-charter-draft": "The owner did not review the charter.",
+    "remains-charter-unserved": "Lines of the charter that no requirement serves: {0}.",
+    "remains-serves-none": "Requirements that serve no line of the charter, for each view: {0}.",
+    "serves-none-view": "{0}: {1}",
     "remains-levels": "Levels that are pending: {0}.",
     "remains-basics": "Views without an item on level 1, while levels are pending: {0}.",
     "remains-vettings": "Vettings that are pending: {0}.",
@@ -1109,7 +1184,7 @@ def proposed_takes(data):
     ({'tests': ['R-03'], 'archive': []}, {})
     >>> row = sample.PROPOSED_ARCHIVE
     >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-07 to R-09, R-01 | none |"))
-    >>> exit = ("vetting.md", "| S-01 section 5 | C-03 |", "| S-01 section 5 | boundary: archive |")
+    >>> exit = ("vetting.md", "| none | C-03 |", "| none | boundary: archive |")
     >>> proposed_takes(sample.load(named, sample.PROPOSED_TABLE, more, exit))["archive"]
     ['R-01', 'R-02', 'R-07', 'R-08']
     """
@@ -1156,7 +1231,7 @@ def left_stakeholders(data):
     which the owner decided, no requirement of the owners of the data stays in the aspect.
 
     >>> one = ("vetting.md", row, row.replace("| none | none |", "| R-02 | owners of the data |"))
-    >>> away = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
+    >>> away = ("vetting.md", "| none | C-01 |", "| none | boundary: recovery |")
     >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE, one))
     []
     >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE, one, away))
@@ -1484,12 +1559,415 @@ def views_emptied_by_boundaries(data):
     >>> away = ("vetting.md", row, row.replace("| C-03 |", "| boundary: recovery |"))
     >>> views_emptied_by_boundaries(sample.load(named, away))
     []
-    >>> more = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
+    >>> more = ("vetting.md", "| none | C-01 |", "| none | boundary: recovery |")
     >>> views_emptied_by_boundaries(sample.load(named, away, more))
     ['storage']
     """
     counts = requirement_counts(data)
     return sorted({c["view"] for c in counts if 2 * c["to a boundary"] > c["requirements"]})
+
+
+def check_charter(data):
+    r"""The form of the charter: the file charter.md beside spec.md. Without the file, nothing fails.
+
+    The head line has the state "draft" or "reviewed by the owner on <YYYY-MM-DD>". Each line has
+    an identifier that is used one time: T-<n> in the table "Target", P-<n> in the table
+    "Principles", K-<n> in the table "Constraints". Each principle has a priority, a whole number
+    that is used one time. Each effect has one of the forms, and each level is 1, 2 or 3.
+
+    >>> import sample
+    >>> check_charter(sample.load())
+    []
+    >>> def planted(old, new):
+    ...     found = check_charter(sample.load(("charter.md", old, new)))
+    ...     return [(f["rule"], f["id"], f["file"], f["line"], f["text"]) for f in found]
+    >>> planted(sample.CHARTER_STATE, "**State**: reviewed")
+    [('charter-state-unknown', '', 'charter.md', 3,
+      "The state 'reviewed' of the charter is not permitted. Use 'draft' or 'reviewed by the owner on
+      <YYYY-MM-DD>'.")]
+    >>> planted(sample.CHARTER_STATE, "**State**: draft"), planted(sample.CHARTER_STATE + "\n", "")[0][:2]
+    ([], ('charter-state-unknown', ''))
+    >>> planted("| 2 | P-2 |", "| 1 | P-2 |")
+    [('charter-priority-twice', 'P-2', 'charter.md', 21,
+      "The priority '1' is used two times. Give each principle a different priority.")]
+    >>> planted("| 2 | P-2 |", "| | P-2 |"), planted("| 2 | P-2 |", "| high | P-2 |")[0][:2]
+    ([('charter-priority-missing', 'P-2', 'charter.md', 21,
+       'The principle has no priority. Write a whole number.')], ('charter-priority-missing', 'P-2'))
+    >>> planted("| 2 | P-2 |", "| 2 | P-1 |")
+    [('charter-id-twice', 'P-1', 'charter.md', 21,
+      'The identifier of the line of the charter is used two times.')]
+    >>> planted("| K-2 |", "| P-9 |")
+    [('charter-id-unknown', 'P-9', 'charter.md', 28,
+      "The identifier 'P-9' is not permitted in the table 'Constraints'. Use 'K-<n>'.")]
+    >>> planted("| T-2 |", "| the goal |")[0][:2]
+    ('charter-id-unknown', 'the goal')
+
+    An effect that is none of the forms fails. A level that is not 1, 2 or 3 fails.
+
+    >>> planted("| no exit: 3.3 |", "| the first claim on level 1 |")
+    [('charter-effect-unknown', 'P-1', 'charter.md', 20,
+      "The effect 'the first claim on level 1' is not permitted. Use 'level <n>', 'no exit: 3.3', 'no exit:
+      boundary', 'no exit: not admitted', 'none' or 'none: rule of the factory'.")]
+    >>> planted("| no exit: 3.3 |", "| |")[0][:2], planted("| no exit: 3.3 |", "| level 1; no exit: 3.3 |")
+    (('charter-effect-unknown', 'P-1'), [])
+    >>> planted("| no exit: 3.3 |", "| level 4 |")
+    [('charter-level-unknown', 'P-1', 'charter.md', 20,
+      "The level '4' of the line of the charter is not permitted. Use 1, 2 or 3.")]
+    >>> planted("| no drill | 1 |", "| no drill | |")[0][:2]
+    ('charter-level-unknown', 'T-1')
+
+    A charter without a line fails. A specification without a charter does not fail.
+
+    >>> folder = sample.folder()
+    >>> _ = (folder / "charter.md").write_text("# Charter\n\n**State**: draft\n", encoding="utf-8")
+    >>> [(f["rule"], f["line"], f["text"]) for f in check_charter(aspect.load(folder))]
+    [('charter-without-line', 3,
+      'The charter has no line. Write the tables Target, Principles and Constraints.')]
+    >>> check_charter(sample.load(charter=False)), charter_remains(sample.load(charter=False))
+    ([], ['The specification has no charter.'])
+    """
+    charter = data.get("charter")
+    if charter is None:
+        return []
+    out, seen, priorities = [], set(), set()
+    if charter["state"] is None:
+        out.append(finding("charter-state-unknown", charter, "", charter["state text"]))
+    if not charter["lines"]:
+        out.append(finding("charter-without-line", charter))
+    letters = {kind: letter for _, kind, letter in aspect.CHARTER_TABLES}
+    for line in charter["lines"]:
+        ident = line["id"]
+        form = aspect.CHARTER_ID.fullmatch(ident)
+        if not form or form.group(1) != letters[line["kind"]]:
+            out.append(
+                finding("charter-id-unknown", line, ident, ident, line["table"], letters[line["kind"]])
+            )
+        if ident in seen:
+            out.append(finding("charter-id-twice", line, ident))
+        seen.add(ident)
+        priority = (line["priority"] or "").strip()
+        if line["kind"] == "principle" and not priority.isdigit():
+            out.append(finding("charter-priority-missing", line, ident))
+        elif line["kind"] == "principle" and int(priority) in priorities:
+            out.append(finding("charter-priority-twice", line, ident, priority))
+        elif line["kind"] == "principle":
+            priorities.add(int(priority))
+        out += [finding("charter-effect-unknown", line, ident, part) for part in line["effect"]["unknown"]]
+        out += [finding("charter-level-unknown", line, ident, n) for n in line["effect"]["wrong levels"]]
+    return out
+
+
+def charter_remains(data):
+    """The lines of what remains for the state of the charter: no charter, or a draft.
+
+    >>> import sample
+    >>> charter_remains(sample.load())
+    []
+    >>> charter_remains(sample.load(sample.CHARTER_DRAFT))
+    ['The owner did not review the charter.']
+    >>> charter_remains({})
+    ['The specification has no charter.']
+    """
+    charter = data.get("charter")
+    if charter is None:
+        return [MESSAGES["remains-no-charter"]]
+    return [MESSAGES["remains-charter-draft"]] if charter["state"] == aspect.DRAFT else []
+
+
+def final_exits(data):
+    """The exit of each requirement, by its identifier: (kind, name). A duplicate has the exit of its row.
+
+    >>> import sample
+    >>> exits = final_exits(sample.load())
+    >>> exits["R-05"], exits["R-06"], exits["R-07"]
+    (('item', 'C-05'), ('item', 'C-05'), ('decision', 'How frequently to make a backup'))
+    >>> final_exits(sample.load(("vetting.md", "| duplicate: R-05 |", "| duplicate: R-19 |")))["R-06"]
+    ('duplicate', 'R-19')
+    """
+    exits = {row.get("id", ""): aspect.exit_of(row.get("goes to")) for row in data["requirements"]}
+    return {
+        ident: exits.get(name, (kind, name)) if kind == "duplicate" else (kind, name)
+        for ident, (kind, name) in exits.items()
+    }
+
+
+def lines_served(data, row):
+    """The lines of the charter that a requirement serves: those of its cell "Serves" that the charter has.
+
+    >>> import sample
+    >>> data = sample.load()
+    >>> [[line["id"] for line in lines_served(data, row)] for row in data["requirements"][1:5]]
+    [[], ['T-2', 'P-1'], [], ['T-1', 'P-2', 'K-1']]
+    >>> lines_served({}, data["requirements"][2])
+    []
+    """
+    known = {line["id"]: line for line in (data.get("charter") or {}).get("lines", [])}
+    return [known[name] for name in aspect.serves_of(row.get("serves")) if name in known]
+
+
+def charter_rules(data):
+    r"""What the charter decides for the items, before the calculation of risk and reward.
+
+    Returns two dictionaries. The first has the items that a line of the charter gives a level:
+    {item: {"level": n, "by": the line}}. The second has the items that the charter does not
+    permit to be "not admitted": {item: [(requirement, line)]}.
+
+    For each item, take the requirements that go to it, and the lines of the charter that they
+    serve. If one or more of these lines gives a level, the item is admitted, and its level is
+    not higher than the lowest such level. The line with the lowest level is the line of the
+    item. If two lines give that level, a constraint comes before a target part, and a target
+    part before a principle; then the lowest identifier decides.
+
+    The programs place.py and check.py use this function: the rule is written one time.
+
+    >>> import sample
+    >>> charter_rules(sample.load())
+    ({'C-02': {'level': 2, 'by': 'T-2'}, 'C-05': {'level': 1, 'by': 'T-1'}}, {'C-05': [('R-05', 'K-1')]})
+
+    A requirement that serves a line with a level gives the level to its item. A duplicate
+    counts for the item of its row.
+
+    >>> r04 = sample.SERVES_R04
+    >>> charter_rules(sample.load(("vetting.md", r04, r04.replace("| none |", "| T-2, K-1 |"))))
+    ({'C-02': {'level': 2, 'by': 'T-2'}, 'C-04': {'level': 2, 'by': 'T-2'},
+      'C-05': {'level': 1, 'by': 'T-1'}}, {'C-04': [('R-04', 'K-1')], 'C-05': [('R-05', 'K-1')]})
+    >>> second = ("vetting.md", "| none | duplicate: R-05 |", "| T-1 | duplicate: R-04 |")
+    >>> charter_rules(sample.load(second))[0]["C-04"]
+    {'level': 1, 'by': 'T-1'}
+
+    The lowest level decides. If two lines give the same level, a constraint comes first, then
+    a target part.
+
+    >>> def line_of(effect_p1, effect_k2, serves):
+    ...     edits = [("charter.md", "| no exit: 3.3 |", f"| {effect_p1} |")]
+    ...     edits += [("charter.md", "| none: rule of the factory |", f"| {effect_k2} |")]
+    ...     edits += [("vetting.md", r04, r04.replace("| none |", f"| {serves} |"))]
+    ...     return charter_rules(sample.load(*edits))[0]["C-04"]
+    >>> line_of("level 2", "level 2", "P-1, T-2, K-2"), line_of("level 2", "level 3", "P-1, T-2, K-2")
+    ({'level': 2, 'by': 'K-2'}, {'level': 2, 'by': 'T-2'})
+    >>> line_of("level 2", "none", "P-1"), line_of("level 3", "level 1", "T-2, P-1, K-2")
+    ({'level': 2, 'by': 'P-1'}, {'level': 1, 'by': 'K-2'})
+
+    A specification without a charter has no such item.
+
+    >>> charter_rules(sample.load(charter=False))
+    ({}, {})
+    """
+    order = {kind: n for n, kind in enumerate(aspect.KIND_ORDER)}
+    exits = final_exits(data)
+    places, admits = {}, {}
+    for row in data["requirements"]:
+        kind, item = exits.get(row.get("id", ""), (None, ""))
+        for line in lines_served(data, row) if kind == "item" else ():
+            level = line["effect"]["level"]
+            key = (level, order[line["kind"]], aspect.charter_key(line["id"]))
+            if level is not None and (item not in places or key < places[item][0]):
+                places[item] = (key, line["id"])
+            if "not admitted" in line["effect"]["no exit"]:
+                admits.setdefault(item, []).append((row.get("id", ""), line["id"]))
+    places = {item: {"level": key[0], "by": ident} for item, (key, ident) in sorted(places.items())}
+    return places, {item: sorted(rows) for item, rows in sorted(admits.items())}
+
+
+def placed_by(place, level):
+    """The text of the cell "Placed by" of an item: the line of the charter that placed it, or "calculation".
+
+    A line places an item when the item is on the level that the line gives. The calculation of
+    risk and reward places an item on a lower level, and each item that no line gives a level.
+
+    >>> place = {"level": 2, "by": "T-2"}
+    >>> placed_by(place, 2), placed_by(place, 1), placed_by(None, 2), placed_by(place, "not admitted")
+    ('T-2', 'calculation', 'calculation', 'calculation')
+    """
+    return place["by"] if place and level == place["level"] else aspect.CALCULATION
+
+
+def served_by(data):
+    """For each line of the charter, by its identifier: the requirements that serve it, sorted.
+
+    >>> import sample
+    >>> served_by(sample.load())
+    {'T-1': ['R-05'], 'T-2': ['R-03'], 'P-1': ['R-03'], 'P-2': ['R-05'], 'K-1': ['R-05'], 'K-2': []}
+    """
+    out = {line["id"]: set() for line in (data.get("charter") or {}).get("lines", [])}
+    for row in data["requirements"]:
+        for line in lines_served(data, row):
+            out[line["id"]].add(row.get("id", ""))
+    return {ident: sorted(rows) for ident, rows in out.items()}
+
+
+def charter_counts(data):
+    """For each line of the charter: the number of requirements that serve it and of items that it placed.
+
+    >>> import sample
+    >>> for line in charter_counts(sample.load()):
+    ...     print(*line.values())
+    T-1 1 1
+    T-2 1 1
+    P-1 1 0
+    P-2 1 0
+    K-1 1 0
+    K-2 0 0
+    >>> list(line), charter_counts(sample.load(charter=False))
+    (['line', 'requirements', 'items placed'], [])
+
+    An item on a lower level than the level of its line was placed by the calculation.
+
+    >>> higher = ("charter.md", "| no drill | 1 |", "| no drill | 2 |")
+    >>> [line["items placed"] for line in charter_counts(sample.load(higher))][:2]
+    [0, 1]
+    """
+    served = served_by(data)
+    places = charter_rules(data)[0] if served else {}
+    levels = (
+        {row.get("id"): aspect.level_of(row.get("level"))[0] for row in live_items(data)} if served else {}
+    )
+    placed = [placed_by(places.get(ident), level) for ident, level in levels.items()]
+    return [
+        {"line": ident, "requirements": len(rows), "items placed": placed.count(ident)}
+        for ident, rows in served.items()
+    ]
+
+
+def serving_none(data):
+    """The number of requirements that serve no line of the charter, for each view. Sorted.
+
+    A specification without a charter gives nothing.
+
+    >>> import sample
+    >>> serving_none(sample.load()), serving_none(sample.load(charter=False))
+    (['operation: 4', 'storage: 2'], [])
+    """
+    counts = {}
+    for row in data["requirements"] if data.get("charter") else ():
+        if not lines_served(data, row):
+            counts[aspect.view_of(row)] = counts.get(aspect.view_of(row), 0) + 1
+    return [MESSAGES["serves-none-view"].format(view, n) for view, n in sorted(counts.items())]
+
+
+def check_serves(data):
+    r"""The charter governs the triage. Returns the findings, and the lines that no requirement serves.
+
+    Without a charter, nothing fails and the cell "Serves" is not necessary. With a charter, each
+    requirement has the cell: identifiers of lines of the charter, or "none".
+
+    >>> import sample
+    >>> check_serves(sample.load()), check_serves(sample.load(charter=False))
+    (([], []), ([], []))
+    >>> def planted(*edits):
+    ...     found, unserved = check_serves(sample.load(*edits))
+    ...     return [(f["rule"], f["id"], f["file"], f["text"]) for f in found], unserved
+    >>> r02, r03, r04, r05 = sample.REQUIREMENT_R02, sample.SERVES_R03, sample.SERVES_R04, sample.SERVES_R05
+    >>> planted(("vetting.md", r04, r04.replace("| none |", "| |")))
+    ([('requirement-cell-empty', 'R-04', 'vetting.md', "The cell 'serves' of the requirement is empty.")], [])
+    >>> planted(("vetting.md", r04, r04.replace("| none |", "| P-9, the first principle |")))[0]
+    [('requirement-serves-unknown', 'R-04', 'vetting.md',
+      "The requirement serves 'P-9'. The charter does not have this line. Write identifiers of the charter
+      with a comma between them, or 'none'."),
+     ('requirement-serves-unknown', 'R-04', 'vetting.md',
+      "The requirement serves 'the first principle'. The charter does not have this line. Write identifiers
+      of the charter with a comma between them, or 'none'.")]
+
+    A requirement does not take an exit that a line that it serves closes: a decision that
+    depends on context, or a boundary. A duplicate has the exit of its row.
+
+    >>> decision = "3.3: How frequently to make a backup"
+    >>> planted(("vetting.md", r03, r03.replace("| C-02 |", f"| {decision} |")))[0][0]
+    ('requirement-exit-closed', 'R-03', 'vetting.md',
+     "The requirement serves 'P-1'. This line of the charter does not permit the exit '3.3'. Give the
+     requirement a different exit.")
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> planted(named, ("vetting.md", r05, r05.replace("| C-05 |", "| boundary: recovery |")))[0][0][::3]
+    ('requirement-exit-closed', "The requirement serves 'P-2'. This line of the charter does not permit the
+    exit 'boundary'. Give the requirement a different exit.")
+    >>> second = ("vetting.md", "| none | duplicate: R-05 |", "| P-1 | duplicate: R-07 |")
+    >>> [f[:2] for f in planted(second)[0]]
+    [('requirement-exit-closed', 'R-06')]
+
+    An item that holds a requirement that serves a line with "no exit: not admitted" is admitted.
+
+    >>> planted(("vetting.md", r04, r04.replace("| none |", "| K-1 |")))[0]
+    [('item-not-admitted-against-charter', 'C-04', 'spec.md',
+      "The item is not admitted. It holds 'R-04', which serves 'K-1'. This line of the charter does not
+      permit that. Run place.py with --write.")]
+
+    An item that a line gives a level is admitted, and its level is not higher than that level.
+
+    >>> planted(("vetting.md", r04, r04.replace("| none |", "| T-2 |")))[0]
+    [('item-above-charter-level', 'C-04', 'spec.md',
+      "The level of the item is 'not admitted'. The line 'T-2' of the charter gives it level 2 or a lower
+      level. Run place.py with --write.")]
+    >>> planted(("vetting.md", r02, r02.replace("| none |", "| T-2 |")))[0]
+    [('item-above-charter-level', 'C-03', 'spec.md',
+      "The level of the item is '3, regulatory'. The line 'T-2' of the charter gives it level 2 or a lower
+      level. Run place.py with --write.")]
+
+    The cell "Placed by" names the line that placed the item, or "calculation". The calculation
+    placed an item that is on a lower level than the level of its line. The cell of an item with
+    a pending level is not examined.
+
+    >>> planted(("spec.md", "| S-02 section 4 | T-2 |", "| S-02 section 4 | calculation |"))[0]
+    [('placed-by-differs', 'C-02', 'spec.md',
+      "The cell 'Placed by' is 'calculation'. The program place.py computes 'T-2'. Run place.py with
+      --write.")]
+    >>> planted(("charter.md", "| no drill | 1 |", "| no drill | 2 |"))[0]
+    [('placed-by-differs', 'C-05', 'spec.md',
+      "The cell 'Placed by' is 'T-1'. The program place.py computes 'calculation'. Run place.py with
+      --write.")]
+    >>> planted(("spec.md", "| 2, operative |", "| pending |"))
+    ([], [])
+
+    A line that no requirement serves fails after the review of the owner. While the charter is
+    a draft, the line remains. A line that is a rule of the factory needs no requirement.
+
+    >>> rule = ("charter.md", "| none: rule of the factory |", "| none |")
+    >>> planted(rule)
+    ([('charter-line-unserved', 'K-2', 'charter.md', "No requirement serves the line 'K-2' of the charter.")],
+     [])
+    >>> planted(rule, sample.CHARTER_DRAFT), planted(sample.CHARTER_DRAFT)
+    (([], ['K-2']), ([], []))
+    """
+    charter = data.get("charter")
+    if charter is None:
+        return [], []
+    out = []
+    known = {line["id"] for line in charter["lines"]}
+    exits = final_exits(data)
+    for row in data["requirements"]:
+        ident = row.get("id", "")
+        if not row.get("serves", ""):
+            out.append(finding("requirement-cell-empty", row, ident, "serves"))
+        out += [
+            finding("requirement-serves-unknown", row, ident, name)
+            for name in aspect.serves_of(row.get("serves"))
+            if name not in known
+        ]
+        closed = aspect.CLOSED_EXITS.get(exits.get(ident, (None, ""))[0])
+        out += [
+            finding("requirement-exit-closed", row, ident, line["id"], closed)
+            for line in lines_served(data, row)
+            if closed in line["effect"]["no exit"]
+        ]
+    places, admits = charter_rules(data)
+    for row in live_items(data):
+        ident = row.get("id", "")
+        level = aspect.level_of(row.get("level"))[0]
+        decided = isinstance(level, int) or level == "not admitted"
+        place = places.get(ident)
+        if level == "not admitted":
+            rule = "item-not-admitted-against-charter"
+            out += [finding(rule, row, ident, *names) for names in admits.get(ident, [])]
+        if place and decided and (level == "not admitted" or level > place["level"]):
+            cell = row.get("level", "").strip()
+            out.append(finding("item-above-charter-level", row, ident, cell, place["by"], place["level"]))
+        cell = row.get("placed by", "").strip().strip("`").strip()
+        if decided and cell != placed_by(place, level):
+            out.append(finding("placed-by-differs", row, ident, cell, placed_by(place, level)))
+    served = served_by(data)
+    unserved = [line for line in charter["lines"] if not served[line["id"]] and not line["effect"]["factory"]]
+    if charter["state"] == aspect.REVIEWED:
+        return out + [finding("charter-line-unserved", line, line["id"], line["id"]) for line in unserved], []
+    return out, [line["id"] for line in unserved]
 
 
 def check_basics(data):
@@ -1868,15 +2346,15 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
           'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'proposed-boundaries': [],
-          'left-stakeholders': [], 'own-sources': [], 'unread': []})
+          'left-stakeholders': [], 'own-sources': [], 'unread': [], 'charter-unserved': [],
+          'serves-none': ['operation: 4', 'storage: 2']})
 
     A view that the boundaries emptied remains. A view with fewer than two sources of its own
     field remains also.
 
     >>> named = sample.BOUNDARIES + chr(10) + sample.BOUNDARY_DECIDED
     >>> away = [
-    ...     ("vetting.md", f"| S-01 section {n} | C-0{c} |", f"| S-01 section {n} | boundary: recovery |")
-    ...     for n, c in ((2, 1), (5, 3))
+    ...     ("vetting.md", f"| none | C-0{c} |", "| none | boundary: recovery |") for c in (1, 3)
     ... ]
     >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
     >>> found, remains = run_checks(sample.load(("spec.md", sample.BOUNDARIES, named), whole, *away))
@@ -1893,7 +2371,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains = run_checks(sample.load(named, sample.PROPOSED_TABLE, more))
     >>> found, remains["proposed-boundaries"], remains["left-stakeholders"]
     ([], ['tests (1 requirements)', 'archive (2 requirements)'], [['archive', 'owners of the data']])
-    >>> exit = ("vetting.md", "| S-01 section 5 | C-03 |", "| S-01 section 5 | boundary: archive |")
+    >>> exit = ("vetting.md", "| none | C-03 |", "| none | boundary: archive |")
     >>> found, remains = run_checks(sample.load(named, sample.PROPOSED_TABLE, exit))
     >>> brief(found), remains["proposed-boundaries"]
     ([('item-without-requirement', 'C-03'), ('requirement-boundary-not-decided', 'R-02')],
@@ -1941,8 +2419,11 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     """
     support, waiting = check_support(data)
     basics, without_basics = check_basics(data)
+    serves, unserved = check_serves(data)
     found = (
         check_scope(data)
+        + check_charter(data)
+        + serves
         + check_scope_findings(data)
         + check_sources(data)
         + check_references(data)
@@ -1984,6 +2465,8 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         "left-stakeholders": left_stakeholders(data),
         "own-sources": views_with_few_sources(data),
         "unread": unread_sources(data),
+        "charter-unserved": unserved,
+        "serves-none": serving_none(data),
     }
     return found, remains
 
@@ -2033,9 +2516,17 @@ def report(data, found, remains, previous_given):
       to a boundary: 0, duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
       to a boundary: 0, duplicates: 0, a proposed boundary would take: 0.
+    Charter, with the number of requirements that serve each line and of items that it placed:
+    - T-1: requirements: 1, items placed: 1.
+    - T-2: requirements: 1, items placed: 1.
+    - P-1: requirements: 1, items placed: 0.
+    - P-2: requirements: 1, items placed: 0.
+    - K-1: requirements: 1, items placed: 0.
+    - K-2: requirements: 0, items placed: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Items that need judgement: C-04.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     Accepted: A. Person, 2026-01-15.
     The check of stable identifiers was skipped: no earlier revision was given.
 
@@ -2057,8 +2548,16 @@ def report(data, found, remains, previous_given):
       to a boundary: 0, duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
       to a boundary: 0, duplicates: 0, a proposed boundary would take: 0.
+    Charter, with the number of requirements that serve each line and of items that it placed:
+    - T-1: requirements: 1, items placed: 1.
+    - T-2: requirements: 1, items placed: 1.
+    - P-1: requirements: 1, items placed: 0.
+    - P-2: requirements: 1, items placed: 0.
+    - K-1: requirements: 1, items placed: 0.
+    - K-2: requirements: 0, items placed: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     - The owner did not accept the specification.
 
     When nothing remains, the report is short. A specification without a view has no such part.
@@ -2068,7 +2567,43 @@ def report(data, found, remains, previous_given):
     >>> data["views"] = data["stakeholders"] = data["vetting_items"] = data["requirements"] = []
     >>> print(report(data, [], run_checks(data, data["checklist"])[1], previous_given=True))
     No check fails.
+    Charter, with the number of requirements that serve each line and of items that it placed:
+    - T-1: requirements: 0, items placed: 0.
+    - T-2: requirements: 0, items placed: 0.
+    - P-1: requirements: 0, items placed: 0.
+    - P-2: requirements: 0, items placed: 0.
+    - K-1: requirements: 0, items placed: 0.
+    - K-2: requirements: 0, items placed: 0.
     Accepted: A. Person, 2026-01-15.
+
+    A specification without a charter has no part "Charter". This remains. A charter that the
+    owner did not review remains also, with each line that no requirement serves.
+
+    >>> data = sample.load(charter=False)
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[7:]))
+    Answers of risk and reward: 8 with a source, 22 by judgement.
+    What remains:
+    - The specification has no charter.
+    - Items that need judgement: C-04.
+    Accepted: A. Person, 2026-01-15.
+    >>> rule = ("charter.md", "| none: rule of the factory |", "| none |")
+    >>> data = sample.load(sample.CHARTER_DRAFT, rule)
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[15:]))
+    What remains:
+    - The owner did not review the charter.
+    - Items that need judgement: C-04.
+    - Lines of the charter that no requirement serves: K-2.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
+    Accepted: A. Person, 2026-01-15.
+
+    A failure of a rule of the charter names the file of its row.
+
+    >>> data = sample.load(("charter.md", "| 2 | P-2 |", "| 1 | P-2 |"), rule)
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[:3]))
+    FAIL charter-priority-twice charter.md:21 P-2: The priority '1' is used two times. Give each principle a
+    different priority.
+    FAIL charter-line-unserved charter.md:28 K-2: No requirement serves the line 'K-2' of the charter.
+    Failing checks: 2.
 
     A stakeholder that is in no view remains. An intent of the owner that was not asked remains.
 
@@ -2080,7 +2615,7 @@ def report(data, found, remains, previous_given):
     FAIL stakeholder-without-requirement spec.md:30 auditors: The stakeholder 'auditors' has no requirement
     in the table Requirements.
     Failing checks: 1.
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[9:13]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[16:20]))
     What remains:
     - The intent of the owner was not asked.
     - Items that need judgement: C-04.
@@ -2091,22 +2626,23 @@ def report(data, found, remains, previous_given):
 
     >>> named = sample.BOUNDARIES + "\n" + sample.BOUNDARY_DECIDED
     >>> row = sample.REQUIREMENT_R02
-    >>> away = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
-    >>> second = ("vetting.md", "| S-02 section 4 | C-02 |", "| S-02 section 4 | C-01 |")
+    >>> away = ("vetting.md", "| none | C-01 |", "| none | boundary: recovery |")
+    >>> second = ("vetting.md", "| S-02 section 4 | T-2, P-1 | C-02 |", "| S-02 section 4 | none | C-01 |")
     >>> third = ("vetting.md", row, row.replace("| C-03 |", "| boundary: recovery |"))
-    >>> fourth = ("vetting.md", "| S-01 section 3 | C-05 |", "| S-01 section 3 | C-03 |")
+    >>> fourth = ("vetting.md", sample.SERVES_R05, "| S-01 section 3 | none | C-03 |")
     >>> fifth = ("vetting.md", "| duplicate: R-05 |", "| C-05 |")
-    >>> sixth = ("vetting.md", '| S-03 "After the drill" | C-04 |', '| S-03 "After the drill" | C-02 |')
+    >>> sixth = ("vetting.md", sample.SERVES_R04, '| S-03 "After the drill" | none | C-02 |')
     >>> own = ("spec.md", "| not admitted | practice |", "| not admitted | own rule, constitution IX |")
     >>> whole = ("spec.md", "| public | full | storage, operation |", "| public | full | all |")
     >>> edits = (("spec.md", sample.BOUNDARIES, named), away, second, third, fourth, fifth, sixth, own, whole)
-    >>> data = sample.load(*edits)
+    >>> data = sample.load(*edits, charter=False)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
     >>> print("\n".join([lines[0], lines[6], *lines[8:]]))
     No check fails.
     - storage: requirements: 2, to an item: 0, to a decision: 0, to an implementation skill: 0,
       to a boundary: 2, duplicates: 0, a proposed boundary would take: 0.
     What remains:
+    - The specification has no charter.
     - Items that need judgement: C-04.
     - More than half of the requirements of the view 'storage' go to a boundary.
     - Views with fewer than two sources of their own field that were read: storage.
@@ -2121,7 +2657,7 @@ def report(data, found, remains, previous_given):
     >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-01, R-02 | owners of the data |"))
     >>> data = sample.load(named, sample.PROPOSED_TABLE, more)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join([lines[0], *lines[5:7], *lines[8:]]))
+    >>> print("\n".join([lines[0], *lines[5:7], *lines[15:]]))
     No check fails.
     - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
       to a boundary: 0, duplicates: 1, a proposed boundary would take: 1.
@@ -2132,22 +2668,25 @@ def report(data, found, remains, previous_given):
     - Boundaries that wait for the decision of the owner: tests (1 requirements), archive (2 requirements).
     - The boundary 'archive' would leave the stakeholder 'owners of the data' with no requirement in the
       aspect.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     Accepted: A. Person, 2026-01-15.
 
     An open finding of a trial remains. A recipe without a trial remains also.
 
     >>> data = sample.load(("trial.md", "| recipe | corrected in abc1235 |", "| recipe | open |"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[15:]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings that are open: F-01.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     Accepted: A. Person, 2026-01-15.
     >>> folder = sample.folder()
     >>> (folder / "trial.md").unlink()
     >>> data = aspect.load(folder)
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[15:]))
     What remains:
     - Items that need judgement: C-04.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     - The recipe has no trial.
     Accepted: A. Person, 2026-01-15.
 
@@ -2155,7 +2694,7 @@ def report(data, found, remains, previous_given):
 
     >>> data = sample.load()
     >>> found, remains = run_checks(data, viewpoints_file="absent.txt")
-    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[8:11]))
+    >>> print("\n".join(report(data, found, remains, previous_given=True).splitlines()[15:18]))
     What remains:
     - Items that need judgement: C-04.
     - Trial findings with a viewpoint that was not checked: F-01, F-02. The list is absent.
@@ -2166,7 +2705,7 @@ def report(data, found, remains, previous_given):
     >>> left = ("vetting.md", sample.READING_S01, "| S-01 | S-01 | 6 | 1-2, 6 | 3-5 |")
     >>> data = sample.load(left)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join([*lines[:2], *lines[9:12]]))
+    >>> print("\n".join([*lines[:2], *lines[16:19]]))
     FAIL full-with-unread-pages spec.md:35 S-01: The source says 'full'. The table Reading names pages that
     no reader got: 3-5.
     Failing checks: 1.
@@ -2174,9 +2713,10 @@ def report(data, found, remains, previous_given):
     - Items that need judgement: C-04.
     - Sources with pages that no reader got: S-01 (3 pages).
     >>> data = sample.load(("vetting.md", "## Reading", "## Other"))
-    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[8:11]))
+    >>> print("\n".join(report(data, *run_checks(data), previous_given=True).splitlines()[15:19]))
     What remains:
     - Items that need judgement: C-04.
+    - Requirements that serve no line of the charter, for each view: operation: 4, storage: 2.
     - The table Reading is absent. Run index.py unread with --write.
 
     A view that waits for the levels is in the list of what remains.
@@ -2184,7 +2724,7 @@ def report(data, found, remains, previous_given):
     >>> c01 = ("spec.md", "| storage | 1 | authority (2) |", "| storage | pending | authority (2) |")
     >>> data = sample.load(c01)
     >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
-    >>> print("\n".join(lines[2:4] + lines[7:11]))
+    >>> print("\n".join(lines[2:4] + lines[14:18]))
     - operation: level 1: 1, level 2: 1, level 3: 0, pending: 0, not admitted: 1, sources: 4, stakeholders: 1,
       sources read for the view: 4.
     - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1,
@@ -2208,8 +2748,8 @@ def report(data, found, remains, previous_given):
     if counts:
         lines.append(MESSAGES["requirements-head"])
         lines += ["- " + MESSAGES["requirement-line"].format(*(c[k] for k in keys)) for c in counts]
-    lines += answer_lines(data)
-    rest = [] if intent_asked(data) else [MESSAGES["remains-intent"]]
+    lines += charter_lines(data) + answer_lines(data)
+    rest = ([] if intent_asked(data) else [MESSAGES["remains-intent"]]) + charter_remains(data)
     for key, ids in remains.items():
         if key in ONE_LINE_EACH:
             # One line for each entry. An entry is one name, or a list with one name for each place.
@@ -2229,6 +2769,22 @@ def report(data, found, remains, previous_given):
     if not previous_given:
         lines.append(MESSAGES["previous-skipped"])
     return "\n".join(lines)
+
+
+def charter_lines(data):
+    """The part "Charter" of the report: one line for each line of the charter. No charter gives no line.
+
+    >>> import sample
+    >>> print(chr(10).join(charter_lines(sample.load())[:3]))
+    Charter, with the number of requirements that serve each line and of items that it placed:
+    - T-1: requirements: 1, items placed: 1.
+    - T-2: requirements: 1, items placed: 1.
+    >>> charter_lines({"requirements": []})
+    []
+    """
+    counts = charter_counts(data)
+    lines = ["- " + MESSAGES["charter-line"].format(*line.values()) for line in counts]
+    return [MESSAGES["charter-head"], *lines] if lines else []
 
 
 def answer_lines(data):
@@ -2269,6 +2825,25 @@ def scope_report(data):
     Failing checks: 1.
     Only the field and the thing to build were checked. The findings wait for the research.
 
+    A charter that exists must have the right form. The lines that no requirement serves are not
+    examined: the register is empty in phase 1. A charter that the owner did not review remains.
+    A specification without a charter remains also.
+
+    >>> state = ("charter.md", sample.CHARTER_STATE, "**State**: accepted")
+    >>> print(scope_report(sample.load(state)))
+    FAIL charter-state-unknown charter.md:3: The state 'accepted' of the charter is not permitted. Use 'draft'
+    or 'reviewed by the owner on <YYYY-MM-DD>'.
+    Failing checks: 1.
+    Only the field and the thing to build were checked. The findings wait for the research.
+    >>> rule = ("charter.md", "| none: rule of the factory |", "| none |")
+    >>> print(scope_report(sample.load(sample.CHARTER_DRAFT, rule)))
+    No check fails.
+    Only the field and the thing to build were checked. The findings wait for the research.
+    What remains:
+    - The owner did not review the charter.
+    >>> print(scope_report(sample.load(charter=False)).splitlines()[-1])
+    - The specification has no charter.
+
     An intent of the owner that has "(no answer)" in each line passes, and remains.
 
     >>> none = [("spec.md", line, line.split(":")[0] + ": (no answer)") for line in sample.INTENT[:2]]
@@ -2278,15 +2853,31 @@ def scope_report(data):
     What remains:
     - The intent of the owner was not asked.
     """
-    found = sorted(check_scope(data), key=lambda f: (f["line"], f["rule"], f["id"]))
+    found = scope_findings(data)
     lines = [
         f"FAIL {f['rule']} {f['file']}:{f['line']} {f['id']}: {f['text']}".replace(" : ", ": ") for f in found
     ]
     lines.append(MESSAGES["failures"].format(len(found)) if found else MESSAGES["no-failure"])
     lines.append(MESSAGES["scope-only"])
-    if not intent_asked(data):
-        lines += [MESSAGES["remains-head"], "- " + MESSAGES["remains-intent"]]
+    rest = ([] if intent_asked(data) else [MESSAGES["remains-intent"]]) + charter_remains(data)
+    if rest:
+        lines += [MESSAGES["remains-head"], *("- " + r for r in rest)]
     return "\n".join(lines)
+
+
+def scope_findings(data):
+    """The findings of phase 1, sorted: the scope, and the form of a charter that exists.
+
+    >>> import sample
+    >>> scope_findings(sample.load())
+    []
+    >>> date = ("spec.md", "2026-01-05; a recipe for", "in January; a recipe for")
+    >>> state = ("charter.md", sample.CHARTER_STATE, "**State**: accepted")
+    >>> brief(scope_findings(sample.load(date, state)))
+    [('charter-state-unknown', ''), ('agreed-without-date', '')]
+    """
+    found = check_scope(data) + check_charter(data)
+    return sorted(found, key=lambda f: (f["file"], f["line"], f["rule"], f["id"], f["text"]))
 
 
 def option(args, flag):
@@ -2328,8 +2919,13 @@ def main(argv=None):
 
     >>> result = json.loads(sample.run(main, bad, "--json")[1])
     >>> sorted(result), brief(result["findings"]), result["accepted"]
-    (['accepted', 'answers', 'findings', 'intent_asked', 'previous', 'reading', 'remains', 'requirements',
-      'trials', 'views'], [('unknown-source', 'C-02')], True)
+    (['accepted', 'answers', 'charter', 'findings', 'intent_asked', 'previous', 'reading', 'remains',
+      'requirements', 'trials', 'views'], [('unknown-source', 'C-02')], True)
+    >>> result["charter"]["present"], result["charter"]["state"], result["charter"]["lines"][:2]
+    (True, 'reviewed', [{'items placed': 1, 'line': 'T-1', 'requirements': 1},
+                        {'items placed': 1, 'line': 'T-2', 'requirements': 1}])
+    >>> result["remains"]["charter-unserved"], result["remains"]["serves-none"]
+    ([], ['operation: 4', 'storage: 2'])
     >>> result["reading"]["table"], result["reading"]["sources"][1], result["remains"]["unread"]
     (True, {'document': 'S-02', 'not read': 0, 'pages': 2, 'source': 'S-02'}, [])
     >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
@@ -2364,6 +2960,16 @@ def main(argv=None):
     >>> no_field = sample.folder(("spec.md", " | **Accepted**: A. Person, 2026-01-15", ""))
     >>> sample.run(main, no_field, "--scope")[0]
     1
+
+    --scope examines the form of a charter that exists. A specification without a charter passes.
+
+    >>> effect = sample.folder(("charter.md", "| no exit: 3.3 |", "| the first claim on level 1 |"))
+    >>> code, out, _ = sample.run(main, effect, "--scope")
+    >>> code, out.splitlines()[0][:45]
+    (1, 'FAIL charter-effect-unknown charter.md:20 P-1')
+    >>> none = sample.folder(charter=False)
+    >>> sample.run(main, none, "--scope")[0], sample.run(main, none)[0]
+    (0, 0)
 
     In phase 1 the fields of the research are as the template has them. --scope does not examine
     them. The template holds a placeholder in each such line, and no name of a real concern: the
@@ -2435,12 +3041,17 @@ def main(argv=None):
         sys.exit(2)
     if "--scope" in args:
         print(scope_report(data))
-        sys.exit(1 if check_scope(data) else 0)
+        sys.exit(1 if scope_findings(data) else 0)
     found, remains = run_checks(data, previous_rows, words)
     if as_json:
         result = {
             "accepted": is_accepted(data),
             "answers": answer_counts(data),
+            "charter": {
+                "present": data["charter"] is not None,
+                "state": (data["charter"] or {}).get("state"),
+                "lines": charter_counts(data),
+            },
             "findings": found,
             "intent_asked": intent_asked(data),
             "previous": previous is not None,

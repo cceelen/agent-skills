@@ -30,6 +30,11 @@ reports are not comparable with new reports.
   or `(decided by the owner on <date>)`. The check fails for a requirement that goes to a
   boundary that the owner did not decide. The table `Proposed boundaries` of `vetting.md`
   shows the requirements that each proposed boundary would take.
+- An aspect specification can have a charter of the owner in `charter.md`: the target, the
+  principles with their priority and the constraints. The charter governs the triage. Each
+  requirement names the lines that it serves in the cell `Serves`. `place.py` applies the
+  charter before the calculation and writes the cell `Placed by` of each item. The check fails
+  for a requirement or an item that does not obey the charter.
 - The template of an aspect specification holds no example of a real concern.
 - `export.py` writes a neutral kit for a trial of the tooling.
 - `seed.py` retrieves the seed documents and standards of the factory into a work folder. The

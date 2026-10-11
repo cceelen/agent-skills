@@ -20,6 +20,44 @@ The block of the recipe skill gets one optional field:
 
 Without it the target is `skills/<name>/`.
 
+## charter.md
+
+Optional, beside `spec.md`. The template is `.specify/templates/overrides/charter-template.md`.
+
+```markdown
+# Charter: <aspect>
+
+**State**: draft
+
+## Target
+
+| Id | Part of the target | Level of the scale | Level of the recipe |
+|---|---|---|---|
+| T-1 | <part of the target> | <level of the scale> | 1 |
+
+## Principles
+
+| Priority | Id | Principle | Comes from | Effect |
+|---|---|---|---|---|
+| 1 | P-1 | <principle> | "<words of the owner>" (<date>) | no exit: 3.3 |
+
+## Constraints
+
+| Id | Constraint | Comes from | Effect |
+|---|---|---|---|
+| K-1 | <constraint> | "<words of the owner>" (<date>) | level 1; no exit: not admitted |
+```
+
+- The state is `draft` or `reviewed by the owner on <YYYY-MM-DD>`. A sentence can follow it.
+- The cell "Effect" holds one or more of `level <n>`, `no exit: 3.3`, `no exit: boundary` and
+  `no exit: not admitted`, with a semicolon between two forms; or `none`; or
+  `none: rule of the factory`.
+- A table is found by the start of its heading, and a column by its name. A table can have
+  more columns.
+
+The checklist of section 4 of `spec.md` has the column "Placed by" as its last column. The
+cell holds the id of a line of the charter, or `calculation`. `place.py` writes it.
+
 ## vetting.md
 
 ```markdown
@@ -41,9 +79,9 @@ Rubric for sources: version <n>. Rubric for items: version <n>.
 
 ## Requirements
 
-| Id | Requirement | Stakeholder | View | Source | Goes to |
-|---|---|---|---|---|---|
-| R-01 | <one sentence> | <stakeholder> | <view> | S-14 finding 1 | C-07 |
+| Id | Requirement | Stakeholder | View | Source | Serves | Goes to |
+|---|---|---|---|---|---|---|
+| R-01 | <one sentence> | <stakeholder> | <view> | S-14 finding 1 | P-1, K-1 | C-07 |
 
 ## Proposed boundaries
 

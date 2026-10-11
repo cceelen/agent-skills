@@ -87,6 +87,34 @@ check.py SPEC --scope
   would leave the stakeholder '<name>' with no requirement in the aspect.` With `--json`: the
   key `a proposed boundary would take` in each row of `requirements`, and the keys
   `proposed-boundaries` and `left-stakeholders` in `remains`.
+- The charter `SPEC/charter.md` is examined when the file is there. In each mode, the form:
+  rule `charter-state-unknown`: `The state '<text>' of the charter is not permitted. Use
+  'draft' or 'reviewed by the owner on <YYYY-MM-DD>'.` Rule `charter-without-line`: no row in
+  the three tables. Rule `charter-id-unknown`: an identifier that is not `T-<n>`, `P-<n>` or
+  `K-<n>` for its table. Rule `charter-id-twice`. Rule `charter-priority-missing`: the
+  priority of a principle is not a whole number. Rule `charter-priority-twice`. Rule
+  `charter-effect-unknown`: `The effect '<text>' is not permitted. Use 'level <n>', 'no exit:
+  3.3', 'no exit: boundary', 'no exit: not admitted', 'none' or 'none: rule of the factory'.`
+  Rule `charter-level-unknown`: a level that is not 1, 2 or 3. Outside `--scope`: rule
+  `requirement-cell-empty` for an empty cell "Serves". Rule `requirement-serves-unknown`:
+  `The requirement serves '<id>'. The charter does not have this line. Write identifiers of
+  the charter with a comma between them, or 'none'.` Rule `requirement-exit-closed`: `The
+  requirement serves '<id>'. This line of the charter does not permit the exit '<exit>'. Give
+  the requirement a different exit.` Rule `item-not-admitted-against-charter`: `The item is
+  not admitted. It holds '<R>', which serves '<id>'. This line of the charter does not permit
+  that. Run place.py with --write.` Rule `item-above-charter-level`: `The level of the item is
+  '<level>'. The line '<id>' of the charter gives it level <n> or a lower level. Run place.py
+  with --write.` Rule `placed-by-differs`: `The cell 'Placed by' is '<text>'. The program
+  place.py computes '<text>'. Run place.py with --write.` Rule `charter-line-unserved`, only
+  after the review of the owner: `No requirement serves the line '<id>' of the charter.`
+- After the part "Requirements", the part "Charter": `Charter, with the number of
+  requirements that serve each line and of items that it placed:` and one line for each line
+  of the charter: `<id>: requirements: <n>, items placed: <n>.` With `--json`: the key
+  `charter` with `present`, `state` and `lines`. Under "remains": `The specification has no
+  charter.`, `The owner did not review the charter.`, `Lines of the charter that no
+  requirement serves: <ids>.` and `Requirements that serve no line of the charter, for each
+  view: <view>: <n>.` With `--json`: the keys `charter-unserved` and `serves-none` in
+  `remains`. `--scope` gives the first two of these lines.
 - A source of section 2 fails the check when its cell `Views` names a view that section 1
   does not have, or when the table has the cell and it is empty. Each line of the part
   "Views" ends with `sources read for the view: <n>`: the sources with the view in the cell
@@ -130,8 +158,9 @@ export.py DIR [--words FILE]
   repository, and must be new or empty.
 - The kit holds `factory/sota-research/` without `scripts/sample.py`, without
   `prompts/plan-review.md`, without `references/viewpoints.txt` and without the files that
-  Python makes when it runs; the template
-  `.specify/templates/overrides/aspect-spec-template.md`; the folder `rules/`;
+  Python makes when it runs; the templates
+  `.specify/templates/overrides/aspect-spec-template.md` and
+  `.specify/templates/overrides/charter-template.md`; the folder `rules/`;
   `skills/library-vetting/scripts/collect.py` and `models.py`; and an `AGENTS.md` and a
   `CLAUDE.md` that the program makes.
 - `--words FILE`: one word or phrase in each line. If an exported file holds one, the program
@@ -275,8 +304,18 @@ place.py SPEC [--write]
 
 - Reads the answers in the table "Items" of `SPEC/vetting.md` and `scripts/rubric-items.txt`.
 - Prints for each item: return, cost, score, admitted or not, level, and the position.
-- `--write`: fills the computed cells of the table "Items" and the Level cells of the
-  checklist in `SPEC/spec.md`. Without it, the program changes no file.
+- `--write`: fills the computed cells of the table "Items", and the cells Level and "Placed
+  by" of the checklist in `SPEC/spec.md`. Without it, the program changes no file.
+- With `SPEC/charter.md`, the charter applies before the calculation. The program uses the
+  function `charter_rules` of `check.py`. An item that holds a requirement that serves a line
+  with a level is admitted, and its level is the lower one of the lowest such level and the
+  level of the calculation. An item that holds a requirement that serves a line with
+  `no exit: not admitted` is admitted, and the calculation gives its level. The line of such
+  an item ends with `placed by <id>` or with `admitted by the charter`.
+- The cell "Placed by" gets the id of the line of the charter that placed the item, or
+  `calculation`. Without a charter, the program fills the cell only when the table has the
+  column. With a charter, a table without the column gives the message for a cell that
+  cannot be written, and the result code `1`.
 - An item with a missing answer stays `pending`, and the report names the answer. Result
   code `1` when an item is pending.
 - An item above level 1 without a risk dimension in the cell Dimension of the table "Items"

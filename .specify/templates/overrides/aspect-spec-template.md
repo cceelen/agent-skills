@@ -123,10 +123,13 @@ place.
 - **Check**: the cheap, deterministic check that shows the item is met, or `judgement`.
 - **Source**: the unit of a source by its identifier where it has one. No text of a source is
   copied here; the evidence record says what the source contributes.
+- **Placed by**: the identifier of the line of the charter that placed the item, or
+  `calculation`. The program `place.py` writes this cell. Do not write it by hand. A line of
+  the charter places an item when the item is on the level that the line gives.
 
-| Id | Item | Why | View | Level | Admitted by | Check | Source |
-|---|---|---|---|---|---|---|---|
-| C-01 | | | | | | | [S-01 unit] |
+| Id | Item | Why | View | Level | Admitted by | Check | Source | Placed by |
+|---|---|---|---|---|---|---|---|---|
+| C-01 | | | | | | | [S-01 unit] | |
 
 **Selection.** The kit recommends; the user decides. The recipe skill leads the owner of the
 project through a risk analysis of the project, along the risk dimensions of section 1. It
@@ -189,6 +192,10 @@ Terms that mean different things in the sources. One preferred form per meaning.
 
 ## Files beside this specification
 
+- `charter.md`: the charter of the aspect. It holds the target, the principles with their
+  priority and the constraints of the owner. It governs the triage of each requirement. Only
+  the owner changes it. Its template is `.specify/templates/overrides/charter-template.md`.
+  This file is optional.
 - `evidence.md`: for each source a summary of what it contributes, where in the source that
   is, the rows of this specification that it supports, and the date read. The summary is in
   Simplified Technical English and in the words of this kit. A second reader compares each
@@ -196,7 +203,10 @@ Terms that mean different things in the sources. One preferred form per meaning.
 - `vetting.md`: for each independent source the measured signals, the result of the rubric and
   the owner's confirmation; for each item the answers of the risk and reward calculation.
   - The table "Requirements" has one row for each requirement that a source states for a
-    stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
+    stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source, Serves and Goes
+    to.
+  - The cell "Serves" holds the identifiers of the lines of the charter that the requirement
+    serves, with a comma between two identifiers, or `none`.
   - The cell "Goes to" has one of these forms: `C-<nn>`, `3.3: <decision>`, `5`,
     `boundary: <name>` or `duplicate: R-<nn>`. A requirement has no other exit.
   - A requirement goes only to a boundary that the owner decided.
