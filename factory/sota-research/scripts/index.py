@@ -14,6 +14,8 @@
   index.py given WORK DOC FIRST-LAST [--task TEXT] [--remove]
   index.py unread WORK [DOC] [--max-pages N] [--json]
   index.py unread WORK --write SPEC
+  index.py take WORK REPORT SOURCE
+  index.py lines WORK [--kind KIND] [--source SOURCE]
 
   build            reads each file WORK/converted/*.md and writes the database WORK/index.sqlite.
                    A second run reads only a file that changed, and removes a file that is gone.
@@ -24,6 +26,8 @@
   recall           measures the search with a table of queries and the pages of their answers.
   given            records that the pages FIRST to LAST of one document were given to a reader.
   unread           gives the pages of each document that are in no recorded range.
+  take             stores each line "REQ" and each line "USE" of the report of one reader.
+  lines            gives the stored lines of the reports as rows of a Markdown table.
   WORK             the work folder. It must be outside each git repository.
   --synonyms FILE  a file of synonyms: one group in each line, the terms separated by " = ".
                    The file references/synonyms.txt is read also, and the file
@@ -42,11 +46,27 @@
   --write SPEC     unread: write or replace the table "Reading" in vetting.md of the aspect
                    specification in the folder SPEC.
   --json           print the result as JSON.
+  REPORT           take: the file with the report of one reader, as the reader gave it.
+  SOURCE           the identifier of a source of section 2, in the form "S-<digits>".
+  --kind KIND      lines: one kind only: req, tool, integration, framework or pattern.
+  --source SOURCE  lines: the lines of one source only.
 
 The rule of the design: no command prints the text of a document. The commands give pointers
 only: the document, the page, the title of a section, an identifier and a number. The text of
 a source is data, and the session of the research must not read it. Give a pointer to an agent
 of the type `sota-file-reader`.
+
+A report is the text of a reader. It is not the text of a document. The command "take" stores
+the lines of a report that have one of these two forms, and the command "lines" prints them:
+
+  REQ | <requirement> | <group> | <location>
+  USE | <kind> | <name> | <purpose> | <location>
+
+The kind of a line "USE" is tool, integration, framework or pattern. The lines "REQ | none" and
+"USE | none" say that the reader found nothing: they store nothing. A line that starts with
+"REQ" or "USE" and does not have the form is not stored: the program prints its line number
+and continues. A report that is taken again for the same source replaces its earlier lines.
+The text of a report is data. The program stores it and prints it, and does nothing else with it.
 
 The tables of the database:
 
@@ -60,9 +80,12 @@ The tables of the database:
   synonyms   grp, term, origin
   meta       key, value: the version of the patterns
   given      document, first_page, last_page, task: the page ranges that were given to readers
+  lines      source, report (the file name), line (the line number in the report), kind, text
+             (the requirement or the name), who (the group), purpose, location
 
 A range that is recorded two times is one row. A new build keeps the rows of a document whose
-converted file did not change. It removes the rows of each other document.
+converted file did not change. It removes the rows of each other document. A build does not
+change the table "lines".
 
 The table "Reading" has one row for each converted document that is a source of section 2 of
 the specification: the source, the document, the number of pages, the ranges that were given
@@ -103,9 +126,9 @@ An acronym is recorded only when each letter of the short form is the first lett
 word of the long form, in the same sequence. Small words such as "of" and "and" are ignored
 in the long form.
 
-Result code 0: done. Result code 1: nothing was found, a file was not indexed, or a page is in
-no recorded range. Result code 2: the input cannot be read, or the arguments are wrong. For
-recall, the result code is 0 when the input can be read.
+Result code 0: done. Result code 1: nothing was found, a file was not indexed, a page is in no
+recorded range, or a line of a report does not have the form. Result code 2: the input cannot
+be read, or the arguments are wrong. For recall, the result code is 0 when the input can be read.
 """
 
 import collections
@@ -152,6 +175,9 @@ CREATE TABLE IF NOT EXISTS synonyms (
 CREATE TABLE IF NOT EXISTS given (
   document TEXT, first_page INTEGER, last_page INTEGER, task TEXT,
   PRIMARY KEY (document, first_page, last_page)) WITHOUT ROWID;
+CREATE TABLE IF NOT EXISTS lines (
+  source TEXT, report TEXT, line INTEGER, kind TEXT, text TEXT, who TEXT, purpose TEXT,
+  location TEXT, PRIMARY KEY (source, report, line)) WITHOUT ROWID;
 """
 TABLES = ("documents", "pages", "sections", "refs", "acronyms", "aliases", "synonyms")
 # The table of the vetting record that names the pages that the readers got.
@@ -160,6 +186,15 @@ READING_CELLS = ("Source", "Document", "Pages", "Given to readers", "Not read")
 READING_NOTE = "The program `index.py unread --write` writes this table. Do not change it by hand."
 NONE = "none"
 RANGE = re.compile(r"(\d+)(?:-(\d+))?")
+# The lines of the reports of the readers. See prompts/reader.md and prompts/sample-reader.md.
+REQ, USE = "REQ", "USE"
+USE_KINDS = ("tool", "integration", "framework", "pattern")
+LINE_KINDS = ("req", *USE_KINDS)
+# A line of a report that can be a line "REQ" or "USE", also after the mark of a list or a quote.
+REPORT_LINE = re.compile(r"[\s>*+`-]*(REQ|USE)\b")
+SOURCE_ID = re.compile(r"S-\d+")
+REQ_CELLS = ("Source", "Requirement", "Group", "Location")
+USE_CELLS = ("Source", "Kind", "Name", "Purpose", "Location")
 
 HEAD = re.compile(r"^- (Source|sha256|Pages): (.*)$", re.M)
 PAGE = re.compile(r"^## Page \d+$", re.M)
@@ -265,6 +300,11 @@ MESSAGES = {
     "reading": "{0} | number of pages: {1} | given to readers: {2} | not read: {3}",
     "written": "The table Reading of {0} is written. Rows: {1}. Sources with pages that no reader got: {2}.",
     "pages-left": "{0} ({1} pages)",
+    "wrong-source": "the source '{0}' does not have the form S-<digits>",
+    "wrong-kind": "the kind '{0}' is not one of these words: {1}",
+    "no-form": "{0} | line {1} | not stored: the line does not have the form of a {2} line",
+    "taken": "Stored: {0} | {1} | {2}",
+    "no-lines": "The index has no such line of a report.",
 }
 
 
@@ -967,7 +1007,10 @@ def connect(work):
 def dump(work):
     """The content of each table, sorted. Two builds from the same files give the same content."""
     with contextlib.closing(connect(work)) as db:
-        return {table: sorted(db.execute(f"SELECT * FROM {table}"), key=repr) for table in (*TABLES, "given")}
+        return {
+            table: sorted(db.execute(f"SELECT * FROM {table}"), key=repr)
+            for table in (*TABLES, "given", "lines")
+        }
 
 
 def build(work, synonyms=(), spec=None, seeds=()):
@@ -1798,9 +1841,7 @@ def write_reading(spec, rows):
         aspect.write_text(path, f"# Vetting record: {aspect.load(spec)['title']}\n")
     text = aspect.read_text(path)
     lines = [line.removesuffix("\r") for line in text.split("\n")]
-    block = [f"## {READING}", "", READING_NOTE, "", "| " + " | ".join(READING_CELLS) + " |"]
-    block.append("|" + "---|" * len(READING_CELLS))
-    block += ["| " + " | ".join(str(cell).replace("|", "\\|") for cell in row) + " |" for row in rows]
+    block = [f"## {READING}", "", READING_NOTE, "", *table_lines(READING_CELLS, rows)]
     found = aspect.Doc(path).titled(READING)
     if found:
         first, last = found[1]
@@ -1814,6 +1855,169 @@ def write_reading(spec, rows):
     for row in rows:
         left[row[0]] += len(aspect.pages_of(row[4]))
     return [MESSAGES["pages-left"].format(ident, count) for ident, count in sorted(left.items()) if count]
+
+
+def table_lines(cells, rows):
+    """The lines of a Markdown table: the head, the line below it and one line for each row.
+
+    >>> print(*table_lines(("A", "B"), [("one", 2), ("a|b", "")]), sep=" ; ")
+    | A | B | ; |---|---| ; | one | 2 | ; | a\\|b |  |
+    """
+    lines = ["| " + " | ".join(cells) + " |", "|" + "---|" * len(cells)]
+    return lines + ["| " + " | ".join(str(cell).replace("|", "\\|") for cell in row) + " |" for row in rows]
+
+
+def source_id(text):
+    """The identifier of a source, if it has the form "S-<digits>".
+
+    >>> source_id("S-01"), source_id("S-118")
+    ('S-01', 'S-118')
+    >>> for text in ("s-01", "S-1a", "S-01; DROP TABLE lines", ""):
+    ...     try:
+    ...         source_id(text)
+    ...     except ValueError as e:
+    ...         print(e)
+    the source 's-01' does not have the form S-<digits>
+    the source 'S-1a' does not have the form S-<digits>
+    the source 'S-01; DROP TABLE lines' does not have the form S-<digits>
+    the source '' does not have the form S-<digits>
+    """
+    if not SOURCE_ID.fullmatch(text):
+        raise ValueError(MESSAGES["wrong-source"].format(text))
+    return text
+
+
+def report_lines(text):
+    r"""The lines "REQ" and "USE" of the report of a reader: (the rows, the lines without the form).
+
+    A row is (line number, kind, text, who, purpose, location). For a line "REQ", the text is
+    the requirement and who is the group. For a line "USE", the text is the name. A line
+    without the form is (line number, "REQ" or "USE"). The lines "REQ | none" and "USE | none"
+    give nothing. Each other line of the report gives nothing.
+
+    >>> text = "4. **Requirements**\nREQ | A project must keep two copies. | operators | page 3\n"
+    >>> text += "  USE | tool | Restic | Makes the copies each night. | line 12  \nREQ | none\nUSE | none\n"
+    >>> text += "USE | pattern | Copy before change | Each change starts with a copy. | job backup\n"
+    >>> rows, wrong = report_lines(text)
+    >>> for row in rows:
+    ...     print(row)
+    (2, 'req', 'A project must keep two copies.', 'operators', '', 'page 3')
+    (3, 'tool', 'Restic', '', 'Makes the copies each night.', 'line 12')
+    (6, 'pattern', 'Copy before change', '', 'Each change starts with a copy.', 'job backup')
+    >>> wrong
+    []
+
+    A line does not have the form when a cell is absent or empty, when it has one cell more,
+    when the kind is a different word, or when the line has other text.
+
+    >>> text = "REQ | no location | operators\nUSE | product | A | b | c\n- REQ | a | b | c\n"
+    >>> text += "USE |  | a | b | c\nREQ\nUSE | none | more\n`REQ | a | b | c`\nREQ: none\n"
+    >>> text += "REQ | a | b | c | d\nREQ | a |  | c\n"
+    >>> report_lines(text + "REQUIRED: nothing\nUSEFUL | tool | a | b | c\nThe REQ lines follow.\n")
+    ([], [(1, 'REQ'), (2, 'USE'), (3, 'REQ'), (4, 'USE'), (5, 'REQ'), (6, 'USE'), (7, 'REQ'), (8, 'REQ'),
+          (9, 'REQ'), (10, 'REQ')])
+    """
+    rows, wrong = [], []
+    for number, line in enumerate(text.splitlines(), 1):
+        found = REPORT_LINE.match(line)
+        if not found:
+            continue
+        head, *cells = (cell.strip() for cell in line.split("|"))
+        if head == found.group(1) and cells == [NONE]:
+            continue
+        if head == REQ and len(cells) == 3 and all(cells):
+            rows.append((number, "req", cells[0], cells[1], "", cells[2]))
+        elif head == USE and len(cells) == 4 and cells[0] in USE_KINDS and all(cells):
+            rows.append((number, cells[0], cells[1], "", cells[2], cells[3]))
+        else:
+            wrong.append((number, found.group(1)))
+    return rows, wrong
+
+
+def take(db, source, report, text):
+    r"""Store the lines "REQ" and "USE" of one report of one source. See report_lines().
+
+    report: the name of the report file. The lines of the same report of the same source that
+    the table has are removed first. Thus the same report gives the same content, and a
+    corrected report replaces its earlier lines. Returns (the number of stored lines of each
+    kind, the lines without the form).
+
+    >>> import sample
+    >>> work = sample.converted({})
+    >>> db = contextlib.closing(connect(work)).__enter__()
+    >>> text = "REQ | A project must keep two copies. | operators | page 3\nREQ | no location\n"
+    >>> text += "USE | pattern | Copy first | A copy comes first. | line 2\n"
+    >>> take(db, "S-01", "S-01-1.md", text)
+    ({'req': 1, 'tool': 0, 'integration': 0, 'framework': 0, 'pattern': 1}, [(2, 'REQ')])
+    >>> first = db.execute("SELECT * FROM lines").fetchall()
+    >>> first
+    [('S-01', 'S-01-1.md', 1, 'req', 'A project must keep two copies.', 'operators', '', 'page 3'),
+     ('S-01', 'S-01-1.md', 3, 'pattern', 'Copy first', '', 'A copy comes first.', 'line 2')]
+    >>> _ = take(db, "S-01", "S-01-1.md", text)
+    >>> db.execute("SELECT * FROM lines").fetchall() == first
+    True
+
+    A different report and a different source add their lines. The text of a report is data.
+
+    >>> take(db, "S-01", "S-01-1.md", "REQ | none\n")[0]["req"], take(db, "S-02", "S-01-1.md", text)[1]
+    (0, [(2, 'REQ')])
+    >>> db.execute("SELECT source, kind FROM lines").fetchall()
+    [('S-02', 'req'), ('S-02', 'pattern')]
+    >>> _ = take(db, "S-02", "S-01-1.md", text.splitlines()[0])
+    >>> _ = take(db, "S-02", "b.md", "REQ | x'); DROP TABLE lines; -- | not named | page 1\n")
+    >>> db.execute("SELECT source, report, text FROM lines").fetchall()
+    [('S-02', 'S-01-1.md', 'A project must keep two copies.'), ('S-02', 'b.md', "x'); DROP TABLE lines; --")]
+    >>> db.close()
+    """
+    rows, wrong = report_lines(text)
+    db.execute("DELETE FROM lines WHERE source = ? AND report = ?", (source, report))
+    db.executemany(
+        "INSERT INTO lines VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [(source, report, *row) for row in rows]
+    )
+    return {kind: sum(row[1] == kind for row in rows) for kind in LINE_KINDS}, wrong
+
+
+def stored_lines(db, kind=None, source=None):
+    r"""The lines of the reports as the lines of Markdown tables, sorted by the source, the report
+    and the line number.
+
+    The table of the requirements is first. The table of the other kinds follows after an empty
+    line. A table without a row is left out.
+
+    >>> import sample
+    >>> work = sample.converted({})
+    >>> db = contextlib.closing(connect(work)).__enter__()
+    >>> _ = take(db, "S-10", "a.md", "REQ | Ten. | not named | page 1\nUSE | tool | T | It runs. | line 4\n")
+    >>> _ = take(db, "S-2", "b.md", "USE | pattern | P | A way. | line 9\nREQ | Two. | users | page 7\n")
+    >>> _ = take(db, "S-2", "a.md", "REQ | First. | users | page 5\n")
+    >>> print("\n".join(stored_lines(db)))
+    | Source | Requirement | Group | Location |
+    |---|---|---|---|
+    | S-2 | First. | users | page 5 |
+    | S-2 | Two. | users | page 7 |
+    | S-10 | Ten. | not named | page 1 |
+    <BLANKLINE>
+    | Source | Kind | Name | Purpose | Location |
+    |---|---|---|---|---|
+    | S-2 | pattern | P | A way. | line 9 |
+    | S-10 | tool | T | It runs. | line 4 |
+    >>> stored_lines(db, "pattern"), stored_lines(db, "req", "S-10")[2:], stored_lines(db, "framework")
+    (['| Source | Kind | Name | Purpose | Location |', '|---|---|---|---|---|',
+      '| S-2 | pattern | P | A way. | line 9 |'], ['| S-10 | Ten. | not named | page 1 |'], [])
+    >>> db.close()
+    """
+    sql = (
+        "SELECT source, kind, text, who, purpose, location FROM lines"
+        " WHERE (?1 IS NULL OR kind = ?1) AND (?2 IS NULL OR source = ?2)"
+        " ORDER BY CAST(substr(source, 3) AS INTEGER), source, report, line"
+    )
+    rows = db.execute(sql, (kind, source)).fetchall()
+    requirements = [(s, text, who, location) for s, k, text, who, _, location in rows if k == "req"]
+    uses = [(s, k, text, purpose, location) for s, k, text, _, purpose, location in rows if k != "req"]
+    tables = [
+        table_lines(cells, part) for cells, part in ((REQ_CELLS, requirements), (USE_CELLS, uses)) if part
+    ]
+    return [line for n, table in enumerate(tables) for line in ([""] * bool(n) + table)]
 
 
 def command(name, db, values, options):
@@ -1837,6 +2041,19 @@ def command(name, db, values, options):
         share = round(100 * found / len(answers)) if answers else 0
         rows = [MESSAGES["missing"].format(q, d, ", ".join(map(str, pages))) for q, d, pages in missing]
         return 0, [MESSAGES["recall"].format(found, len(answers), share, partial), *rows]
+    if name == "take":
+        source, path = source_id(values[1]), pathlib.Path(values[0])
+        counts, wrong = take(db, source, path.name, aspect.read_text(path))
+        db.commit()
+        lines = [MESSAGES["no-form"].format(path.name, number, word) for number, word in wrong]
+        stored = ", ".join(f"{kind} {count}" for kind, count in counts.items())
+        return int(bool(wrong)), [*lines, MESSAGES["taken"].format(source, path.name, stored)]
+    if name == "lines":
+        kind, source = options["kind"], options["source"]
+        if kind is not None and kind not in LINE_KINDS:
+            raise ValueError(MESSAGES["wrong-kind"].format(kind, ", ".join(LINE_KINDS)))
+        lines = stored_lines(db, kind, None if source is None else source_id(source))
+        return int(not lines), lines or [MESSAGES["no-lines"]]
     if name == "unread" and options["write"] is not None:
         rows = reading_rows(db, aspect.load(options["write"])["sources"])
         left = write_reading(options["write"], rows)
@@ -1889,6 +2106,8 @@ COMMANDS = {
     "recall": (1,),
     "given": (2,),
     "unread": (0, 1),
+    "take": (2,),
+    "lines": (0,),
 }
 FLAGS = {"--no-synonyms", "--json", "--exact", "--remove"}
 
@@ -2037,6 +2256,71 @@ def main(argv=None):
     >>> sample.run(main, "unread", work, "--write", work / "absent")[0]
     2
 
+    The lines "REQ" and "USE" of the reports of the readers. A line without the form is not
+    stored, and gives the result code 1. A report that is taken again replaces its lines.
+
+    >>> report = work / "reports" / "S-01-1.md"
+    >>> report.parent.mkdir()
+    >>> text = "REQ | A project must keep two copies. | operators | page 3\nREQ | none\n"
+    >>> _ = report.write_text(text + "REQ | A copy should be in a second place.\n", encoding="utf-8")
+    >>> run("take", work, report, "S-01")
+    S-01-1.md | line 3 | not stored: the line does not have the form of a REQ line
+    Stored: S-01 | S-01-1.md | req 1, tool 0, integration 0, framework 0, pattern 0
+    1
+    >>> _ = report.write_text(text + "REQ | A copy should be in a second place. | not named | page 4\n")
+    >>> run("take", work, report, "S-01"), run("take", work, report, "S-01")
+    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0
+    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0
+    (0, 0)
+    >>> sample_report = report.with_name("S-18-1.md")
+    >>> text = "USE | tool | Restic | Makes the copies each night. | line 12\nUSE | none\n"
+    >>> _ = sample_report.write_text(text + "USE | pattern | Copy first | A copy comes first. | job backup\n")
+    >>> run("take", work, sample_report, "S-18")
+    Stored: S-18 | S-18-1.md | req 0, tool 1, integration 0, framework 0, pattern 1
+    0
+    >>> run("lines", work)
+    | Source | Requirement | Group | Location |
+    |---|---|---|---|
+    | S-01 | A project must keep two copies. | operators | page 3 |
+    | S-01 | A copy should be in a second place. | not named | page 4 |
+    <BLANKLINE>
+    | Source | Kind | Name | Purpose | Location |
+    |---|---|---|---|---|
+    | S-18 | tool | Restic | Makes the copies each night. | line 12 |
+    | S-18 | pattern | Copy first | A copy comes first. | job backup |
+    0
+    >>> run("lines", work, "--kind", "pattern", "--source", "S-18")
+    | Source | Kind | Name | Purpose | Location |
+    |---|---|---|---|---|
+    | S-18 | pattern | Copy first | A copy comes first. | job backup |
+    0
+    >>> run("lines", work, "--kind", "req", "--source", "S-18"), run("lines", work, "--kind", "other")
+    The index has no such line of a report.
+    The input cannot be read: the kind 'other' is not one of these words: req, tool, integration, framework,
+    pattern
+    (1, 2)
+    >>> run("lines", work, "--source", "18"), run("take", work, report, "one")
+    The input cannot be read: the source '18' does not have the form S-<digits>
+    The input cannot be read: the source 'one' does not have the form S-<digits>
+    (2, 2)
+    >>> run("take", work, work / "reports" / "absent.md", "S-01")
+    The input cannot be read: WORK/reports/absent.md: No such file or directory
+    2
+    >>> [sample.run(main, *args)[0] for args in (("take", work, report), ("lines", work, "S-01"))]
+    [2, 2]
+
+    A build keeps the lines of the reports.
+
+    >>> run("build", work, "--from", sample.folder())
+    Index: documents 2, pages 8, sections 12, references 25, acronym pairs 5, groups of synonyms 5, updated 0,
+    removed 0.
+    0
+    >>> run("lines", work, "--kind", "tool")
+    | Source | Kind | Name | Purpose | Location |
+    |---|---|---|---|---|
+    | S-18 | tool | Restic | Makes the copies each night. | line 12 |
+    0
+
     The measure of the search.
 
     >>> answers = work / "answers.md"
@@ -2094,6 +2378,7 @@ def main(argv=None):
         files.append(value)
     spec, manifest, doc = (check.option(args, flag) for flag in ("--from", "--manifest", "--doc"))
     task, write = check.option(args, "--task"), check.option(args, "--write")
+    kind, source = check.option(args, "--kind"), check.option(args, "--source")
     numbers = [check.option(args, flag) for flag in ("--limit", "--max-pages")]
     flags = {a for a in args if a.startswith("--")}
     names = [a for a in args if not a.startswith("--")]
@@ -2108,7 +2393,7 @@ def main(argv=None):
         return 2
     limit, max_pages = (int(n) if n else None for n in numbers)
     options = {"flags": flags, "doc": doc, "limit": limit, "max_pages": max_pages, "task": task}
-    options["write"] = write
+    options.update(write=write, kind=kind, source=source)
     try:
         if name == "build":
             seeds, _, problems = seed.read_manifest(manifest or seed.MANIFEST)

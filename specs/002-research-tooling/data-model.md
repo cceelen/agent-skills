@@ -126,6 +126,7 @@ committed.
 | `converted/<id>.md` | the text of that file with one heading for each page, and the marker `.reader-may-read` beside it |
 | `seeds.json` | the date of `--today` or `null`, and for each seed: id, kind, file, converted, sha256, pages, state |
 | `index.sqlite` | the index of the converted files: see "Index" |
+| `reports/<source id>-<part>.md` | the report of one reader, as the reader gave it; written by the session, read by `index.py take` |
 | `synonyms.txt` | the synonyms that the research of this work folder found, in the form of `references/synonyms.txt`; written by the session, read by `index.py build` when it is there |
 
 State of a seed: `retrieved`, `recorded` (kind `page`), `owner must give the file`, `changed`
@@ -149,6 +150,7 @@ same content. No table holds a current time.
 | synonyms | one term of one group | grp, term, origin (`acronym`, `file` or `glossary`) |
 | meta | the version of the patterns | key, value |
 | given | one range of pages that was given to a reader | document, first_page, last_page, task; the key is the document with the two pages |
+| lines | one line `REQ` or `USE` of the report of a reader | source (`S-<digits>`), report (the file name), line (the line number in the report), kind (`req`, `tool`, `integration`, `framework` or `pattern`), text (the requirement, or the name), who (the group; empty for a line `USE`), purpose (empty for a line `REQ`), location; the key is the source, the report and the line |
 
 A converted file with a different digest is read again. A different version of the patterns
 makes the index again. The tables aliases and synonyms, the references of the family
@@ -156,6 +158,9 @@ makes the index again. The tables aliases and synonyms, the references of the fa
 The table given is written by `index.py given`. A build keeps the rows of a document whose
 converted file did not change, also when the version of the patterns changed. It removes the
 rows of each other document.
+The table lines is written by `index.py take`. A report that is taken again for the same
+source replaces its rows. The same reports give the same rows. A build does not change the
+table. A database without the table gets it when a command opens the database.
 
 Families of a reference: `section`, `chapter`, `page`, `table`, `figure`, `name` (internal);
 the families of the table `STANDARDS` of the program, `address`, `doi`, `citation`, `document`

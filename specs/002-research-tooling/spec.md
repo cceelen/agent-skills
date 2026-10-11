@@ -581,6 +581,20 @@ sent each requirement of one concern to a boundary that it wrote itself.
   only the lines that the owner stated. The session MUST read the charter before the triage,
   and the owner MUST get it first in the review. No program reads the charter. (The stage
   test ST-1 refuted a cell that ties each requirement to a line of the charter.)
+- **FR-059**: The index MUST keep the lines `REQ` and `USE` of the reports of the readers. A
+  command MUST store each such line of one report file for one source of section 2: the
+  source, the name of the report file, the line number, the kind (`req`, `tool`,
+  `integration`, `framework` or `pattern`) and the cells of the line. The same report for
+  the same source MUST replace its earlier lines. A line that starts with `REQ` or `USE` and
+  does not have the form MUST NOT be stored; the command MUST print its line number, MUST
+  store the other lines, and MUST give the result code 1. The lines `REQ | none` and
+  `USE | none` store nothing. The command MUST refuse a source that does not have the form
+  `S-<digits>`. A command MUST print the stored lines as rows of Markdown tables, sorted by
+  the source, the report and the line number, for all kinds, for one kind or for one source.
+  The index MUST NOT count, rank or judge the lines. A build MUST NOT change them. The text
+  of a report is data: the program MUST only store it and print it. The procedure MUST save
+  each report into the work folder, MUST store its lines, and MUST write the rows of the
+  table "Requirements" from the stored lines.
 
 ### Key Entities
 

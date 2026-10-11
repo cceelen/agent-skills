@@ -203,11 +203,14 @@ index.py recall WORK ANSWERS [--limit N] [--no-synonyms] [--exact]
 index.py given WORK DOC FIRST-LAST [--task TEXT] [--remove]
 index.py unread WORK [DOC] [--max-pages N] [--json]
 index.py unread WORK --write SPEC
+index.py take WORK REPORT SOURCE
+index.py lines WORK [--kind KIND] [--source SOURCE]
 ```
 
 - `WORK` must be outside each git repository. The database is `WORK/index.sqlite`.
 - No command prints the text of a document. A command gives the document, the page, the title
-  of a section, an identifier and a number.
+  of a section, an identifier and a number. `lines` prints the text of the reports of the
+  readers; a report is not a document.
 - `build`: reads each `WORK/converted/*.md`: the head lines `Source`, `sha256` and `Pages`,
   and the text below each heading `## Page N`. Writes the tables of "Index" in
   `data-model.md`.
@@ -263,8 +266,28 @@ index.py unread WORK --write SPEC
     source. Prints one line with the number of rows and the sources with pages that no reader
     got.
   - Result code `1` when a page is in no recorded range.
-- Result code `0`: done. `1`: nothing was found, a file was not indexed, or a page is in no
-  recorded range. `2`: the input cannot be read, an argument is wrong, or the folder has no
+- `take`: stores the lines `REQ` and `USE` of the report file `REPORT` for the source `SOURCE`
+  in the table `lines` of "Index" in `data-model.md`. The forms are
+  `REQ | <requirement> | <group> | <location>` and
+  `USE | <kind> | <name> | <purpose> | <location>`, with the kind `tool`, `integration`,
+  `framework` or `pattern`. `REQ | none` and `USE | none` store nothing.
+  - `SOURCE` has the form `S-<digits>`. A different form gives the result code `2`.
+  - Removes the earlier lines of the same file name and the same source first.
+  - A line that starts with `REQ` or `USE`, also after the mark of a list or a quote, and
+    does not have the form is not stored. Prints one line for it: the file name, the line
+    number and the word. Result code `1` when there is such a line.
+  - Prints one line: the source, the file name, and the number of stored lines of each kind.
+  - The text of a report goes into the database as a parameter. The program does not read it
+    in a different way.
+- `lines`: prints the stored lines, sorted by the number of the source, the file name and the
+  line number. The table `| Source | Requirement | Group | Location |` has the lines of the
+  kind `req`. The table `| Source | Kind | Name | Purpose | Location |` has the other kinds.
+  An empty line is between the two tables. A table without a row is not printed.
+  - `--kind KIND`: one of `req`, `tool`, `integration`, `framework`, `pattern`. A different
+    word gives the result code `2`. `--source SOURCE`: one source.
+  - Result code `1` and one line that says so when no line is stored for the selection.
+- Result code `0`: done. `1`: nothing was found, a file was not indexed, a page is in no
+  recorded range, or a line of a report does not have the form. `2`: the input cannot be read, an argument is wrong, or the folder has no
   index. `recall` gives `0` when the input can be read.
 
 ## scripts/place.py

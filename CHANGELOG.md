@@ -53,6 +53,8 @@ reports are not comparable with new reports.
 - The research finds the pages of a concern with `index.py search`, and the references of a
   view with `index.py refs` and `index.py cited`.
 - `index.py build` reads the file `synonyms.txt` of the work folder, if the file is there.
+- `index.py take` records the lines `REQ` and `USE` of the report of a reader. `index.py lines`
+  gives the recorded lines as tables. The research writes the table `Requirements` from them.
 - An aspect specification can have a charter of the owner in `charter.md`: the target, the
   principles with their priority, and the constraints. The agent reads it before the triage,
   and you get it first in the review.
