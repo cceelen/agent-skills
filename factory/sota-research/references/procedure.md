@@ -271,6 +271,9 @@ with their priority and the constraints of the owner. It is optional.
    - Give each item its view: write one view name of section 1 into the cell "View".
    - For each view, find the practices that are basic and not negotiable in that view. Make
      each one a checklist item.
+   - An item names the practice only. If the sources disagree on a number, a goal or a
+     threshold of the practice, do not write it into the item. Write it into section 3.4, and
+     write a decision in section 3.3.
    - A requirement does not go to a decision of section 3.3. A decision tells how a practice is
      done, not if it is done.
    - If no checklist item names the practice of a requirement, write a new item for it. Give
