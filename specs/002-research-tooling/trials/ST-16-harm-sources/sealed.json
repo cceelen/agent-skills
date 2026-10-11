@@ -1,0 +1,19 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/evidence/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/evidence/risk-answers.md": "2d113202638e56f49301395c8bb2b1dc2e91553724828afd4ce0709dc57ac120",
+    "inputs/evidence/scripts/rubric-items.txt": "1f9480ccab99829b312eb1bddf7d2c2a2148d548e169076defe83f1affad81f4",
+    "inputs/evidence/spec.md": "bc227eb5cbd249ad550acd8edaac6e1ca8c7de26831c62bb8316f1e24c330920",
+    "inputs/evidence/vetting.md": "03f675c6621103b7f0cca0a155dce7bbd3cda2590f9efeb2da4c92ad80a7f4c7",
+    "inputs/harm/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/harm/risk-answers.md": "80a820a0f524d8929e83a603c87d506c05c2dadff982536c6de69707eb2f6589",
+    "inputs/harm/scripts/rubric-items.txt": "1f9480ccab99829b312eb1bddf7d2c2a2148d548e169076defe83f1affad81f4",
+    "inputs/harm/spec.md": "c5e61a75547d2065737d448a8a74a5e91826ed558d84ffd7e063a636be985830",
+    "inputs/harm/vetting.md": "e39163cf0e36abcef0417fb3a80b82b3208bf9b0a0ee03b6108847d26dcb795b",
+    "prompts/task.md": "09f141e8382568b9c36b78dd3c501eb6107a92368666d45994761af192a1df48",
+    "registration.md": "6da83d03e3781e767aac472cba16f0de0d1511fc940e6cfbd5e8d9c2bc24a99a"
+  },
+  "seal": "182483048cf0b25f2ea192537be85312ecd8fb7ed53a475a9adbb1a86db8e52b"
+}
