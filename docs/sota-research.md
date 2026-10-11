@@ -11,7 +11,7 @@ The tooling is in `factory/sota-research/`. Users of the kit do not install it.
 
 | Phase | What occurs | Your part as the owner |
 |---|---|---|
-| 1. What to build | The agent asks for your intent. Then it settles only the field and the thing to build with you. | You answer three questions. You name the field and the thing. |
+| 1. What to build | The agent asks for your intent. Then it settles only the field and the thing to build with you. | You answer six questions. You name the field and the thing. You confirm the charter. |
 | 2. Research | Isolated readers read the sources. The agent finds the stakeholders, the views, the contexts, the risk dimensions and the boundaries, and distils the strategy and the checklist. Programs vet the sources and place the items. | None. |
 | 3. Review | The agent stops and gives you the findings. | You compare your intent with the findings. You correct the stakeholders, the views, the contexts, the risk dimensions and the boundaries, confirm the sources, correct the answers and accept the result. |
 | 4. Rendering | A program renders the recipe skill. A pull request delivers it. | You review the pull request. |
@@ -24,12 +24,15 @@ Before you accept a recipe, you can try it on a project. See "Try a recipe on a 
 ## Your intent
 
 The name of an aspect can mean less in the literature than it means to you. Thus the agent
-asks for your intent in phase 1, before it reads a source. It asks three questions:
+asks for your intent in phase 1, before it reads a source. It asks six questions:
 
 1. What do you mean by the aspect, in your words? Which concerns does it bring together?
 2. What must a project be able to show after it applied the recipe? Is there a measurable
    target?
 3. What do you not want?
+4. Which principles must the recipe follow? Which one wins when two of them disagree?
+5. For each principle: what will you look at in the review to see that the recipe follows it?
+6. What can not be traded against cost or time?
 
 - The agent asks each question one time. It does not ask a question that you answered already.
 - The agent writes each answer as a quote, with the date, into the field `Intent of the owner`
@@ -383,8 +386,11 @@ The charter is the "why" of an aspect: your target, your principles with their p
 your constraints. The file is `charter.md`, beside `spec.md`. It is optional. Its template is
 `.specify/templates/overrides/charter-template.md`.
 
-- Give the agent a charter file, or state the lines in the session.
+- The agent writes the charter in phase 1, from your answers to the six questions.
 - The agent writes only the lines that you stated, in your words.
+- The agent gives you the charter before the research starts. Confirm it or correct it.
+- If you have a charter file, give it to the agent. The agent asks only what the file does
+  not answer.
 - The agent reads the charter before the triage of the requirements.
 - A principle with a lower number decides when two requirements disagree.
 - In the review, you get the charter first, with the facts for each principle.

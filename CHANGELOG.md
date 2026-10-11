@@ -56,7 +56,8 @@ reports are not comparable with new reports.
 - `index.py take` records the lines `REQ` and `USE` of the report of a reader. `index.py lines`
   gives the recorded lines as tables. The research writes the table `Requirements` from them.
 - An aspect specification can have a charter of the owner in `charter.md`: the target, the
-  principles with their priority, and the constraints. The agent reads it before the triage,
+  principles with their priority, and the constraints. The agent writes it in phase 1 from your answers to six
+  questions, and you confirm it before the research. The agent reads it before the triage,
   and you get it first in the review.
 
 ## 1.0.3

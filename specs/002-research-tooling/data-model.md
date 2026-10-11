@@ -38,8 +38,8 @@ not confirmed yet is listed under "what remains": only the owner can end that st
 ## Charter (`charter.md`)
 
 Optional, beside `spec.md`. A head line with the state (`draft`, or `reviewed by the owner on
-<date>`), and the tables "Target", "Principles" (with a priority) and "Constraints". Each line
-holds the words of the owner. No program reads the file.
+<date>`), and the tables "Target", "Principles" (with a priority) and "Constraints". The session writes it in phase 1
+from the answers of the owner. Each line holds the words of the owner. No program reads the file.
 
 ## Evidence record (`evidence.md`)
 

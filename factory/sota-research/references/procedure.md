@@ -77,9 +77,14 @@ Settle only the intent of the owner, the field and the thing to build.
    2. What must a project be able to show after it applied the recipe? Is there a measurable
       target?
    3. What do you not want?
+   4. Which principles must the recipe follow? Which one wins when two of them disagree?
+   5. For each principle: what will you look at in the review to see that the recipe
+      follows it?
+   6. What can not be traded against cost or time?
 2. Record the answers.
-   - Write each answer as a quote, with the date of the answer, for the field "Intent of the
-     owner" of section 1. Use one line for each answer.
+   - Write each of the answers 1 to 3 as a quote, with the date of the answer, for the field
+     "Intent of the owner" of section 1. Use one line for each answer.
+   - Write the answers 4 to 6 only into the charter: see "The charter of the owner".
    - Do not change the words of the owner. Do not add to them.
    - If the owner gives no answer to a question, write `(no answer)`.
    - If the owner is not in the session, do not invent an answer. Write `(no answer)` in each
@@ -112,7 +117,8 @@ Settle only the intent of the owner, the field and the thing to build.
 8. Run the check for this phase:
    `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
    Correct each line that starts with `FAIL`.
-9. Tell the owner the four fields as they are written, and that the research starts now. If
+9. Tell the owner the four fields and the charter as they are written, and that the research
+   starts now. If
    the owner does not object, commit `spec.md` on the branch. If the repository has a remote,
    push the branch. This first commit makes the branch of the specification. Each later step
    is a pull request into it.
@@ -125,14 +131,22 @@ its reason and its date in section 7.
 The charter is the file `charter.md`, beside `spec.md`. It holds the target, the principles
 with their priority and the constraints of the owner. It is optional.
 
-- If the owner gives a charter file, copy it to `charter.md` without a change.
-- If the owner states a target, a principle or a constraint in the session, copy
-  `.specify/templates/overrides/charter-template.md` to `charter.md`. Write one row for each
-  statement, in the words of the owner, with the date. Write the state `draft`.
-- Do not write a line that the owner did not state. Do not ask the owner for a charter.
-- Give the owner a charter that you wrote, as it is written. If the owner confirms it, write
-  `reviewed by the owner on <date>` into the head line.
-- If the owner gave no file and stated no line, write no charter.
+- Write the charter from the answers of step 1 of phase 1, after step 7 of that phase. Copy
+  `.specify/templates/overrides/charter-template.md` to `charter.md`. Write the state `draft`.
+  - Write the target from answer 2: one row for each part that the owner stated.
+  - Write the principles from answers 1, 4 and 5: one row for each principle, in the order
+    that the owner gave. If the owner gave no order, write the principles in the order of the
+    answers, and ask the owner one time if the order is correct.
+  - Write the constraints from answers 3 and 6.
+  - Write each row in the words of the owner, with the date.
+- Do not write a line that the owner did not state. Do not propose a principle, a target or a
+  constraint.
+- If the owner gives a charter file, copy it to `charter.md` without a change. Ask only the
+  questions of step 1 that the file does not answer.
+- Give the owner the charter as it is written, in step 9 of phase 1. If the owner confirms
+  it, write `reviewed by the owner on <date>` into the head line.
+- If the owner was not in the session, or stated no target, no principle and no constraint,
+  write no charter.
 - Commit `charter.md` together with `spec.md`.
 - If the owner changes the charter later, write the change in the words of the owner, with
   the date. Then do step 10 of phase 2 again.
