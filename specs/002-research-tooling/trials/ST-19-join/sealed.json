@@ -1,0 +1,21 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/join/classes.md": "3b97408831e61d26c1775bdd898cb9b53204410e79c682d3faf81d65502aec10",
+    "inputs/join/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/join/risk-answers.md": "09d8e93c5409962ec496ca7c1b4cf51e6669956d580d9a184bb3a82e402f44c7",
+    "inputs/join/scripts/rubric-items.txt": "00cec3aa0f0a135de582106eb8512cbeb399617f5f953c1a4db401ef42aac3c3",
+    "inputs/join/spec.md": "2843f141d05ea42dc07e853f334f0dd5259efc3837a01e4ca94745fb1d094992",
+    "inputs/join/vetting.md": "e628d804acb3dcdeb92996e047f619c8e082904f53325049857ba61877baf9b7",
+    "inputs/old/classes.md": "3b97408831e61d26c1775bdd898cb9b53204410e79c682d3faf81d65502aec10",
+    "inputs/old/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/old/risk-answers.md": "09d8e93c5409962ec496ca7c1b4cf51e6669956d580d9a184bb3a82e402f44c7",
+    "inputs/old/scripts/rubric-items.txt": "00cec3aa0f0a135de582106eb8512cbeb399617f5f953c1a4db401ef42aac3c3",
+    "inputs/old/spec.md": "bc227eb5cbd249ad550acd8edaac6e1ca8c7de26831c62bb8316f1e24c330920",
+    "inputs/old/vetting.md": "03f675c6621103b7f0cca0a155dce7bbd3cda2590f9efeb2da4c92ad80a7f4c7",
+    "prompts/task.md": "c800b4d03575ff9454fd1bfd4e19537f47018e256e1bdfa108a79c7774b5122f",
+    "registration.md": "f7e6d2e4baca7c0811a95cd7ba048e20f2342596be42f7337369b04ef3c777bd"
+  },
+  "seal": "4522509fad357bdb7e633924ec91a5f0cade5a899556aa98e0f38b5d6ee4ce75"
+}
