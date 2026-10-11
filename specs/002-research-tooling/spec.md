@@ -619,6 +619,9 @@ sent each requirement of one concern to a boundary that it wrote itself.
   of a regulation or a standard that requires the item gives 3; a row of a regulation or a
   standard that recommends it, or a row of a specification of a foundation that asks for it,
   gives 2; no such row gives 1.
+- **FR-063**: The research MUST search for the regulation, the governance and the public
+  recommendations of the aspect, in the words of each view and of each stakeholder, and MUST
+  give each one that it finds to a reader. The source is the text of the issuer.
 
 ### Key Entities
 

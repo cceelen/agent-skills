@@ -22,6 +22,8 @@ reports are not comparable with new reports.
 - The answer "Probability" of a checklist item says how strongly regulations and standards ask
   for the item. The requirement rows of the item give the answer. The rubric for items has the
   version 3.
+- The research searches also for the regulation, the governance and the public recommendations
+  of an aspect.
 - The check names each item whose harm has no source. The rendered checklist marks a level
   that rests on no source.
 - An aspect specification names the measured targets of its aspect. The check fails for an

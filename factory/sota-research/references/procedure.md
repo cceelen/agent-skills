@@ -223,6 +223,15 @@ with their priority and the constraints of the owner. It is optional.
    - Find the existing descriptions first: standards, frameworks of foundations, the
      documentation of platform vendors, research, recognized books. Then find the practice
      sources.
+   - Find the regulation, the governance and the public recommendations of the aspect also.
+     Search for each of these kinds, in the words of each view and of each stakeholder:
+     - laws and regulations that bind a group of projects or of organizations;
+     - frameworks of governance and of audit, and the rules of an industry;
+     - recommendations that a public authority publishes.
+   - Give each one that you find to a reader. Do not leave one out because it binds only one
+     industry or one region.
+   - Record the text of the issuer as the source. Do not record a summary or a commentary of
+     a different party in its place.
    - Find the maintained projects of the aspect also. Search for each of these kinds, in the
      words of each view:
      - projects that give the practices of the aspect as components that a project can use
