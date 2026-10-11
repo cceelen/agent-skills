@@ -145,6 +145,13 @@ with their priority and the constraints of the owner. It is optional.
   sentences, the order and the cells "How it is checked". Ask the owner to confirm or to
   correct them. If the owner confirms, write `reviewed by the owner on <date>` into the head
   line.
+- The order of the principles is a decision of the owner. Work it out with the owner:
+  - Give the proposed order with each pair of principles that can disagree, and say what the
+    order decides for that pair.
+  - Change the order as the owner says. Do not settle the order alone.
+  - While the owner did not confirm the order, record each case of step 10 of phase 2 in
+    which the order decided between two requirements. Give these cases to the owner in the
+    review, each as a question.
 - If the owner says something later that states a target, a principle or a constraint, add
   the row as a proposal and ask the owner to confirm it. Then do step 10 of phase 2 again.
 - If the owner gives a charter file, copy it to `charter.md` without a change.

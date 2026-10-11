@@ -387,6 +387,8 @@ your constraints. The file is `charter.md`, beside `spec.md`. It is optional. It
 - Each row names your words that it comes from. The agent writes no row without your words.
 - The agent proposes the sentence of each principle, the order, and how you can check it.
 - The agent gives you the draft before the research starts. Confirm it or correct it.
+- You decide the order of the principles. The agent shows what the order decides.
+- If you did not confirm the order, the review gives you each case that the order decided.
 - If you state a new principle later, the agent adds it as a proposal and asks you.
 - The agent reads the charter before the triage of the requirements.
 - A principle with a lower number decides when two requirements disagree.
