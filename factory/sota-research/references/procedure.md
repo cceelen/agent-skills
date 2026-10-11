@@ -199,6 +199,14 @@ with their priority and the constraints of the owner. It is optional.
    - Find the existing descriptions first: standards, frameworks of foundations, the
      documentation of platform vendors, research, recognized books. Then find the practice
      sources.
+   - Find the maintained projects of the aspect also. Search for each of these kinds, in the
+     words of each view:
+     - projects that give the practices of the aspect as components that a project can use
+       again;
+     - tools that examine or measure how a project does the aspect.
+   - A maintained project shows what is done and what can be used again. Record the date of
+     its start and of its last release. Where it disagrees with a newer standard, write the
+     disagreement into section 3.4.
    - Record each search query in `vetting.md`, in the list "Searches", with the view that it
      serves. The owner sees the list in the review.
 5. **Read.** Give each source to one agent of the type `sota-source-reader`, with the task
