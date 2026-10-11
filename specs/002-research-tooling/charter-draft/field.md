@@ -1,6 +1,6 @@
 # Charter of the field software engineering (draft)
 
-**State**: draft for the review of the owner. The owner did not accept it.
+**State**: reviewed by the owner on 2026-10-11. The owner confirmed the order and the words. The owner decided that the lines are a charter of the field and also a principle of the constitution (principle XIII).
 
 This charter is above the charter of each aspect. An aspect gets its lines unchanged and adds
 its own. The lines apply in two places: to each recipe that the factory makes, and to the way
@@ -12,7 +12,7 @@ so they should be ingrained into the factory"
 
 ## Principles
 
-The order is a proposal of the agent. The owner gave no order.
+The agent proposed the order; the owner confirmed it on 2026-10-11.
 
 | Priority | Id | Principle | For a recipe | For the work of the factory |
 |---|---|---|---|---|
@@ -35,8 +35,8 @@ The order is a proposal of the agent. The owner gave no order.
 - **A small run first.** A run with one view and a small set of sources comes before a run with
   all views.
 
-## Questions for the owner
+## Answers of the owner, 2026-10-11
 
-1. Is this a charter of the field, above each aspect, or a part of the constitution?
-2. Is the order correct?
-3. Which words must change?
+1. Both: a charter of the field, above each aspect, and a part of the constitution.
+2. The order is correct.
+3. The words are correct.

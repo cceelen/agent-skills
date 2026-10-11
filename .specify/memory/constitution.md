@@ -120,6 +120,19 @@ Each skill of the kit holds the rules of the kit for this principle. A rule abou
 of an agent enters the kit with its measured effect, as the number of runs and the result, or
 with the statement that it was not tested.
 
+### XIII. Early evidence, small steps
+
+Five practices are common in each aspect of software engineering: test an assumption early,
+evaluate early, shift left, iterate fast and prototype fast. A recipe of the kit applies them:
+it asks a project to check an assumption before the project builds on it, puts each check at
+the earliest step where it can find the defect, and prefers a small step with a result to a
+large step.
+
+The factory applies them to its own work. An iteration of the factory changes one thing and
+names its assumption and the cheapest test of that assumption. A stage of the work is tried
+alone, on the recorded result of the stage before it, before all stages run. A recipe is
+rendered and tried as a plan early, also from a specification that is not complete.
+
 ## How the factory works
 
 1. **What to build.** The owner and the agent settle, in dialogue, the field and the thing to
@@ -155,4 +168,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.3.2 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
+**Version**: 3.4.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-11
