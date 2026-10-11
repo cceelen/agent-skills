@@ -204,6 +204,11 @@ with their priority and the constraints of the owner. It is optional.
      - projects that give the practices of the aspect as components that a project can use
        again;
      - tools that examine or measure how a project does the aspect.
+     - open projects that many other projects depend on: what each one does for the aspect
+       in its own work.
+   - Give a file of such a project to a reader with the task `prompts/sample-reader.md`. The
+     reader reports the tools, the integrations, the frameworks and the patterns that the
+     project uses.
    - A maintained project shows what is done and what can be used again. Record the date of
      its start and of its last release. Where it disagrees with a newer standard, write the
      disagreement into section 3.4.
