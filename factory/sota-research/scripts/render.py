@@ -413,10 +413,20 @@ def render_checklist(data, mark):
 
     >>> [line.split(" | ")[3] for line in text.splitlines() if line.startswith("| C-")]
     ['storage', 'operation', 'operation', 'storage']
+
+    A level that rests on no source has a mark.
+
+    >>> c05 = "| C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) |"
+    >>> none = c05.replace("(S-04 README)", "(judgement)").replace("(S-01 section 3)", "(judgement)")
+    >>> text = render_checklist(sample.load(("vetting.md", c05, none)), "<stamp>")
+    >>> [line.split(" | ")[4] for line in text.splitlines() if line.startswith("| C-")]
+    ['1', '1 (judgement)', '2, operative', '3, regulatory']
     """
+    unsupported = set(check.by_judgement(data, check.ANSWERS))
     rows = [
         [r.get(k, "") for k in ("id", "item", "why")]
-        + [aspect.view_of(r), r.get("level", ""), r.get("check", "")]
+        + [aspect.view_of(r), r.get("level", "") + (" (judgement)" if r.get("id") in unsupported else "")]
+        + [r.get("check", "")]
         for r in rendered_items(data)
     ]
     return "\n".join(
@@ -425,7 +435,8 @@ def render_checklist(data, mark):
             f"# Checklist: {data['title']}\n",
             "Each item is generic. Level 1 holds the basic practices. An item above level 1 names the",
             "risk dimension that calls for it. A check of `judgement` needs a person or a review. The",
-            "view of an item is the set of concerns that the item belongs to.\n",
+            "view of an item is the set of concerns that the item belongs to. A level with the mark",
+            "`(judgement)` rests on no source: the research found none for its risk or its cost.\n",
             table(["Id", "Item", "Risk that it answers", "View", "Level", "Check"], rows),
         ]
     )

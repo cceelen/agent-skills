@@ -38,7 +38,9 @@ check.py SPEC --scope
 - After the part "Views", one line: `Answers of risk and reward: <n> with a source, <m> by
   judgement.` It counts the answers in the table "Items" of `SPEC/vetting.md` and fails
   nothing. With `--json`: the key `answers` with `source`, `judgement` and `other`, and the
-  key `intent_asked`.
+  key `intent_asked`. Then, when there are such items, the line `Items with a severity or a
+  probability by judgement. Each one is a question for the owner: <ids>.` and the line `Items
+  whose level rests on judgement only: <ids>.`
 - Result code `1` when a check fails. Pending levels, pending vettings and a missing
   acceptance are listed as "remains" and do not fail the check.
 - A finding of `trial.md` with an unknown trial, viewpoint or route, an empty text or a wrong

@@ -147,7 +147,7 @@ EVIDENCE = """\
 VETTING = """\
 # Vetting record: backups of project data
 
-Rubric for sources: version 1. Rubric for items: version 1.
+Rubric for sources: version 1. Rubric for items: version 2.
 
 ## Sources
 
@@ -163,7 +163,7 @@ Rubric for sources: version 1. Rubric for items: version 1.
 | C-01 | 3 (S-02 abstract) | 3 (S-02 abstract) | 3 (S-01 section 2) | 1 (judgement) | 1 (judgement) | 0 (judgement) |  | 27 | 2 | 135 | yes | 1 |
 | C-02 | 3 (S-02 section 4) | 2 (S-02 section 4) | 2 (judgement) | 2 (judgement) | 2 (judgement) | 0 (judgement) | operative | 12 | 4 | 30 | yes | 2, operative |
 | C-03 | 3 (S-01 section 5) | 2 (judgement) | 2 (judgement) | 3 (judgement) | 3 (judgement) | 0 (judgement) | regulatory | 12 | 6 | 20 | yes | 3, regulatory |
-| C-04 | 1 (judgement) | 1 (judgement) | 2 (judgement) | 3 (judgement) | 2 (judgement) | 1 (judgement) |  | 2 | 5 | -1 | no | not admitted |
+| C-04 | 1 (S-03 "After the drill") | 1 (judgement) | 2 (judgement) | 3 (judgement) | 2 (judgement) | 1 (judgement) |  | 2 | 5 | -1 | no | not admitted |
 | C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) | 1 (judgement) | 2 (judgement) | 0 (judgement) |  | 18 | 3 | 60 | yes | 1 |
 
 ## Requirements

@@ -241,6 +241,12 @@ Answers of risk and reward: 11 with a source, 169 by judgement.
 - An answer by judgement is an answer of a model without a source. Examine these answers in
   the review.
 - The line does not fail the check. With `--json`, the numbers are in the key `answers`.
+- A second line names each item whose severity and probability have no source. Decide the
+  harm of each such item. Your decision is recorded with its date. It is not a source.
+- A third line names each admitted item that has no source for each answer. The rendered
+  checklist shows `(judgement)` after the level of such an item.
+- The cost of an item is a count of elements: the settings, the steps, the files and the
+  integrations that a project changes. It is not an estimate of time.
 
 To compare with an earlier revision, give that file to the program:
 

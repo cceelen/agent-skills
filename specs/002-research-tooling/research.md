@@ -63,7 +63,7 @@ repository (read on 2026-10-09) unless a source is named.
 
 - **Decision**: six answers for each item, each a whole number with its source:
   severity of the harm (1 to 3), probability without the item (1 to 3), breadth of contexts
-  (1 to 3), effort to adopt (1 to 3), effort to keep (1 to 3), risk of the item itself (0 to
+  (1 to 3), elements to adopt (1 to 3), elements to keep (1 to 3), risk of the item itself (0 to
   2). The program computes `return = severity x probability x breadth`, `cost = adopt + keep`,
   and `score = (return x 10) // cost - 5 x own risk`, in whole numbers. `rubric-items.txt`
   holds the questions, the scales, the thresholds and the version.

@@ -16,15 +16,24 @@ values of the scale.
 | Severity | How bad is the harm that the item prevents? |
 | Probability | How probable is that harm in a project that does not have the item? |
 | Breadth | In how many contexts does the item apply? |
-| Adopt | How much effort is necessary to adopt the item? |
-| Keep | How much effort is necessary to keep the item? |
+| Adopt | How many elements does a project add or change to adopt the item? |
+| Keep | How many elements does a project change to keep the item? |
 | Own risk | Which risk does the item itself bring? |
 
 ## Rules
 
 - Write each answer as a number, then its source in parentheses: `3 (S-02 section 4)`. Read
   `evidence.md` in this turn to find the source. Do not use a summary of it or your memory.
+- A source is a row of section 2 of `spec.md`, with the location in that source. A context, a
+  view, a risk dimension or a different part of the specification is not a source.
+- For Adopt and Keep, count the elements: the settings, the steps, the files and the
+  integrations. Take them from a source that shows them, for example a sample of a maintained
+  component that does the item. Do not estimate a time. Do not use a statement of a source
+  about hours, days or the size of a team.
 - If no source gives the answer, write `(judgement)` after the number. Do not invent a source.
+- The check names each item whose severity and probability have no source. Give each one to
+  the owner as a question. A decision of the owner is not a source: record it with its date
+  in section 7 of `spec.md`.
 - Answer for a typical project. Do not answer for one project that you know.
 - If the return of an item depends on the risk of a project, write the name of the risk
   dimension from section 1 of `spec.md` in the cell Dimension. An example is an item with a

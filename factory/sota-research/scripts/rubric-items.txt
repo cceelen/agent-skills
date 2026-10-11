@@ -2,7 +2,7 @@
 # Increase the version when a question, a scale, a threshold or a limit changes.
 # Do not change the identifier of a question. Records refer to it.
 
-version: 1
+version: 2
 
 # An item is admitted when its score is at or above this value.
 threshold admission: 20
@@ -26,15 +26,15 @@ question breadth 1-3: In how many contexts does the item apply?
   2: In many contexts, but not in all.
   3: In each context, from a single maintainer to a company.
 
-question adopt 1-3: How much effort is necessary to adopt the item?
-  1: Less than one hour, with tools that the project has.
-  2: Some days, or a new tool.
-  3: Weeks, a change of the process, or a paid service.
+question adopt 1-3: How many elements does a project add or change to adopt the item?
+  1: One element: one setting, or one step in a pipeline that the project has.
+  2: Some elements, or one new integration with a tool or a service.
+  3: Many elements in more than one part of the project, more than one new integration, or a change of the process.
 
-question keep 1-3: How much effort is necessary to keep the item?
-  1: None, or a program does it.
-  2: Some regular work.
-  3: Constant work, or a person with special knowledge.
+question keep 1-3: How many elements does a project change to keep the item?
+  1: None. A program keeps it.
+  2: Some elements at each new version of a tool or of the project.
+  3: Elements at each change of the code, or a decision of a person each time.
 
 question own-risk 0-2: Which risk does the item itself bring, for example lock-in or false confidence?
   0: None that is known.

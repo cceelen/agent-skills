@@ -258,6 +258,10 @@ MESSAGES = {
     ),
     "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
     "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
+    "answers-harm": (
+        "Items with a severity or a probability by judgement. Each one is a question for the owner: {0}."
+    ),
+    "answers-level": "Items whose level rests on judgement only: {0}.",
     "remains-head": "What remains:",
     "remains-intent": "The intent of the owner was not asked.",
     "remains-levels": "Levels that are pending: {0}.",
@@ -469,8 +473,8 @@ def answer_counts(data):
 
     >>> import sample
     >>> answer_counts(sample.load())
-    {'judgement': 22, 'other': 0, 'source': 8}
-    >>> row = "| C-04 | 1 (judgement) | 1 (judgement) |"
+    {'judgement': 21, 'other': 0, 'source': 9}
+    >>> row = '| C-04 | 1 (S-03 "After the drill") | 1 (judgement) |'
     >>> answer_counts(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | |")))
     {'judgement': 20, 'other': 1, 'source': 8}
     >>> answer_counts({"vetting_items": []})
@@ -2110,7 +2114,7 @@ def report(data, found, remains, previous_given):
       duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
       duplicates: 0, a proposed boundary would take: 0.
-    Answers of risk and reward: 8 with a source, 22 by judgement.
+    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - Items that need judgement: C-04.
     Accepted: A. Person, 2026-01-15.
@@ -2134,7 +2138,7 @@ def report(data, found, remains, previous_given):
       duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
       duplicates: 0, a proposed boundary would take: 0.
-    Answers of risk and reward: 8 with a source, 22 by judgement.
+    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - The owner did not accept the specification.
 
@@ -2267,7 +2271,7 @@ def report(data, found, remains, previous_given):
       sources read for the view: 4.
     - storage: level 1: 0, level 2: 0, level 3: 1, pending: 1, not admitted: 0, sources: 2, stakeholders: 1,
       sources read for the view: 2.
-    Answers of risk and reward: 8 with a source, 22 by judgement.
+    Answers of risk and reward: 9 with a source, 21 by judgement.
     What remains:
     - Levels that are pending: C-01.
     - Views without an item on level 1, while levels are pending: storage.
@@ -2309,15 +2313,47 @@ def report(data, found, remains, previous_given):
     return "\n".join(lines)
 
 
+def by_judgement(data, names):
+    """The items of vetting.md that have no source for each named answer, and "judgement" for one or more.
+
+    >>> import sample
+    >>> by_judgement(sample.load(), ("severity", "probability")), by_judgement(sample.load(), ANSWERS)
+    ([], [])
+    >>> c04 = '| C-04 | 1 (S-03 "After the drill") |'
+    >>> data = sample.load(("vetting.md", c04, "| C-04 | 1 (judgement) |"))
+    >>> by_judgement(data, ("severity", "probability")), by_judgement(data, ANSWERS)
+    (['C-04'], ['C-04'])
+    >>> by_judgement({"vetting_items": []}, ANSWERS)
+    []
+    """
+    found = []
+    for row in data["vetting_items"]:
+        cells = [row.get(name, "") for name in names]
+        if not any(aspect.source_ids(c) for c in cells) and any("judgement" in c.lower() for c in cells):
+            found.append(row.get("item", ""))
+    return sorted(found)
+
+
 def answer_lines(data):
     """The lines of the report for the answers of risk and reward. No answer gives no line.
 
+    An item has a line when its severity and its probability have no source: the harm that the item prevents
+    is then a question for the owner. An admitted item has a line when no answer has a source.
+
     >>> import sample
     >>> answer_lines(sample.load())
-    ['Answers of risk and reward: 8 with a source, 22 by judgement.']
-    >>> row = "| C-04 | 1 (judgement) | 1 (judgement) |"
+    ['Answers of risk and reward: 9 with a source, 21 by judgement.']
+    >>> c04 = '| C-04 | 1 (S-03 "After the drill") |'
+    >>> line = answer_lines(sample.load(("vetting.md", c04, "| C-04 | 1 (judgement) |")))[1]
+    >>> line[:52], line[52:]
+    ('Items with a severity or a probability by judgement.', ' Each one is a question for the owner: C-04.')
+    >>> row = '| C-04 | 1 (S-03 "After the drill") | 1 (judgement) |'
     >>> answer_lines(sample.load(("vetting.md", row, "| C-04 | 1 (owner) | 1 |")))[1]
     "Answers of risk and reward without a source and without 'judgement': 2."
+    >>> c05 = "| C-05 | 2 (judgement) | 3 (S-04 README) | 3 (S-01 section 3) |"
+    >>> answer_lines(sample.load(("vetting.md", c05, c05.replace("(S-04 README)", "(judgement)").replace(
+    ...     "(S-01 section 3)", "(judgement)"))))[-1]
+    'Items whose level rests on judgement only: C-05.'
     >>> answer_lines({"vetting_items": []})
     []
     """
@@ -2327,6 +2363,13 @@ def answer_lines(data):
     lines = [MESSAGES["answers"].format(counts["source"], counts["judgement"])]
     if counts["other"]:
         lines.append(MESSAGES["answers-other"].format(counts["other"]))
+    harm = by_judgement(data, ("severity", "probability"))
+    if harm:
+        lines.append(MESSAGES["answers-harm"].format(", ".join(harm)))
+    admitted = {r["id"] for r in live_items(data) if aspect.level_of(r.get("level"))[0] in (1, 2, 3)}
+    level = [i for i in by_judgement(data, ANSWERS) if i in admitted]
+    if level:
+        lines.append(MESSAGES["answers-level"].format(", ".join(level)))
     return lines
 
 
@@ -2411,7 +2454,7 @@ def main(argv=None):
     >>> result["reading"]["table"], result["reading"]["sources"][1], result["remains"]["unread"]
     (True, {'document': 'S-02', 'not read': 0, 'pages': 2, 'source': 'S-02'}, [])
     >>> result["answers"], result["intent_asked"], result["remains"]["stakeholders"]
-    ({'judgement': 22, 'other': 0, 'source': 8}, True, [])
+    ({'judgement': 21, 'other': 0, 'source': 9}, True, [])
     >>> result["trials"], result["remains"]["trial"]
     (['T-01'], [])
     >>> result["views"][1]

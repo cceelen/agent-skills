@@ -235,7 +235,8 @@ specification whose check reports no failure other than "not accepted".
 - **FR-013**: An item with a missing answer MUST stay "pending".
 - **FR-014**: Each item MUST name the risk that it answers. The questions MUST cover the
   reward (how bad the harm is that the item prevents, how probable that harm is without the item, in how many contexts the item
-  applies), the cost (the effort to adopt and the effort to keep) and the risk of the item
+  applies), the cost (the number of elements that a project changes to adopt the item and to
+  keep it; not an estimate of time) and the risk of the item
   itself. Each answer is on a fixed scale and names its source. The research session records
   the answers, and the owner corrects them.
 - **FR-014a**: An item with a good return at a low cost in each context MUST be on level 1.
@@ -609,6 +610,11 @@ sent each requirement of one concern to a boundary that it wrote itself.
   for the conversion when a page came back empty or in part, or when its words must be
   examined. (The stage test ST-13 found no more requirement lines from the text than from
   the web tool.)
+- **FR-061**: A source of an answer of risk and reward MUST be a source of the aspect
+  specification with its location. A context, a view or a risk dimension is not a source. The
+  check MUST name each item whose severity and probability have no source: each one is a
+  question for the owner. A decision of the owner is recorded with its date and is not a
+  source. The rendered checklist MUST mark each level that rests on no source.
 
 ### Key Entities
 

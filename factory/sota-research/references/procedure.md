@@ -617,6 +617,11 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
   is in no view.
 - The line "Answers of risk and reward" gives the number of answers with a source and the
   number of answers by judgement. Give it to the owner as it is.
+- The line "Items with a severity or a probability by judgement" names the items whose harm
+  has no source. Give each one to the owner as a question. Record the answer of the owner with
+  its date in section 7. It is a decision, not a source.
+- The line "Items whose level rests on judgement only" names the admitted items without a
+  source for each answer. The rendered checklist marks their level.
 - The list names each finding of a trial that is open. It says so if the recipe has no trial.
 - If a row of `trial.md` fails, correct the cell. Do not change the sentence of a finding.
 - The part "Views" gives, for each view, the number of items on each level, the number of

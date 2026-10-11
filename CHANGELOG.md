@@ -17,6 +17,10 @@ reports are not comparable with new reports.
 - The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
   the plan from eight viewpoints, and the check reports the findings that are open. One
   viewpoint is the integrity of each asset, from the source to the system of the user.
+- The cost of a checklist item is the number of elements that a project changes to adopt the
+  item and to keep it. It is not an estimate of time. The rubric for items has the version 2.
+- The check names each item whose harm has no source. The rendered checklist marks a level
+  that rests on no source.
 - An aspect specification names the measured targets of its aspect. The check fails for an
   empty field `Targets`.
 - The tooling asks the owner for the intent before the research, and compares it with the
