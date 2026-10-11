@@ -97,3 +97,4 @@ A stage test tries one stage on recorded input of an earlier trial. It has no re
 | Id | Date | Stage | Recorded input | Result | Folder |
 |---|---|---|---|---|---|
 | ST-1 | 2026-10-11 | the cell Serves of the register (iteration I-6) | 151 requirements of the trial I-4, the charter of DevSecOps | refuted, 3 runs: the row of the coverage and the row of fuzzing serve `none` in each run; 148 of 151 cells are the same in the three runs | `trials/ST-1-serves` |
+| ST-2 | 2026-10-11 | the exit of a requirement to a decision of 3.3 | 117 requirements of the trial I-4 that went to a decision, its decisions and its checklist | confirmed, 3 runs: the row of the coverage goes to a new item that names the coverage in each run; each run writes 42 to 46 new items beside the 42 recorded items | `trials/ST-2-exit` |

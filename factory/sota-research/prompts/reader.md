@@ -42,11 +42,17 @@ Report these points, in this order. Write in short sentences, in your own words.
    statement, for example "page 12". Say no more than the source says. Keep the limits of the
    source: the group, the place or the condition for which the source makes the statement.
 4. **Requirements of the source**: each thing that the source says a project must or should
-   do, one line each. Report each requirement of the source. Do not select.
-   - After each line, give the group of persons that the requirement serves, if the source
-     names one. If the source names no group, write "not named".
-   - Then give the location, as in point 3.
-   - Keep "must" and "should" as the source has them. Say no more than the source says.
+   do. Report each requirement of the source. Do not select.
+   - Write one line for each requirement, in this form, with no other text in the line:
+     `REQ | <requirement> | <group> | <location>`
+   - The requirement: one sentence in your own words. Keep "must" and "should" as the source
+     has them. Say no more than the source says.
+   - The group: the group of persons that the requirement serves, if the source names one.
+     If the source names no group, write `not named`.
+   - The location: as in point 3.
+   - Do not write the character `|` or a quotation mark into a cell.
+   - Start no other line of the report with `REQ`.
+   - If the source states no requirement, write the one line `REQ | none`.
 5. **Where the source disagrees** with a different source that the caller named.
 6. **For an independent source only**:
    - Does the author have a record in the field? Answer `yes` or `no`, with the address of
