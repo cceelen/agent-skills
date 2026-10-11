@@ -5,12 +5,14 @@
 # ///
 """Check of one aspect specification and its evidence record. Standard library only.
 
-  check.py SPEC [--previous FILE] [--words FILE] [--json]
+  check.py SPEC [--previous FILE] [--words FILE] [--index WORK] [--json]
   check.py SPEC --scope
 
   SPEC             the folder with spec.md, evidence.md and, if present, vetting.md and trial.md
   --previous FILE  an earlier revision of spec.md, for the check of stable identifiers
   --words FILE     the product words of the aspect, one in each line; an item must not use one
+  --index WORK     the work folder of the research. The check compares the register of the
+                   requirements with the requirement lines that the index of that folder holds.
   --json           print one JSON object in place of the text report
   --scope          check only what is settled before the research: the head line, the aspect,
                    the field, the intent of the owner and the date of the agreement. Use this in
@@ -45,6 +47,10 @@ forms, and no other:
 
 A requirement does not go to a decision of section 3.3.
 
+With --index, each requirement line that a reader reported and that the index holds needs a row
+of the register with the same source and the same words, and each row needs such a line. Thus a
+requirement cannot be lost or added between the reports and the register.
+
 Each item that is not retired holds a requirement, or its cell "Admitted by" is "own rule". Each
 stakeholder of section 1 has a requirement. The report gives the requirements of each view by
 their exit. A view with more than half of its requirements at a boundary remains.
@@ -77,9 +83,11 @@ that export.py made does not hold this file. Without the file, the viewpoint of 
 checked, and the list of what remains says so.
 """
 
+import contextlib
 import json
 import pathlib
 import re
+import sqlite3
 import sys
 
 import aspect
@@ -217,6 +225,9 @@ MESSAGES = {
         "The requirement names the stakeholder '{0}'. Section 1 does not have this stakeholder."
     ),
     "requirement-without-source": "The requirement names no source of section 2.",
+    "index-absent": "The work folder '{0}' has no index with the lines of the reports.",
+    "line-not-in-register": "A reader reported this requirement of {0}. The register has no row for it: {1}",
+    "requirement-not-in-index": "The index has no requirement line of {0} with the words of this row.",
     "item-without-requirement": "No requirement of the table Requirements goes to the item.",
     "stakeholder-without-requirement": "The stakeholder '{0}' has no requirement in the table Requirements.",
     "checklist-empty": "The checklist of section 4 has no item.",
@@ -1984,6 +1995,76 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     return found, remains
 
 
+def plain(text):
+    """The words of a cell without the differences of spaces, of capital letters and of the full
+    stop at the end.
+
+    >>> plain("  Keep   a Copy. "), plain("Keep a copy")
+    ('keep a copy', 'keep a copy')
+    """
+    return " ".join(text.split()).lower().rstrip(" .")
+
+
+def check_index(data, work):
+    r"""The register of the requirements against the requirement lines of the index.
+
+    A line of the index is the report of a reader. Each line needs a row of the register with the
+    same source and the same words, and each row needs a line.
+
+    >>> import contextlib, index, sample
+    >>> good, work = sample.load(), sample.converted({})
+    >>> with contextlib.closing(index.connect(work)) as db:
+    ...     for row in good["requirements"]:
+    ...         line = " | ".join(("REQ", row["requirement"], row["stakeholder"], row["source"]))
+    ...         _ = index.take(db, row["source"].split()[0], row["id"] + ".md", line + "\n")
+    ...     db.commit()
+    >>> check_index(good, work)
+    []
+
+    A line that the session did not write into the register fails. A row that no reader reported
+    fails also.
+
+    >>> with contextlib.closing(index.connect(work)) as db:
+    ...     _ = index.take(db, "S-02", "b.md", "REQ | Keep a second copy. | users | page 2\n")
+    ...     db.commit()
+    >>> row = good["requirements"][0]
+    >>> row["requirement"] = "A requirement that no reader reported."
+    >>> [(f["rule"], f["id"], f["file"]) for f in check_index(good, work)]
+    [('line-not-in-register', 'S-01', 'vetting.md'), ('line-not-in-register', 'S-02', 'vetting.md'),
+     ('requirement-not-in-index', 'R-01', 'vetting.md')]
+    >>> check_index(good, work)[1]["text"]
+    'A reader reported this requirement of S-02. The register has no row for it: Keep a second copy.'
+
+    A work folder without an index fails.
+
+    >>> [f["rule"] for f in check_index(good, work / "absent")]
+    ['index-absent']
+    """
+    path = pathlib.Path(work) / "index.sqlite"
+    place = {"_file": "vetting.md"}
+    try:
+        if not path.is_file():
+            raise sqlite3.Error
+        with contextlib.closing(sqlite3.connect(path)) as db:
+            stored = db.execute("SELECT source, text FROM lines WHERE kind = 'req'").fetchall()
+    except sqlite3.Error:
+        return [finding("index-absent", place, "", work)]
+    rows = {}
+    for row in data["requirements"]:
+        source = (re.findall(r"S-\d+", row.get("source", "")) or [""])[0]
+        rows.setdefault((source, plain(row.get("requirement", ""))), row)
+    lines = {(source, plain(text)): text for source, text in stored}
+    out = [
+        finding("line-not-in-register", place, key[0], key[0], lines[key])
+        for key in sorted(set(lines) - set(rows))
+    ]
+    out += [
+        finding("requirement-not-in-index", rows[key], rows[key].get("id", ""), key[0] or "its source")
+        for key in sorted(set(rows) - set(lines))
+    ]
+    return out
+
+
 def is_accepted(data):
     """The head line names the person and the date of the acceptance.
 
@@ -2407,6 +2488,13 @@ def main(argv=None):
     >>> _ = words.write_bytes(b"\xff\xfe")
     >>> sample.run(main, good, "--words", words)[0], sample.run(main, good, "--previous", words)[0]
     (2, 2)
+
+    --index compares the register with the lines of the reports in the index of a work folder.
+
+    >>> code, out, _ = sample.run(main, good, "--index", good.parent / "no-work")
+    >>> code, out.splitlines()[0].split(":")[0], out.splitlines()[0].endswith("the lines of the reports.")
+    (1, 'FAIL index-absent vetting.md', True)
+
     >>> code, _, err = sample.run(main)
     >>> code, "check.py SPEC" in err
     (2, True)
@@ -2418,6 +2506,7 @@ def main(argv=None):
         print(__doc__, file=sys.stderr)
         sys.exit(2)
     previous, words_file = option(args, "--previous"), option(args, "--words")
+    work = option(args, "--index")
     as_json = "--json" in args
     folder = next((a for a in args if not a.startswith("--")), "")
     try:
@@ -2434,6 +2523,11 @@ def main(argv=None):
         print(scope_report(data))
         sys.exit(1 if check_scope(data) else 0)
     found, remains = run_checks(data, previous_rows, words)
+    if work is not None:
+        found = sorted(
+            found + check_index(data, work),
+            key=lambda f: (f["file"], f["line"], f["rule"], f["id"], f["text"]),
+        )
     if as_json:
         result = {
             "accepted": is_accepted(data),

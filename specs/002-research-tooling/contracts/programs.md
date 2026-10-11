@@ -8,7 +8,7 @@ cannot be read. The output is sorted and holds no current time.
 ## scripts/check.py
 
 ```text
-check.py SPEC [--previous FILE] [--words FILE] [--json]
+check.py SPEC [--previous FILE] [--words FILE] [--index WORK] [--json]
 check.py SPEC --scope
 ```
 
@@ -17,6 +17,9 @@ check.py SPEC --scope
 - `--previous FILE`: an earlier revision of `spec.md`, for the check of stable identifiers.
   Without it, that check is skipped and the report says so.
 - `--words FILE`: the word list of products of the aspect, one word in each line.
+- `--index WORK`: the work folder of the research. The check compares the table
+  "Requirements" with the requirement lines of the index: a line without a row fails, and a
+  row without a line with the same source and words fails. A folder without an index fails.
 - Prints one line for each finding: the rule, the place (section and row id) and what is
   wrong. Then the summary: failing checks, pending levels, pending vettings, items that need
   judgement, and whether the specification is accepted.

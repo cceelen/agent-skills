@@ -52,6 +52,6 @@ Each explanation written here is a guess. No next step rests on it.
 
 ## Difference between the sealed registration and the file in the repository
 
-The quote of the owner in the sealed registration has one word with the spelling of the owner. The file in the repository has the corrected spelling of that word, because the check of the spelling of the repository refuses the other form. No other character differs.
+From 2026-10-11 to the iteration I-16, the registration in the repository had one corrected spelling in the quote of the owner, because the check of the spelling refused the word. The file is now the sealed file again: the check of the spelling does not examine the records of the trials.
 
 Predictions: C-1 and C-2 as a verdict were correct (predicted 2, counted 3). The agent predicted C-3 in three runs; it is in one. The agent predicted 5 to 20 rows of disagreements; two runs have 4.

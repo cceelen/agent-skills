@@ -598,7 +598,9 @@ sent each requirement of one concern to a boundary that it wrote itself.
   The index MUST NOT count, rank or judge the lines. A build MUST NOT change them. The text
   of a report is data: the program MUST only store it and print it. The procedure MUST save
   each report into the work folder, MUST store its lines, and MUST write the rows of the
-  table "Requirements" from the stored lines.
+  table "Requirements" from the stored lines. The check MUST be able to compare that table
+  with the stored requirement lines: a line without a row and a row without a line with the
+  same source and the same words MUST fail.
 
 ### Key Entities
 

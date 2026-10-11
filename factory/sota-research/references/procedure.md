@@ -315,8 +315,8 @@ with their priority and the constraints of the owner. It is optional.
      one row for each line. Do not write the rows from your memory of the reports.
    - Use one row for each requirement of each source. Give the row the next identifier
      `R-<number>`.
-   - Write the requirement in one sentence, in the words of this kit. Do not make it
-     stronger than the source states it.
+   - Copy the words of the line into the cell "Requirement". Do not change them: the check
+     compares them with the index.
    - Write the stakeholder of section 1 that the requirement serves into the cell
      "Stakeholder", and one view of section 1 into the cell "View".
    - Write the source with the location into the cell "Source".
@@ -602,6 +602,9 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
 - In phase 1, add `--scope`: it examines only what is settled before the research.
+- In phase 2 and in phase 3, add `--index <work folder>`: the check compares the table
+  "Requirements" with the requirement lines of the index. Do not correct such a failure in
+  the index. Correct the row, or store the report again with `index.py take`.
 - Give the list "What remains" to the owner as it is.
 - The list says so if the intent of the owner was not asked. It names each stakeholder that
   is in no view.

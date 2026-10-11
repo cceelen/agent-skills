@@ -54,6 +54,8 @@ reports are not comparable with new reports.
 - The research finds the pages of a concern with `index.py search`, and the references of a
   view with `index.py refs` and `index.py cited`.
 - `index.py build` reads the file `synonyms.txt` of the work folder, if the file is there.
+- `check.py --index` compares the register of the requirements with the requirement lines
+  that the readers reported. A requirement that was lost, added or changed fails.
 - `index.py take` records the lines `REQ` and `USE` of the report of a reader. `index.py lines`
   gives the recorded lines as tables. The research writes the table `Requirements` from them.
 - An aspect specification can have a charter of the owner in `charter.md`: the target, the

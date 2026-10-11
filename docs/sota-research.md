@@ -250,6 +250,16 @@ uv run factory/sota-research/scripts/check.py specs/<number>-<name> --previous p
 ```
 
 - If an item is no longer valid, keep its row and set its level to `retired`.
+
+To compare the register of the requirements with the reports of the readers, add the work
+folder of the research:
+
+```text
+uv run factory/sota-research/scripts/check.py specs/<number>-<name> --index <work folder>
+```
+
+- The check fails for a requirement line of the index that has no row in the register.
+- The check fails for a row that has no requirement line with the same source and words.
 - Do not use the identifier of a retired item again.
 - If the report lists an item with a changed text, make sure that the meaning is the same. If
   the meaning changed, give the item a new identifier.

@@ -2,7 +2,7 @@
 
 ## 1. Question
 
-- **Quote**: "don't only look at the items produced by a projects but also by their writing and principals about it. the TBC project is quite opinionated. i don't agree with all of the choices, and there are common recommendations that disagree too, e.g. pinning all external resources used."
+- **Quote**: "don't only look at the items produced by a projects but also by their writing and principals about it. the TBC project is quite opinionated. i dont' agree with all of the choices, and there are common recommendations that disagree too, e.g. pinning all external resources used."
 - **Date**: 2026-10-11
 - **Decision**: what is done after each outcome.
   - `confirmed`: the kind `principle` and the comparison stay in the procedure. The full trial of the factory follows.

@@ -75,4 +75,4 @@ Predictions: 12 of 16 were correct. Wrong: G-4, G-7, B-3, B-7.
 
 Limits: one run. The readers ran as new sessions of the agent product, not as sub-agents: the session wrote this into section 7. The web tool of a reader returns a summary of a page.
 
-The copy of `vetting.md` in this folder differs from the file of the run in two words of rows 735 and 766: the spelling check of the repository refused them.
+Until the iteration I-16, the copy of `vetting.md` in this folder had two corrected spellings, in rows 735 and 766. The file is now the file of the run again: the check of the spelling does not examine the records of the trials.

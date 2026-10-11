@@ -732,7 +732,7 @@ One row for each requirement line of the reports of the readers. The sentence of
 | R-0601 | When software is the predominant system of interest, ISO/IEC/IEEE 12207 should be used. | producers | quality | S-01 page 396 | C-73 |
 | R-0602 | The ethical-values standard requires consideration of values relevant to the culture where the system is deployed. | producers | quality | S-01 page 400 | C-74 |
 | R-0603 | Users of standards should look for the most recent version and for newer titles. | producers | quality | S-01 page 403 | C-77 |
-| R-0604 | The what is and hows of requirements work should be set by the nature of the software, not by the life cycle. | software engineers | quality | S-01 page 44 | C-68 |
+| R-0604 | The whats and hows of requirements work should be set by the nature of the software, not by the life cycle. | software engineers | quality | S-01 page 44 | C-68 |
 | R-0605 | Downstream maintainers should not be able to tell the earlier life cycle from the form of the requirements alone. | producers | quality | S-01 page 44 | C-68 |
 | R-0606 | Whenever a nonfunctional requirement is changed, the impact on other requirements should be considered. | software engineers | quality | S-01 page 46 | C-68 |
 | R-0607 | The kinds of security requirements that should be considered are described in the Security KA. | software engineers | security | S-01 page 47 | C-18 |
@@ -763,7 +763,7 @@ One row for each requirement line of the reports of the readers. The sentence of
 | R-0632 | A good architecture should address the distinct concerns of its stakeholders and also the consequences of their interactions. | software engineers | quality | S-01 page 77 | C-69 |
 | R-0633 | Quoted from Dijkstra: a program must be correct and should be efficient, used to illustrate separation of concerns; not a requirement of the source itself. | software engineers | quality | S-01 page 69 | C-69 |
 | R-0634 | The design must solve the problems that the software requirements establish. | software engineers | quality | S-01 page 85 | C-69 |
-| R-0635 | The software design must provide a guide to implementers on building the system. | software engineers | quality | S-01 page 85 | C-69 |
+| R-0635 | The software design must provide a guide to implementors on building the system. | software engineers | quality | S-01 page 85 | C-69 |
 | R-0636 | Design should be complete with respect to the modes and states of the software. | software engineers | quality | S-01 page 86 | C-69 |
 | R-0637 | A design should be sufficient for designers to demonstrate how requirements will be met. | software engineers | quality | S-01 page 86 | C-69 |
 | R-0638 | A software design description should be sufficient as a basis for verifying a design. | software engineers | quality | S-01 page 86 | C-69 |
