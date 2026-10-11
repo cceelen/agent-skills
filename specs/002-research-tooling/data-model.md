@@ -60,11 +60,11 @@ the table "Reading". Five tables, formats in `contracts/files.md`.
 | Proposed boundaries | one boundary of section 1 with the state `proposed` | boundary, requirements that it would take (ids of the table "Requirements", or `none`), stakeholders that it would leave with no requirement, reason |
 | Reading | one converted document of one source of section 2 | source id, document id or `none`, pages, given to readers (ranges or `none`), not read (ranges or `none`) |
 
-The cell "Goes to" of a requirement is `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
-`duplicate: R-<nn>`. The check fails for each other text, for an exit that names a row that
-does not exist, for an item without a requirement that is not admitted by `own rule`, and for
-a stakeholder without a requirement. A view with more than half of its requirements at a
-boundary is listed under "what remains".
+The cell "Goes to" of a requirement is `C-<nn>`, `5`, `boundary: <name>` or
+`duplicate: R-<nn>`. A requirement does not go to a decision of section 3.3. The check fails
+for each other text, for an exit that names a row that does not exist, for an item without a
+requirement that is not admitted by `own rule`, and for a stakeholder without a requirement.
+A view with more than half of its requirements at a boundary is listed under "what remains".
 
 State of a boundary of section 1: `proposed` (written by the session; a line without a state
 is `proposed`) → `decided` (by the owner, with the date), or the boundary is removed (declined

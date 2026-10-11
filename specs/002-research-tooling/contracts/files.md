@@ -61,9 +61,9 @@ The program `index.py unread --write` writes this table. Do not change it by han
 ```
 
 - The session writes the table "Requirements": one row for each requirement that a source
-  states for a stakeholder. The cell "Goes to" is `C-<nn>`, `3.3: <decision>`, `5`,
-  `boundary: <name>` or `duplicate: R-<nn>`. No program writes this table. A requirement
-  goes only to a boundary that the owner decided.
+  states for a stakeholder. The cell "Goes to" is `C-<nn>`, `5`, `boundary: <name>` or
+  `duplicate: R-<nn>`. A requirement does not go to a decision of section 3.3. No program
+  writes this table. A requirement goes only to a boundary that the owner decided.
 - The session writes the table "Proposed boundaries": one row for each boundary of section 1
   with the state `proposed`. The cell of the requirements holds identifiers of the table
   "Requirements", a range in the form `R-<nn> to R-<nn>`, or `none`. No program writes this

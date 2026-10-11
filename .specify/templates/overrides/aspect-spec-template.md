@@ -103,8 +103,8 @@ High level, for the agent that runs the work. One page.
 
 ## 4. Checklist
 
-Generic items, valid across the contexts of section 1. One short sentence each. An item that
-holds only in some contexts belongs in 3.3; an item for one product belongs in an
+Generic items, valid across the contexts of section 1. One short sentence each. The way to do an
+item that depends on context belongs in 3.3; an item for one product belongs in an
 implementation skill. There is no fixed number of items: distil until each item earns its
 place.
 
@@ -200,8 +200,9 @@ Terms that mean different things in the sources. One preferred form per meaning.
   the owner's confirmation; for each item the answers of the risk and reward calculation.
   - The table "Requirements" has one row for each requirement that a source states for a
     stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
-  - The cell "Goes to" has one of these forms: `C-<nn>`, `3.3: <decision>`, `5`,
-    `boundary: <name>` or `duplicate: R-<nn>`. A requirement has no other exit.
+  - The cell "Goes to" has one of these forms: `C-<nn>`, `5`, `boundary: <name>` or
+    `duplicate: R-<nn>`. A requirement has no other exit.
+  - A requirement does not go to a decision of section 3.3.
   - A requirement goes only to a boundary that the owner decided.
   - The table "Proposed boundaries" has one row for each boundary of section 1 with the state
     `(proposed)`. Its columns are Boundary, Requirements that it would take, Stakeholders that

@@ -58,8 +58,8 @@ check.py SPEC --scope
   `unread` in `remains`.
 - Outside `--scope`, the table "Requirements" of `SPEC/vetting.md` fails the check when it is
   absent or empty; when a cell is empty; when an identifier is used two times; when the cell
-  "Goes to" is not `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
-  `duplicate: R-<nn>`; when the exit names an item, a decision, a boundary or a row that does
+  "Goes to" is not `C-<nn>`, `5`, `boundary: <name>` or `duplicate: R-<nn>`; when the cell
+  names a decision of section 3.3; when the exit names an item, a boundary or a row that does
   not exist, an item that is retired, or a row that is a duplicate; when a stakeholder or a
   view is not in section 1; and when the source is not in section 2. An item that is not
   retired fails the check when no requirement goes to it and its cell "Admitted by" does not

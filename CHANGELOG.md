@@ -22,7 +22,7 @@ reports are not comparable with new reports.
   fails for an aspect specification without the field `Stakeholders`.
 - The check gives the number of answers of risk and reward with a source and by judgement.
 - The research records each requirement that a source states in the table `Requirements` of
-  `vetting.md`. Each requirement goes to a checklist item, or leaves by one of four named
+  `vetting.md`. Each requirement goes to a checklist item, or leaves by one of three named
   exits. The check fails for an aspect specification without this table.
 - Each source names the views that it was read for, in the cell `Views`. The check lists each
   view with fewer than two sources of its own field.

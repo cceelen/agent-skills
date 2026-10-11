@@ -410,11 +410,12 @@ record became no item, and one view had no source of its own field.
   sentence, the stakeholder, the view, the source with its location, and the cell "Goes to".
   The reader of a source MUST report each requirement of the source as its own point, with
   the group of persons that it serves and the location. The session MUST record each one
-  without a judgement. The cell "Goes to" MUST have one of five forms: `C-<nn>`, a checklist
-  item; `3.3: <decision>`, a decision of section 3.3; `5`, an implementation skill;
-  `boundary: <name>`, a boundary of section 1; `duplicate: R-<nn>`, a row that is not a
-  duplicate. No other exit is permitted. A requirement that is basic in its view becomes an
-  item also when its cost is high, and the calculation places it. The check MUST fail, outside
+  without a judgement. The cell "Goes to" MUST have one of four forms: `C-<nn>`, a checklist
+  item; `5`, an implementation skill; `boundary: <name>`, a boundary of section 1;
+  `duplicate: R-<nn>`, a row that is not a duplicate. No other exit is permitted. A
+  requirement MUST NOT go to a decision of section 3.3. A requirement that is basic in its
+  view becomes an item also when its cost is high, and the calculation places it. The check
+  MUST fail, outside
   the check of phase 1, when the table is absent or empty; when a cell is empty; when an
   identifier is used two times; when the cell "Goes to" has no such form or names a row that
   does not exist or an item that is retired; when a stakeholder or a view is not in section

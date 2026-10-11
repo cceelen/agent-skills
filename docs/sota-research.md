@@ -319,10 +319,12 @@ The cell `Goes to` holds the one exit of the requirement:
 | Form | Meaning |
 |---|---|
 | `C-<nn>` | The checklist item that holds the requirement. The calculation places the item. |
-| `3.3: <decision>` | The requirement depends on context. The name is the cell `Decision` of a row of section 3.3. |
 | `5` | The requirement is knowledge of one product, for an implementation skill. |
 | `boundary: <name>` | A neighbouring aspect owns the requirement. The name is a boundary of section 1 that you decided. |
 | `duplicate: R-<nn>` | A second source states the same requirement. The row that it names is not a duplicate. |
+
+A requirement does not go to a decision of section 3.3. A decision tells how a practice is
+done, not if it is done.
 
 The check fails in these cases:
 

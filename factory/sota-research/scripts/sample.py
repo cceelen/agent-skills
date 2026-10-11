@@ -176,7 +176,7 @@ Rubric for sources: version 1. Rubric for items: version 1.
 | R-04 | Write a review after each restore drill. | operators | operation | S-03 "After the drill" | C-04 |
 | R-05 | Make the backup with a program. | operators | operation | S-01 section 3 | C-05 |
 | R-06 | Start the backup program by a schedule. | operators | operation | S-04 README | duplicate: R-05 |
-| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | 3.3: How frequently to make a backup |
+| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | C-05 |
 | R-08 | Keep the schedule in the settings file of the backup tool. | operators | operation | S-04 README | 5 |
 
 ## Reading
@@ -290,7 +290,7 @@ STAKEHOLDER_OWNERS = (
 )
 TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in each interval; the record of the drills measures it. (S-02 section 4)"
 REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |"
-REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a backup |"
+REQUIREMENT_R07 = "| R-07 | Make a backup in the interval that the lost work permits. | operators | operation | S-01 section 3 | C-05 |"
 BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
 # A specification with named boundaries: one that the owner decided and two that are proposed.
 # A boundary line without a state is proposed.

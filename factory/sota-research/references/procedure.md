@@ -271,7 +271,12 @@ with their priority and the constraints of the owner. It is optional.
    - Give each item its view: write one view name of section 1 into the cell "View".
    - For each view, find the practices that are basic and not negotiable in that view. Make
      each one a checklist item.
-   - A statement that depends on context becomes a decision in section 3.3.
+   - A requirement does not go to a decision of section 3.3. A decision tells how a practice is
+     done, not if it is done.
+   - If no checklist item names the practice of a requirement, write a new item for it. Give
+     two requirements with the same practice the same item.
+   - Where the way to do a practice depends on context, write a decision in section 3.3 in
+     addition. The requirement stays with its item.
    - A statement about one product goes to the table of implementation skills in section 5.
    - Leave out what an agent can learn from the project or from the source itself. Do not
      leave out a requirement of the table "Requirements".
@@ -279,8 +284,6 @@ with their priority and the constraints of the owner. It is optional.
      forms:
      - `C-<nn>`: the checklist item that holds the requirement. Two or more requirements
        can go to one item.
-     - `3.3: <decision>`: the requirement depends on context. Write the cell "Decision" of
-       its row in section 3.3.
      - `5`: the requirement is knowledge of one product, for an implementation skill.
      - `boundary: <name>`: a neighbouring aspect owns the requirement. Write the name of a
        boundary of section 1 that has the state `(decided by the owner on <date>)`.

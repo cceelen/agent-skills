@@ -52,7 +52,6 @@ DECIDED_START = "decided by the owner"
 # The forms of the cell "Goes to" of a requirement. A requirement has no other exit.
 EXITS = (
     ("item", re.compile(r"(C-\d+)")),
-    ("decision", re.compile(r"3\.3:\s*(\S.*)")),
     ("skill", re.compile(r"(5)")),
     ("boundary", re.compile(r"boundary:\s*(\S.*)")),
     ("duplicate", re.compile(r"duplicate:\s*(R-\d+)")),
@@ -387,16 +386,18 @@ def pages_of(cell):
 def exit_of(cell):
     """(kind, name) of the cell "Goes to" of a requirement. The kind is None for a different text.
 
-    A requirement goes to a checklist item, to a decision of section 3.3, to an implementation
-    skill of section 5 or to a boundary of section 1, or it is a duplicate of a different row.
+    A requirement goes to a checklist item, to an implementation skill of section 5 or to a
+    boundary of section 1, or it is a duplicate of a different row.
 
-    >>> exit_of("C-02"), exit_of("3.3: How frequently to make a backup"), exit_of("5")
-    (('item', 'C-02'), ('decision', 'How frequently to make a backup'), ('skill', '5'))
+    >>> exit_of("C-02"), exit_of("5")
+    (('item', 'C-02'), ('skill', '5'))
     >>> exit_of("boundary: `recovery`"), exit_of("`duplicate: R-05`")
     (('boundary', 'recovery'), ('duplicate', 'R-05'))
 
-    Each other text is not an exit.
+    Each other text is not an exit. A decision of section 3.3 is not an exit.
 
+    >>> exit_of("3.3: How frequently to make a backup")
+    (None, '3.3: How frequently to make a backup')
     >>> other = ("one source only states it", "depends on context", "3.3", "C-02, C-03", "boundary:", None)
     >>> for cell in other:
     ...     print(exit_of(cell))
@@ -553,7 +554,7 @@ def load(folder):
 
     >>> [(r["id"], r["stakeholder"], view_of(r), r["goes to"]) for r in data["requirements"]][5:]
     [('R-06', 'operators', 'operation', 'duplicate: R-05'),
-     ('R-07', 'operators', 'operation', '3.3: How frequently to make a backup'),
+     ('R-07', 'operators', 'operation', 'C-05'),
      ('R-08', 'operators', 'operation', '5')]
     >>> data["requirements"][0]["_file"], [names_of(s["views"]) for s in data["sources"]][1:3]
     ('vetting.md', [['storage', 'operation'], ['operation']])
