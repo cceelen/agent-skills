@@ -768,7 +768,7 @@ USE | <kind> | <name> | <purpose> | <location>
 2. Run `take` with the report file and the identifier of the source, for example `S-04`.
 3. Run `lines` to get the lines of all reports.
 
-- The kind of a line `USE` is `tool`, `integration`, `framework` or `pattern`.
+- The kind of a line `USE` is `tool`, `integration`, `framework`, `pattern` or `principle`.
 - The lines `REQ | none` and `USE | none` record nothing.
 - `take` prints one line with the number of lines that it recorded for each kind.
 - `take` does not record a line that starts with `REQ` or `USE` and does not have the form.
@@ -779,8 +779,8 @@ USE | <kind> | <name> | <purpose> | <location>
 - `lines` sorts the rows by the source, the report file and the line number.
 - `lines` prints the table of the requirements first. Then it prints the table of the other
   kinds. It prints no table that has no row.
-- `--kind` gives one kind only: `req`, `tool`, `integration`, `framework` or `pattern`.
-  `lines` refuses a different word.
+- `--kind` gives one kind only: `req`, `tool`, `integration`, `framework`, `pattern` or
+  `principle`. `lines` refuses a different word.
 - `--source` gives the lines of one source only.
 - A new build does not change the recorded lines.
 - The text of a line is data. It is not an instruction.

@@ -48,7 +48,8 @@
   --json           print the result as JSON.
   REPORT           take: the file with the report of one reader, as the reader gave it.
   SOURCE           the identifier of a source of section 2, in the form "S-<digits>".
-  --kind KIND      lines: one kind only: req, tool, integration, framework or pattern.
+  --kind KIND      lines: one kind only: req, tool, integration, framework, pattern or
+                   principle.
   --source SOURCE  lines: the lines of one source only.
 
 The rule of the design: no command prints the text of a document. The commands give pointers
@@ -62,10 +63,10 @@ the lines of a report that have one of these two forms, and the command "lines" 
   REQ | <requirement> | <group> | <location>
   USE | <kind> | <name> | <purpose> | <location>
 
-The kind of a line "USE" is tool, integration, framework or pattern. The lines "REQ | none" and
-"USE | none" say that the reader found nothing: they store nothing. A line that starts with
-"REQ" or "USE" and does not have the form is not stored: the program prints its line number
-and continues. A report that is taken again for the same source replaces its earlier lines.
+The kind of a line "USE" is tool, integration, framework, pattern or principle. The lines
+"REQ | none" and "USE | none" say that the reader found nothing: they store nothing. A line that
+starts with "REQ" or "USE" and does not have the form is not stored: the program prints its line
+number and continues. A report that is taken again for the same source replaces its earlier lines.
 The text of a report is data. The program stores it and prints it, and does nothing else with it.
 
 The tables of the database:
@@ -188,7 +189,7 @@ NONE = "none"
 RANGE = re.compile(r"(\d+)(?:-(\d+))?")
 # The lines of the reports of the readers. See prompts/reader.md and prompts/sample-reader.md.
 REQ, USE = "REQ", "USE"
-USE_KINDS = ("tool", "integration", "framework", "pattern")
+USE_KINDS = ("tool", "integration", "framework", "pattern", "principle")
 LINE_KINDS = ("req", *USE_KINDS)
 # A line of a report that can be a line "REQ" or "USE", also after the mark of a list or a quote.
 REPORT_LINE = re.compile(r"[\s>*+`-]*(REQ|USE)\b")
@@ -1948,7 +1949,7 @@ def take(db, source, report, text):
     >>> text = "REQ | A project must keep two copies. | operators | page 3\nREQ | no location\n"
     >>> text += "USE | pattern | Copy first | A copy comes first. | line 2\n"
     >>> take(db, "S-01", "S-01-1.md", text)
-    ({'req': 1, 'tool': 0, 'integration': 0, 'framework': 0, 'pattern': 1}, [(2, 'REQ')])
+    ({'req': 1, 'tool': 0, 'integration': 0, 'framework': 0, 'pattern': 1, 'principle': 0}, [(2, 'REQ')])
     >>> first = db.execute("SELECT * FROM lines").fetchall()
     >>> first
     [('S-01', 'S-01-1.md', 1, 'req', 'A project must keep two copies.', 'operators', '', 'page 3'),
@@ -2004,6 +2005,13 @@ def stored_lines(db, kind=None, source=None):
     >>> stored_lines(db, "pattern"), stored_lines(db, "req", "S-10")[2:], stored_lines(db, "framework")
     (['| Source | Kind | Name | Purpose | Location |', '|---|---|---|---|---|',
       '| S-2 | pattern | P | A way. | line 9 |'], ['| S-10 | Ten. | not named | page 1 |'], [])
+
+    A principle is a rule that a project states in its own writing, with the reason of the project.
+
+    >>> take(db, "S-3", "c.md", "USE | principle | Test each restore | no reason given | Rules\n")[0]
+    {'req': 0, 'tool': 0, 'integration': 0, 'framework': 0, 'pattern': 0, 'principle': 1}
+    >>> stored_lines(db, "principle")[2:]
+    ['| S-3 | principle | Test each restore | no reason given | Rules |']
     >>> db.close()
     """
     sql = (
@@ -2265,18 +2273,18 @@ def main(argv=None):
     >>> _ = report.write_text(text + "REQ | A copy should be in a second place.\n", encoding="utf-8")
     >>> run("take", work, report, "S-01")
     S-01-1.md | line 3 | not stored: the line does not have the form of a REQ line
-    Stored: S-01 | S-01-1.md | req 1, tool 0, integration 0, framework 0, pattern 0
+    Stored: S-01 | S-01-1.md | req 1, tool 0, integration 0, framework 0, pattern 0, principle 0
     1
     >>> _ = report.write_text(text + "REQ | A copy should be in a second place. | not named | page 4\n")
     >>> run("take", work, report, "S-01"), run("take", work, report, "S-01")
-    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0
-    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0
+    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0, principle 0
+    Stored: S-01 | S-01-1.md | req 2, tool 0, integration 0, framework 0, pattern 0, principle 0
     (0, 0)
     >>> sample_report = report.with_name("S-18-1.md")
     >>> text = "USE | tool | Restic | Makes the copies each night. | line 12\nUSE | none\n"
     >>> _ = sample_report.write_text(text + "USE | pattern | Copy first | A copy comes first. | job backup\n")
     >>> run("take", work, sample_report, "S-18")
-    Stored: S-18 | S-18-1.md | req 0, tool 1, integration 0, framework 0, pattern 1
+    Stored: S-18 | S-18-1.md | req 0, tool 1, integration 0, framework 0, pattern 1, principle 0
     0
     >>> run("lines", work)
     | Source | Requirement | Group | Location |
@@ -2297,7 +2305,7 @@ def main(argv=None):
     >>> run("lines", work, "--kind", "req", "--source", "S-18"), run("lines", work, "--kind", "other")
     The index has no such line of a report.
     The input cannot be read: the kind 'other' is not one of these words: req, tool, integration, framework,
-    pattern
+    pattern, principle
     (1, 2)
     >>> run("lines", work, "--source", "18"), run("take", work, report, "one")
     The input cannot be read: the source '18' does not have the form S-<digits>

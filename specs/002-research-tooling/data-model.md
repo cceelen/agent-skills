@@ -150,7 +150,7 @@ same content. No table holds a current time.
 | synonyms | one term of one group | grp, term, origin (`acronym`, `file` or `glossary`) |
 | meta | the version of the patterns | key, value |
 | given | one range of pages that was given to a reader | document, first_page, last_page, task; the key is the document with the two pages |
-| lines | one line `REQ` or `USE` of the report of a reader | source (`S-<digits>`), report (the file name), line (the line number in the report), kind (`req`, `tool`, `integration`, `framework` or `pattern`), text (the requirement, or the name), who (the group; empty for a line `USE`), purpose (empty for a line `REQ`), location; the key is the source, the report and the line |
+| lines | one line `REQ` or `USE` of the report of a reader | source (`S-<digits>`), report (the file name), line (the line number in the report), kind (`req`, `tool`, `integration`, `framework`, `pattern` or `principle`), text (the requirement, or the name), who (the group; empty for a line `USE`), purpose (empty for a line `REQ`), location; the key is the source, the report and the line |
 
 A converted file with a different digest is read again. A different version of the patterns
 makes the index again. The tables aliases and synonyms, the references of the family

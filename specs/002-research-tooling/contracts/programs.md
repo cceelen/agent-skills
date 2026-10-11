@@ -270,7 +270,7 @@ index.py lines WORK [--kind KIND] [--source SOURCE]
   in the table `lines` of "Index" in `data-model.md`. The forms are
   `REQ | <requirement> | <group> | <location>` and
   `USE | <kind> | <name> | <purpose> | <location>`, with the kind `tool`, `integration`,
-  `framework` or `pattern`. `REQ | none` and `USE | none` store nothing.
+  `framework`, `pattern` or `principle`. `REQ | none` and `USE | none` store nothing.
   - `SOURCE` has the form `S-<digits>`. A different form gives the result code `2`.
   - Removes the earlier lines of the same file name and the same source first.
   - A line that starts with `REQ` or `USE`, also after the mark of a list or a quote, and
@@ -283,8 +283,8 @@ index.py lines WORK [--kind KIND] [--source SOURCE]
   line number. The table `| Source | Requirement | Group | Location |` has the lines of the
   kind `req`. The table `| Source | Kind | Name | Purpose | Location |` has the other kinds.
   An empty line is between the two tables. A table without a row is not printed.
-  - `--kind KIND`: one of `req`, `tool`, `integration`, `framework`, `pattern`. A different
-    word gives the result code `2`. `--source SOURCE`: one source.
+  - `--kind KIND`: one of `req`, `tool`, `integration`, `framework`, `pattern`, `principle`. A
+    different word gives the result code `2`. `--source SOURCE`: one source.
   - Result code `1` and one line that says so when no line is stored for the selection.
 - Result code `0`: done. `1`: nothing was found, a file was not indexed, a page is in no
   recorded range, or a line of a report does not have the form. `2`: the input cannot be read, an argument is wrong, or the folder has no
