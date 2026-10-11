@@ -422,6 +422,20 @@ full guide of 411 pages, one knowledge area was not read, and no person saw it b
 - [x] T153 In `specs/002-research-tooling/`: FR-055 and FR-056 in `spec.md`; the table `given`, the table "Reading" and the file `synonyms.txt` of a work folder in `data-model.md` and `contracts/`; the row of I-4 and the metric M-15 in `iterations.md`
 - [x] T154 Verify in a scratch folder outside each repository, with the file of the SWEBOK Guide: `ranges`, `given` for all ranges but two, `unread` with the result code 1, `unread --write` and `check.py` on a copy of a specification, then the two last ranges and the result code 0; a kit of `export.py` holds the new steps
 
+## Phase 22: Only the owner decides a boundary (iteration I-5)
+
+**Purpose**: FR-057. In the trial of I-3 the session sent each requirement of one concern to a
+boundary that it wrote itself. The check permitted it: section 1 named the boundary, and the
+session writes section 1.
+
+- [x] T155 In `.specify/templates/overrides/aspect-spec-template.md`: each boundary line of section 1 carries its state, `(proposed)` or `(decided by the owner on <YYYY-MM-DD>)`; the table "Proposed boundaries" in the description of `vetting.md`
+- [x] T156 In `factory/sota-research/scripts/aspect.py`: read the state of each boundary, a line without a state is proposed; read the table "Proposed boundaries"; the identifiers of requirements in a cell, with a range. In `scripts/sample.py`: the lines of three boundaries and the table, for the examples
+- [x] T157 In `factory/sota-research/scripts/check.py`: the rules `requirement-boundary-not-decided`, `boundary-state-unknown`, `boundary-without-date`, `proposed-boundary-without-row`, `proposed-row-unknown`, `proposed-row-decided` and `proposed-requirement-unknown`; the proposed boundaries and the stakeholders that they would leave with no requirement under what remains; the number of requirements that a proposed boundary would take in the part "Requirements"; the same with `--json`
+- [x] T158 In `factory/sota-research/references/procedure.md`: no exit to a boundary that the owner did not decide, and the row of a proposed boundary, in the step "Distil"; the proposed boundaries directly after the intent, the stakeholders and the views in phase 3, with the steps after a decision and after a decline; the boundaries in the refresh
+- [x] T159 In `docs/sota-research.md` and `CHANGELOG.md`: the states of a boundary and the table "Proposed boundaries"
+- [x] T160 In `specs/002-research-tooling/`: FR-057 in `spec.md`; the state of a boundary and the table "Proposed boundaries" in `data-model.md` and `contracts/`; the row of I-5 in `iterations.md`
+- [x] T161 Verify: the check on the specification of the trial I-3 fails for each requirement that goes to a boundary; in a copy outside each repository, the requirements of one boundary that is marked as decided pass; a kit of `export.py` holds the new text of the template and of the procedure
+
 ---
 
 ## Dependencies & Execution Order

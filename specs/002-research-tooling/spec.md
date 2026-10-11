@@ -552,6 +552,30 @@ synonyms. The references in a document and to other documents stay connected.
   converted file MUST report the first and the last page that it read, and each page of its
   range that it did not read, with the reason.
 
+Decision of the owner, 2026-10-11, after the trial of the iteration I-3: only the owner
+decides a boundary that takes requirements away from an aspect. In that trial the session
+sent each requirement of one concern to a boundary that it wrote itself.
+
+- **FR-057**: Each boundary of section 1 MUST have a state in its line: `(proposed)`, or
+  `(decided by the owner on <YYYY-MM-DD>)`. A line without a state is proposed. The session
+  MUST write a boundary as proposed, and only the owner decides it. A requirement MUST NOT go
+  to a boundary that the owner did not decide. `vetting.md` MUST hold a table "Proposed
+  boundaries" with one row for each proposed boundary: the boundary, the requirements of the
+  register that it would take, the stakeholders that it would leave with no requirement, and
+  the reason. The check MUST fail, outside the check of phase 1, when a requirement goes to a
+  boundary that the owner did not decide; when a state has a different form; when a decided
+  state has no date; when a proposed boundary has no row; when a row names a boundary that
+  section 1 does not have or that the owner decided; and when a row names a requirement that
+  the register does not have. The check MUST list under "What remains" each proposed
+  boundary with the number of requirements that it would take, and each stakeholder that a
+  proposed boundary would leave with no requirement in the aspect. The report MUST give, for
+  each view, the number of requirements that a proposed boundary would take, also in the
+  JSON report. In the review, the owner MUST get the proposed boundaries directly after the
+  intent, the stakeholders and the views. After the decision of the owner, the session
+  writes the state with the date and changes the exit of the requirements that the boundary
+  takes; it removes a boundary that the owner declined. In a refresh, a decided boundary
+  stays and a new boundary starts as proposed.
+
 ### Key Entities
 
 - **Aspect specification**: the source of a recipe. It holds the aspect, the sources, the
@@ -573,6 +597,8 @@ synonyms. The references in a document and to other documents stay connected.
   source. Each checklist item belongs to one view.
 - **Requirement**: one thing that a source says a project must or should do, with its
   stakeholder, its view, its source and its one exit.
+- **Boundary**: what one neighbouring aspect owns and what the aspect keeps, with its state:
+  proposed by the research, or decided by the owner with the date.
 
 - **Index**: the database of the converted documents of a work folder, with their pages,
   sections, references, acronyms, other names and synonyms, and with the page ranges that were

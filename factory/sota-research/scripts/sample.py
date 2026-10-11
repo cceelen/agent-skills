@@ -292,6 +292,27 @@ TARGET = "  - `restore drill`: three levels: no drill, one drill, a drill in eac
 REQUIREMENT_R02 = "| R-02 | Keep a copy of the backup in a second place. | owners of the data | storage | S-01 section 5 | C-03 |"
 REQUIREMENT_R07 = "| operation | S-01 section 3 | 3.3: How frequently to make a backup |"
 BOUNDARIES = "- **Boundaries**: the recovery of a complete site belongs to a different aspect. (judgement)"
+# A specification with named boundaries: one that the owner decided and two that are proposed.
+# A boundary line without a state is proposed.
+BOUNDARY_DECIDED = "  - `recovery`: a complete site. (decided by the owner on 2026-01-12) (judgement)"
+BOUNDARY_PROPOSED = "  - `tests`: the design of a test. (proposed) (judgement)"
+BOUNDARY_NO_STATE = "  - `archive`: records that are kept for the law. (judgement)"
+BOUNDARIES_NAMED = "\n".join((BOUNDARIES, BOUNDARY_DECIDED, BOUNDARY_PROPOSED, BOUNDARY_NO_STATE))
+PROPOSED_HEAD = (
+    "| Boundary | Requirements that it would take "
+    "| Stakeholders that it would leave with no requirement | Reason |"
+)
+PROPOSED_TESTS = "| tests | R-03 | none | A source gives the restore test to the aspect of the tests. |"
+PROPOSED_ARCHIVE = "| archive | none | none | No requirement of the sources is about such records. |"
+# The edit that gives the vetting record of the sample the table "Proposed boundaries".
+PROPOSED_TABLE = (
+    "vetting.md",
+    "## Reading",
+    "\n".join(
+        ("## Proposed boundaries", "", PROPOSED_HEAD, "|---|---|---|---|", PROPOSED_TESTS, PROPOSED_ARCHIVE)
+    )
+    + "\n\n## Reading",
+)
 READING_S01 = "| S-01 | S-01 | 6 | 1-6 | none |"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 

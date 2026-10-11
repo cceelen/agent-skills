@@ -26,6 +26,10 @@ reports are not comparable with new reports.
   exits. The check fails for an aspect specification without this table.
 - Each source names the views that it was read for, in the cell `Views`. The check lists each
   view with fewer than two sources of its own field.
+- Only the owner decides a boundary of an aspect. Each boundary has a state: `(proposed)`
+  or `(decided by the owner on <date>)`. The check fails for a requirement that goes to a
+  boundary that the owner did not decide. The table `Proposed boundaries` of `vetting.md`
+  shows the requirements that each proposed boundary would take.
 - The template of an aspect specification holds no example of a real concern.
 - `export.py` writes a neutral kit for a trial of the tooling.
 - `seed.py` retrieves the seed documents and standards of the factory into a work folder. The

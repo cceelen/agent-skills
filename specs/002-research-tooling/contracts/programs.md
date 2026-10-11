@@ -68,6 +68,25 @@ check.py SPEC --scope
   requirements and the number for each exit. With `--json`: the key `requirements`. Under
   "remains", one line for each view: `More than half of the requirements of the view '<name>'
   go to a boundary.` With `--json`: the key `boundaries` in `remains`.
+- Outside `--scope`, the state of each boundary of section 1 and the table "Proposed
+  boundaries" of `SPEC/vetting.md` are examined. `aspect.py` reads the state from the line of
+  the boundary: `(proposed)` or `(decided by the owner on <YYYY-MM-DD>)`; a line without a
+  state is `proposed`. Rule `requirement-boundary-not-decided`: the cell "Goes to" names a
+  boundary that the owner did not decide: `The requirement goes to the boundary '<name>'. The
+  owner did not decide this boundary. Give the requirement a different exit, and propose the
+  boundary to the owner.` Rule `boundary-state-unknown`: a state of a different form. Rule
+  `boundary-without-date`: a decided state without a date. Rule
+  `proposed-boundary-without-row`: a proposed boundary has no row in the table. Rule
+  `proposed-row-unknown`: a row for a boundary that section 1 does not have. Rule
+  `proposed-row-decided`: a row for a boundary that the owner decided. Rule
+  `proposed-requirement-unknown`: a row names a requirement that the table "Requirements"
+  does not have. Each line of the part "Requirements" ends with `a proposed boundary would
+  take: <n>`: the requirements of the view that a row names, and the requirements whose cell
+  "Goes to" names a proposed boundary. Under "remains": `Boundaries that wait for the decision
+  of the owner: <name> (<n> requirements).` and, one line for each, `The boundary '<name>'
+  would leave the stakeholder '<name>' with no requirement in the aspect.` With `--json`: the
+  key `a proposed boundary would take` in each row of `requirements`, and the keys
+  `proposed-boundaries` and `left-stakeholders` in `remains`.
 - A source of section 2 fails the check when its cell `Views` names a view that section 1
   does not have, or when the table has the cell and it is empty. Each line of the part
   "Views" ends with `sources read for the view: <n>`: the sources with the view in the cell

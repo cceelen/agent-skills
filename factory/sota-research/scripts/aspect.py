@@ -7,8 +7,10 @@
 
   load(folder)  reads spec.md, evidence.md, vetting.md and trial.md into plain dictionaries and lists
 
-The file vetting.md has four tables: "Sources", "Items", "Requirements" and "Reading". The
-table "Requirements" has one row for each requirement that a source states for a stakeholder.
+The file vetting.md has five tables: "Sources", "Items", "Requirements", "Proposed boundaries"
+and "Reading". The table "Requirements" has one row for each requirement that a source states
+for a stakeholder. The table "Proposed boundaries" has one row for each boundary of section 1
+that the owner did not decide, with the requirements that the boundary would take.
 The table "Reading" has one row for each converted document of a source, with the pages that
 the readers got and the pages that no reader got. The program index.py writes it.
 
@@ -20,6 +22,7 @@ in the section. Each row is a dictionary: the header names in lowercase are the 
 only a missing spec.md is an error.
 """
 
+import datetime
 import doctest
 import itertools
 import pathlib
@@ -38,6 +41,14 @@ PRINCIPLE = re.compile(r"\bconstitution ([IVX]+)\b", re.I)
 INTENT = "intent of the owner"
 STAKEHOLDERS = re.compile(r"\s*\(stakeholders:([^)]*)\)", re.I)
 PAGE_SPAN = re.compile(r"(\d+)(?:\s*[-\u2013]\s*(\d+))?")
+REQUIREMENT_ID = re.compile(r"\bR-\d+\b")
+REQUIREMENT_RANGE = re.compile(r"\bR-(\d+) to R-(\d+)\b")
+# The state of a boundary of section 1, in the line of the boundary: "(proposed)" or
+# "(decided by the owner on <YYYY-MM-DD>)". A line without a state is proposed.
+PROPOSED, DECIDED = "proposed", "decided"
+BOUNDARY_STATE = re.compile(r"\(\s*((?:proposed|decided)\b[^)]*)\)", re.I)
+DECIDED_ON = re.compile(r"decided by the owner on (\S+)")
+DECIDED_START = "decided by the owner"
 # The forms of the cell "Goes to" of a requirement. A requirement has no other exit.
 EXITS = (
     ("item", re.compile(r"(C-\d+)")),
@@ -404,6 +415,61 @@ def exit_of(cell):
     return None, cell
 
 
+def requirement_ids(cell):
+    """The identifiers of requirements in a cell. "R-02 to R-04" gives the three of them.
+
+    >>> requirement_ids("R-02 to R-04, R-09; `R-011`"), requirement_ids("none"), requirement_ids(None)
+    (['R-011', 'R-02', 'R-03', 'R-04', 'R-09'], [], [])
+    """
+    cell = cell or ""
+    ids = set(REQUIREMENT_ID.findall(cell))
+    for a, b in REQUIREMENT_RANGE.findall(cell):
+        width = len(a)
+        ids.update(f"R-{n:0{width}d}" for n in range(int(a), int(b) + 1))
+    return sorted(ids)
+
+
+def boundary_state(text):
+    """(state, detail) of the line of a boundary of section 1.
+
+    The state is "proposed" or "decided". A boundary takes a requirement away from the aspect
+    only after the owner decided it. The detail of a decided boundary is the date of the decision.
+    A line without a state is proposed.
+
+    >>> boundary_state("what it owns. (proposed) (S-01 section 5)"), boundary_state("it owns. (judgement)")
+    (('proposed', None), ('proposed', None))
+    >>> boundary_state("what it owns. (decided by the owner on 2026-01-12) (S-01 section 5)")
+    ('decided', '2026-01-12')
+
+    A decided state needs a date: the state is then "undated". Each other text that starts with
+    one of the two words is not a state: the state is then None, and the detail is the text.
+
+    >>> other = ("(decided by the owner in the review)", "(decided by the owner on 2026-13-40)")
+    >>> other += ("(decided by the session)", "(Proposed)", "(proposed by a reader)")
+    >>> for text in (*other, "(proposed) (decided by the owner on 2026-01-12)", None):
+    ...     print(boundary_state(text))
+    ('undated', 'decided by the owner in the review')
+    ('undated', 'decided by the owner on 2026-13-40')
+    (None, 'decided by the session')
+    (None, 'Proposed')
+    (None, 'proposed by a reader')
+    (None, 'proposed; decided by the owner on 2026-01-12')
+    ('proposed', None)
+    """
+    found = [state.strip() for state in BOUNDARY_STATE.findall(text or "")]
+    if not found or found == [PROPOSED]:
+        return PROPOSED, None
+    if len(found) > 1:
+        return None, "; ".join(found)
+    on = DECIDED_ON.fullmatch(found[0])
+    if on:
+        try:
+            return DECIDED, datetime.date.fromisoformat(on.group(1)).isoformat()
+        except ValueError:
+            return "undated", found[0]
+    return ("undated" if found[0].startswith(DECIDED_START) else None), found[0]
+
+
 def stakeholders_of(text):
     """The stakeholders that the line of a view names, in the form "(stakeholders: a, b)".
 
@@ -492,6 +558,20 @@ def load(folder):
     >>> data["requirements"][0]["_file"], [names_of(s["views"]) for s in data["sources"]][1:3]
     ('vetting.md', [['storage', 'operation'], ['operation']])
 
+    Each boundary of section 1 has a state. A boundary line without a state is proposed. The
+    table "Proposed boundaries" of vetting.md has one row for each proposed boundary.
+
+    >>> data["boundaries"], data["proposed_boundaries"]
+    ([], [])
+    >>> edits = (("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED), sample.PROPOSED_TABLE)
+    >>> data = load(sample.folder(*edits))
+    >>> [(b["name"], b["state"], b["date"]) for b in data["boundaries"]]
+    [('recovery', 'decided', '2026-01-12'), ('tests', 'proposed', None), ('archive', 'proposed', None)]
+    >>> rows = data["proposed_boundaries"]
+    >>> [(r["boundary"], r["requirements that it would take"], r["_file"]) for r in rows]
+    [('tests', 'R-03', 'vetting.md'), ('archive', 'none', 'vetting.md')]
+    >>> data = load(sample.folder())
+
     The table "Reading" of vetting.md has one row for each converted document of a source.
 
     >>> data["has_reading"], [(r["source"], r["document"], r["pages"]) for r in data["reading"]]
@@ -518,8 +598,8 @@ def load(folder):
     >>> data = load(folder)
     >>> data["evidence"], data["vetting_items"], data["has_vetting"], data["trials"], data["trial_findings"]
     ([], [], False, [], [])
-    >>> data["requirements"], data["reading"], data["has_reading"]
-    ([], [], False)
+    >>> data["requirements"], data["proposed_boundaries"], data["reading"], data["has_reading"]
+    ([], [], [], False)
     >>> (folder / "spec.md").unlink()
     >>> load(folder)
     Traceback (most recent call last):
@@ -563,6 +643,7 @@ def load(folder):
         "vetting_sources": [],
         "vetting_items": [],
         "requirements": [],
+        "proposed_boundaries": [],
         "reading": [],
         "has_reading": False,
         "has_vetting": False,
@@ -573,8 +654,13 @@ def load(folder):
     data["views"] = data["aspect"].get("views", {}).get("items", [])
     data["targets"] = data["aspect"].get("targets", {}).get("items", [])
     data["stakeholders"] = data["aspect"].get("stakeholders", {}).get("items", [])
+    data["boundaries"] = data["aspect"].get("boundaries", {}).get("items", [])
     for view in data["views"]:
         view["stakeholders"] = stakeholders_of(view["text"])
+    for boundary in data["boundaries"]:
+        boundary["state"], detail = boundary_state(boundary["text"])
+        boundary["date"] = detail if boundary["state"] == DECIDED else None
+        boundary["state text"] = detail if boundary["state"] != DECIDED else None
     intent = data["aspect"].get(INTENT, {})
     whole = {"name": INTENT, "text": intent.get("value"), "_line": intent.get("_line")}
     data["intent"] = intent.get("items") or ([whole] if whole["text"] else [])
@@ -586,6 +672,7 @@ def load(folder):
             ("Sources", "vetting_sources"),
             ("Items", "vetting_items"),
             ("Requirements", "requirements"),
+            ("Proposed boundaries", "proposed_boundaries"),
             ("Reading", "reading"),
         ),
         "trial.md": (("Trials", "trials"), ("Findings", "trial_findings")),

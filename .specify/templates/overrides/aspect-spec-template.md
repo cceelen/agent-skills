@@ -47,8 +47,15 @@ source, or says `(judgement)`. A use case is chosen only when the recipe is appl
   answer, and the source.
   - `[name]`: [question] [Opinion: the opinion of the kit on the answer] ([source])
   - `[name]`: [question] [Opinion: the opinion of the kit on the answer] ([source])
-- **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each.
-  - `[name]`: [what it owns; what this aspect keeps] ([source])
+- **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each:
+  a short name, what the neighbouring aspect owns and what this aspect keeps, the state, and
+  the source. A boundary has one of two states. Write the state in one of these forms, before
+  the source. `(proposed)`: the research proposes the boundary, and it takes no requirement.
+  `(decided by the owner on <YYYY-MM-DD>)`: the owner decided the boundary on that date, and
+  a requirement can go to it. Only the owner decides a boundary. A line without a state is
+  proposed.
+  - `[name]`: [what it owns; what this aspect keeps] (proposed) ([source])
+  - `[name]`: [what it owns; what this aspect keeps] (decided by the owner on [YYYY-MM-DD]) ([source])
 - **Targets**: the measurable results that a project reaches when it applies the recipe. The
   targets come from the sources in the research; the owner can name one in the intent. One
   line each: the name, the scale with its levels, the program or the method that measures it,
@@ -192,6 +199,11 @@ Terms that mean different things in the sources. One preferred form per meaning.
     stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
   - The cell "Goes to" has one of these forms: `C-<nn>`, `3.3: <decision>`, `5`,
     `boundary: <name>` or `duplicate: R-<nn>`. A requirement has no other exit.
+  - A requirement goes only to a boundary that the owner decided.
+  - The table "Proposed boundaries" has one row for each boundary of section 1 with the state
+    `(proposed)`. Its columns are Boundary, Requirements that it would take, Stakeholders that
+    it would leave with no requirement, and Reason. The cell of the requirements holds
+    identifiers of the table "Requirements", or `none`.
   - Each checklist item holds a requirement, or its cell "Admitted by" is `own rule`.
 - `trial.md`: the record of the trials of the recipe on a project. This file is optional.
   - The table "Trials" has one row for each trial. Its columns are Id, Date, Project, Commit

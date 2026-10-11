@@ -45,6 +45,12 @@ Rubric for sources: version <n>. Rubric for items: version <n>.
 |---|---|---|---|---|---|
 | R-01 | <one sentence> | <stakeholder> | <view> | S-14 finding 1 | C-07 |
 
+## Proposed boundaries
+
+| Boundary | Requirements that it would take | Stakeholders that it would leave with no requirement | Reason |
+|---|---|---|---|
+| <name> | R-02, R-05 to R-07 | <stakeholders, or none> | <reason and source> |
+
 ## Reading
 
 The program `index.py unread --write` writes this table. Do not change it by hand.
@@ -56,7 +62,15 @@ The program `index.py unread --write` writes this table. Do not change it by han
 
 - The session writes the table "Requirements": one row for each requirement that a source
   states for a stakeholder. The cell "Goes to" is `C-<nn>`, `3.3: <decision>`, `5`,
-  `boundary: <name>` or `duplicate: R-<nn>`. No program writes this table.
+  `boundary: <name>` or `duplicate: R-<nn>`. No program writes this table. A requirement
+  goes only to a boundary that the owner decided.
+- The session writes the table "Proposed boundaries": one row for each boundary of section 1
+  with the state `proposed`. The cell of the requirements holds identifiers of the table
+  "Requirements", a range in the form `R-<nn> to R-<nn>`, or `none`. No program writes this
+  table. The session removes the row when the owner decides or declines the boundary.
+- Each line of the field `Boundaries` of section 1 of `spec.md` holds the state of the
+  boundary, before the source: `(proposed)` or `(decided by the owner on <YYYY-MM-DD>)`. A
+  line without a state is `proposed`.
 - `index.py unread --write SPEC` writes the part "Reading" and replaces it in a later run. No
   person and no session writes it. It has one row for each converted document of the work
   folder that is a source of section 2. `Pages` is the number of pages. `Given to readers`

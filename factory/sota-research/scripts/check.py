@@ -40,12 +40,23 @@ forms, and no other:
   C-<nn>              the checklist item that holds the requirement
   3.3: <decision>     a decision that depends on context; the cell Decision of its row in section 3.3
   5                   knowledge of one product, for an implementation skill
-  boundary: <name>    a neighbouring aspect owns the requirement; a boundary of section 1
+  boundary: <name>    a neighbouring aspect owns the requirement; a boundary of section 1 that
+                      the owner decided
   duplicate: R-<nn>   the same requirement from a second source; a row that is not a duplicate
 
 Each item that is not retired holds a requirement, or its cell "Admitted by" is "own rule". Each
 stakeholder of section 1 has a requirement. The report gives the requirements of each view by
 their exit. A view with more than half of its requirements at a boundary remains.
+
+Each boundary of section 1 has a state in its line: "(proposed)", or "(decided by the owner on
+<YYYY-MM-DD>)". A line without a state is proposed. Only the owner decides a boundary. A
+requirement that goes to a boundary that the owner did not decide fails. The table "Proposed
+boundaries" of vetting.md has one row for each proposed boundary: the boundary, the requirements
+of the register that it would take, the stakeholders that it would leave with no requirement, and
+the reason. A proposed boundary without a row fails. A row for a boundary that section 1 does not
+have or that the owner decided fails. A row that names a requirement that the register does not
+have fails. Each proposed boundary remains, with the number of requirements that it would take.
+Each stakeholder that a proposed boundary would leave with no requirement in the aspect remains.
 
 The cell "Views" of a source in section 2 names the views that the source was read for, or "all"
 for a body of knowledge. A specification of an earlier revision has no such cell: this fails
@@ -88,6 +99,10 @@ EXIT_WORDS = {
     "duplicate": "duplicates",
 }
 OWN_RULE = "own rule"
+# The words of the report for the requirements of a view that a proposed boundary would take.
+WOULD_TAKE = "a proposed boundary would take"
+# The keys of what remains that give one line for each entry.
+ONE_LINE_EACH = ("boundaries", "left-stakeholders")
 SCOPE_FIELDS = ("aspect", "field and disciplines", "agreed with the owner on")
 FINDING_FIELDS = ("contexts", "boundaries")
 NO_ANSWER = "(no answer)"
@@ -172,6 +187,30 @@ MESSAGES = {
     "requirement-boundary-unknown": (
         "The requirement goes to the boundary '{0}'. Section 1 does not have this boundary."
     ),
+    "requirement-boundary-not-decided": (
+        "The requirement goes to the boundary '{0}'. The owner did not decide this boundary. "
+        "Give the requirement a different exit, and propose the boundary to the owner."
+    ),
+    "boundary-state-unknown": (
+        "The state '{0}' of the boundary is not permitted. "
+        "Use '(proposed)' or '(decided by the owner on <YYYY-MM-DD>)'."
+    ),
+    "boundary-without-date": (
+        "The boundary '{0}' is decided and has no date. Use '(decided by the owner on <YYYY-MM-DD>)'."
+    ),
+    "proposed-boundary-without-row": (
+        "The boundary '{0}' is proposed. The table 'Proposed boundaries' of vetting.md has no row for it."
+    ),
+    "proposed-row-unknown": (
+        "The table 'Proposed boundaries' has a row for '{0}'. Section 1 does not have this boundary."
+    ),
+    "proposed-row-decided": (
+        "The table 'Proposed boundaries' has a row for '{0}'. The owner decided this boundary. "
+        "Remove the row."
+    ),
+    "proposed-requirement-unknown": (
+        "The row of the boundary '{0}' names '{1}'. The table Requirements does not have this row."
+    ),
     "requirement-duplicate-unknown": (
         "The requirement is a duplicate of '{0}'. The table Requirements does not have this row."
     ),
@@ -208,7 +247,7 @@ MESSAGES = {
     "requirements-head": "Requirements of the sources, with the number for each view and where they go:",
     "requirement-line": (
         "{0}: requirements: {1}, to an item: {2}, to a decision: {3}, to an implementation skill: {4}, "
-        "to a boundary: {5}, duplicates: {6}."
+        "to a boundary: {5}, duplicates: {6}, a proposed boundary would take: {7}."
     ),
     "answers": "Answers of risk and reward: {0} with a source, {1} by judgement.",
     "answers-other": "Answers of risk and reward without a source and without 'judgement': {0}.",
@@ -224,6 +263,11 @@ MESSAGES = {
     "remains-viewpoints": "Trial findings with a viewpoint that was not checked: {0}. The list is absent.",
     "remains-stakeholders": "Stakeholders that are in no view: {0}.",
     "remains-boundaries": "More than half of the requirements of the view '{0}' go to a boundary.",
+    "remains-proposed-boundaries": "Boundaries that wait for the decision of the owner: {0}.",
+    "boundary-takes": "{0} ({1} requirements)",
+    "remains-left-stakeholders": (
+        "The boundary '{0}' would leave the stakeholder '{1}' with no requirement in the aspect."
+    ),
     "remains-own-sources": "Views with fewer than two sources of their own field that were read: {0}.",
     "remains-unread": "Sources with pages that no reader got: {0}.",
     "remains-no-reading": "The table Reading is absent. Run index.py unread with --write.",
@@ -1030,6 +1074,182 @@ def boundary_names(data):
     return {item["name"] for item in data["aspect"].get("boundaries", {}).get("items", [])}
 
 
+def boundaries_in_state(data, state):
+    """The names of the boundaries of section 1 that have this state, in the order of section 1.
+
+    >>> import sample
+    >>> data = sample.load(("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED))
+    >>> boundaries_in_state(data, aspect.DECIDED), boundaries_in_state(data, aspect.PROPOSED)
+    (['recovery'], ['tests', 'archive'])
+    >>> boundaries_in_state(sample.load(), aspect.PROPOSED)
+    []
+    """
+    return [b["name"] for b in data["boundaries"] if b["state"] == state]
+
+
+def row_boundary(row):
+    """The name of the boundary in a row of the table "Proposed boundaries".
+
+    >>> row_boundary({"boundary": " `tests` "}), row_boundary({})
+    ('tests', '')
+    """
+    return row.get("boundary", "").strip().strip("`").strip()
+
+
+def proposed_takes(data):
+    """For each proposed boundary of section 1: the requirements of the register that it would take.
+
+    These are the requirements that its row in the table "Proposed boundaries" names. A requirement
+    whose cell "Goes to" names the boundary counts also: the check fails for it, and the owner sees
+    the number. The identifiers are sorted.
+
+    >>> import sample
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> proposed_takes(sample.load(named, sample.PROPOSED_TABLE)), proposed_takes(sample.load())
+    ({'tests': ['R-03'], 'archive': []}, {})
+    >>> row = sample.PROPOSED_ARCHIVE
+    >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-07 to R-09, R-01 | none |"))
+    >>> exit = ("vetting.md", "| S-01 section 5 | C-03 |", "| S-01 section 5 | boundary: archive |")
+    >>> proposed_takes(sample.load(named, sample.PROPOSED_TABLE, more, exit))["archive"]
+    ['R-01', 'R-02', 'R-07', 'R-08']
+    """
+    known = {row.get("id", "") for row in data["requirements"]}
+    takes = {name: set() for name in boundaries_in_state(data, aspect.PROPOSED)}
+    for row in data["proposed_boundaries"]:
+        if row_boundary(row) in takes:
+            ids = aspect.requirement_ids(row.get("requirements that it would take"))
+            takes[row_boundary(row)].update(ident for ident in ids if ident in known)
+    for row in data["requirements"]:
+        kind, name = aspect.exit_of(row.get("goes to"))
+        if kind == "boundary" and name in takes:
+            takes[name].add(row.get("id", ""))
+    return {name: sorted(ids) for name, ids in takes.items()}
+
+
+def waiting_boundaries(data):
+    """The proposed boundaries, each with the number of requirements that it would take.
+
+    >>> import sample
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> waiting_boundaries(sample.load(named, sample.PROPOSED_TABLE)), waiting_boundaries(sample.load())
+    (['tests (1 requirements)', 'archive (0 requirements)'], [])
+    """
+    return [MESSAGES["boundary-takes"].format(name, len(ids)) for name, ids in proposed_takes(data).items()]
+
+
+def left_stakeholders(data):
+    """Each [boundary, stakeholder]: the proposed boundary would take each requirement of the stakeholder.
+
+    A requirement that goes to a boundary that the owner decided is not in the aspect. A
+    stakeholder that has no requirement in the aspect before the proposal is not in this list.
+
+    >>> import sample
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE)), left_stakeholders(sample.load())
+    ([], [])
+    >>> row = sample.PROPOSED_ARCHIVE
+    >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-01, R-02 | owners of the data |"))
+    >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE, more))
+    [['archive', 'owners of the data']]
+
+    Here the boundary "archive" would take R-02 only. When R-01 goes to the boundary "recovery",
+    which the owner decided, no requirement of the owners of the data stays in the aspect.
+
+    >>> one = ("vetting.md", row, row.replace("| none | none |", "| R-02 | owners of the data |"))
+    >>> away = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
+    >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE, one))
+    []
+    >>> left_stakeholders(sample.load(named, sample.PROPOSED_TABLE, one, away))
+    [['archive', 'owners of the data']]
+    """
+    decided = set(boundaries_in_state(data, aspect.DECIDED))
+    kept = {}
+    for row in data["requirements"]:
+        kind, name = aspect.exit_of(row.get("goes to"))
+        if kind != "boundary" or name not in decided:
+            for holder in aspect.names_of(row.get("stakeholder")):
+                kept.setdefault(holder, set()).add(row.get("id", ""))
+    out = []
+    for boundary, ids in proposed_takes(data).items():
+        for holder in data["stakeholders"]:
+            rows = kept.get(holder["name"])
+            if rows and rows <= set(ids) and [boundary, holder["name"]] not in out:
+                out.append([boundary, holder["name"]])
+    return out
+
+
+def check_boundaries(data):
+    r"""The state of each boundary of section 1, and the table "Proposed boundaries" of vetting.md.
+
+    Only the owner decides a boundary. The line of a boundary holds its state: "(proposed)", or
+    "(decided by the owner on <YYYY-MM-DD>)". A line without a state is proposed.
+
+    >>> import sample
+    >>> check_boundaries(sample.load())
+    []
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> check_boundaries(sample.load(named, sample.PROPOSED_TABLE))
+    []
+    >>> def planted(old, new, file="spec.md"):
+    ...     found = check_boundaries(sample.load(named, sample.PROPOSED_TABLE, (file, old, new)))
+    ...     return [(f["rule"], f["id"], f["file"], f["line"], f["text"]) for f in found]
+
+    A state that is none of the two forms fails. A decided state without a date fails.
+
+    >>> planted("(proposed)", "(proposed by a reader)")
+    [('boundary-state-unknown', 'tests', 'spec.md', 21,
+      "The state 'proposed by a reader' of the boundary is not permitted. Use '(proposed)' or '(decided by
+      the owner on <YYYY-MM-DD>)'.")]
+    >>> planted("(decided by the owner on 2026-01-12)", "(decided by the owner)")
+    [('boundary-without-date', 'recovery', 'spec.md', 20,
+      "The boundary 'recovery' is decided and has no date. Use '(decided by the owner on <YYYY-MM-DD>)'.")]
+
+    Each proposed boundary has a row in the table "Proposed boundaries".
+
+    >>> planted(sample.PROPOSED_ARCHIVE + "\n", "", "vetting.md")
+    [('proposed-boundary-without-row', 'archive', 'spec.md', 22,
+      "The boundary 'archive' is proposed. The table 'Proposed boundaries' of vetting.md has no row for it.")]
+    >>> brief(check_boundaries(sample.load(named)))
+    [('proposed-boundary-without-row', 'tests'), ('proposed-boundary-without-row', 'archive')]
+
+    A row names a proposed boundary of section 1, and requirements of the register.
+
+    >>> planted("| tests | R-03 |", "| quality | R-03 |", "vetting.md")[1]
+    ('proposed-row-unknown', 'quality', 'vetting.md', 39,
+     "The table 'Proposed boundaries' has a row for 'quality'. Section 1 does not have this boundary.")
+    >>> planted("| tests | R-03 |", "| recovery | R-03 |", "vetting.md")[1]
+    ('proposed-row-decided', 'recovery', 'vetting.md', 39,
+     "The table 'Proposed boundaries' has a row for 'recovery'. The owner decided this boundary. Remove the
+     row.")
+    >>> planted("| tests | R-03 |", "| tests | R-03, R-19 |", "vetting.md")
+    [('proposed-requirement-unknown', 'tests', 'vetting.md', 39,
+      "The row of the boundary 'tests' names 'R-19'. The table Requirements does not have this row.")]
+    """
+    out = []
+    rows = data["proposed_boundaries"]
+    with_row = {row_boundary(row) for row in rows}
+    states = {b["name"]: b["state"] for b in data["boundaries"]}
+    for boundary in data["boundaries"]:
+        name = boundary["name"]
+        if boundary["state"] is None:
+            out.append(finding("boundary-state-unknown", boundary, name, boundary["state text"]))
+        elif boundary["state"] == "undated":
+            out.append(finding("boundary-without-date", boundary, name, name))
+        elif boundary["state"] == aspect.PROPOSED and name not in with_row:
+            out.append(finding("proposed-boundary-without-row", boundary, name, name))
+    known = {row.get("id", "") for row in data["requirements"]}
+    for row in rows:
+        name = row_boundary(row)
+        if name not in states:
+            out.append(finding("proposed-row-unknown", row, name, name))
+        elif states[name] == aspect.DECIDED:
+            out.append(finding("proposed-row-decided", row, name, name))
+        for ident in aspect.requirement_ids(row.get("requirements that it would take")):
+            if ident not in known:
+                out.append(finding("proposed-requirement-unknown", row, name, name, ident))
+    return out
+
+
 def exit_fault(data, kind, name):
     """The rule that the exit of a requirement fails, or None. See check_requirements.
 
@@ -1048,7 +1268,10 @@ def exit_fault(data, kind, name):
         known = {r.get("decision", "").strip().lower() for r in data["context_decisions"]}
         return None if name.lower() in known else "requirement-decision-unknown"
     if kind == "boundary":
-        return None if name in boundary_names(data) else "requirement-boundary-unknown"
+        if name not in boundary_names(data):
+            return "requirement-boundary-unknown"
+        decided = boundaries_in_state(data, aspect.DECIDED)
+        return None if name in decided else "requirement-boundary-not-decided"
     if kind == "duplicate":
         exits = {r.get("id"): aspect.exit_of(r.get("goes to"))[0] for r in data["requirements"]}
         if name not in exits:
@@ -1100,7 +1323,7 @@ def check_requirements(data):
     ('requirement-cell-empty', "The cell 'goes to' of the requirement is empty.")
 
     An exit names a row that exists: an item that is not retired, a decision of section 3.3, a
-    boundary of section 1, or a requirement that is not a duplicate.
+    boundary of section 1 that the owner decided, or a requirement that is not a duplicate.
 
     >>> goes("C-09")
     [('requirement-item-unknown', 'R-07',
@@ -1114,9 +1337,19 @@ def check_requirements(data):
     >>> goes("boundary: recovery")
     [('requirement-boundary-unknown', 'R-07',
       "The requirement goes to the boundary 'recovery'. Section 1 does not have this boundary.")]
-    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
-    >>> goes("boundary: recovery", ("spec.md", sample.BOUNDARIES, named))
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> goes("boundary: recovery", named)
     []
+
+    Only the owner decides a boundary. A requirement does not go to a proposed boundary, and not
+    to a boundary without a state.
+
+    >>> goes("boundary: tests", named)
+    [('requirement-boundary-not-decided', 'R-07',
+      "The requirement goes to the boundary 'tests'. The owner did not decide this boundary. Give the
+      requirement a different exit, and propose the boundary to the owner.")]
+    >>> goes("boundary: archive", named)[0][:2]
+    ('requirement-boundary-not-decided', 'R-07')
     >>> goes("duplicate: R-19")
     [('requirement-duplicate-unknown', 'R-07',
       "The requirement is a duplicate of 'R-19'. The table Requirements does not have this row.")]
@@ -1214,17 +1447,25 @@ def requirement_counts(data):
     >>> import sample
     >>> for view in requirement_counts(sample.load()):
     ...     print(*view.values())
-    operation 6 3 1 1 0 1
-    storage 2 2 0 0 0 0
+    operation 6 3 1 1 0 1 0
+    storage 2 2 0 0 0 0 0
     >>> list(view)
     ['view', 'requirements', 'to an item', 'to a decision', 'to an implementation skill', 'to a boundary',
-     'duplicates']
+     'duplicates', 'a proposed boundary would take']
+
+    The last number is the number of requirements of the view that a proposed boundary would take.
+
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> [view[WOULD_TAKE] for view in requirement_counts(sample.load(named, sample.PROPOSED_TABLE))]
+    [1, 0]
     """
     out = []
+    taken = {ident for ids in proposed_takes(data).values() for ident in ids}
     for view in sorted(data["views"], key=lambda v: (v["name"], v["_line"])):
         rows = [r for r in data["requirements"] if aspect.view_of(r) == view["name"]]
         kinds = [aspect.exit_of(r.get("goes to"))[0] for r in rows]
         exits = {words: kinds.count(kind) for kind, words in EXIT_WORDS.items()}
+        exits[WOULD_TAKE] = sum(r.get("id", "") in taken for r in rows)
         out.append({"view": view["name"], "requirements": len(rows), **exits})
     return out
 
@@ -1232,13 +1473,13 @@ def requirement_counts(data):
 def views_emptied_by_boundaries(data):
     r"""The views with more than half of their requirements at a boundary, sorted.
 
-    The owner sees such a view: the boundaries took most of what the sources state for it.
+    The owner sees such a view: the boundaries that the owner decided took most of what the
+    sources state for it.
 
     >>> import sample
     >>> views_emptied_by_boundaries(sample.load())
     []
-    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
-    >>> named = ("spec.md", sample.BOUNDARIES, named)
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
     >>> row = sample.REQUIREMENT_R02
     >>> away = ("vetting.md", row, row.replace("| C-03 |", "| boundary: recovery |"))
     >>> views_emptied_by_boundaries(sample.load(named, away))
@@ -1626,13 +1867,13 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains = run_checks(sample.load())
     >>> found, remains
     ([], {'levels': [], 'basics': [], 'vettings': [], 'waiting': [], 'judgement': ['C-04'], 'changed': [],
-          'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'own-sources': [],
-          'unread': []})
+          'trial': [], 'viewpoints': [], 'stakeholders': [], 'boundaries': [], 'proposed-boundaries': [],
+          'left-stakeholders': [], 'own-sources': [], 'unread': []})
 
     A view that the boundaries emptied remains. A view with fewer than two sources of its own
     field remains also.
 
-    >>> named = sample.BOUNDARIES + chr(10) + "  - `recovery`: a complete site. (judgement)"
+    >>> named = sample.BOUNDARIES + chr(10) + sample.BOUNDARY_DECIDED
     >>> away = [
     ...     ("vetting.md", f"| S-01 section {n} | C-0{c} |", f"| S-01 section {n} | boundary: recovery |")
     ...     for n, c in ((2, 1), (5, 3))
@@ -1641,6 +1882,22 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
     >>> found, remains = run_checks(sample.load(("spec.md", sample.BOUNDARIES, named), whole, *away))
     >>> brief(found), remains["boundaries"], remains["own-sources"]
     ([('item-without-requirement', 'C-01'), ('item-without-requirement', 'C-03')], ['storage'], ['storage'])
+
+    A proposed boundary remains, with the number of requirements that it would take. A
+    stakeholder that it would leave with no requirement in the aspect remains also. A requirement
+    that goes to a proposed boundary fails the check.
+
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> row = sample.PROPOSED_ARCHIVE
+    >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-01, R-02 | owners of the data |"))
+    >>> found, remains = run_checks(sample.load(named, sample.PROPOSED_TABLE, more))
+    >>> found, remains["proposed-boundaries"], remains["left-stakeholders"]
+    ([], ['tests (1 requirements)', 'archive (2 requirements)'], [['archive', 'owners of the data']])
+    >>> exit = ("vetting.md", "| S-01 section 5 | C-03 |", "| S-01 section 5 | boundary: archive |")
+    >>> found, remains = run_checks(sample.load(named, sample.PROPOSED_TABLE, exit))
+    >>> brief(found), remains["proposed-boundaries"]
+    ([('item-without-requirement', 'C-03'), ('requirement-boundary-not-decided', 'R-02')],
+     ['tests (1 requirements)', 'archive (1 requirements)'])
 
     What remains does not fail the check: a pending level, a pending vetting, a changed text.
 
@@ -1693,6 +1950,7 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         + check_views(data)
         + check_stakeholders(data)
         + check_requirements(data)
+        + check_boundaries(data)
         + check_reading(data)
         + basics
         + check_evidence(data)
@@ -1722,6 +1980,8 @@ def run_checks(data, previous_rows=None, words=(), viewpoints_file=VIEWPOINTS_FI
         "viewpoints": unchecked_viewpoints(data, viewpoints_file),
         "stakeholders": stakeholders_without_view(data),
         "boundaries": views_emptied_by_boundaries(data),
+        "proposed-boundaries": waiting_boundaries(data),
+        "left-stakeholders": left_stakeholders(data),
         "own-sources": views_with_few_sources(data),
         "unread": unread_sources(data),
     }
@@ -1770,9 +2030,9 @@ def report(data, found, remains, previous_given):
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
-      to a boundary: 0, duplicates: 1.
+      to a boundary: 0, duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
-      to a boundary: 0, duplicates: 0.
+      to a boundary: 0, duplicates: 0, a proposed boundary would take: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - Items that need judgement: C-04.
@@ -1794,9 +2054,9 @@ def report(data, found, remains, previous_given):
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
-      to a boundary: 0, duplicates: 1.
+      to a boundary: 0, duplicates: 1, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
-      to a boundary: 0, duplicates: 0.
+      to a boundary: 0, duplicates: 0, a proposed boundary would take: 0.
     Answers of risk and reward: 8 with a source, 22 by judgement.
     What remains:
     - The owner did not accept the specification.
@@ -1829,7 +2089,7 @@ def report(data, found, remains, previous_given):
     A view that the boundaries emptied remains, with one line for each view. A view with fewer
     than two sources of its own field remains also.
 
-    >>> named = sample.BOUNDARIES + "\n  - `recovery`: a complete site. (judgement)"
+    >>> named = sample.BOUNDARIES + "\n" + sample.BOUNDARY_DECIDED
     >>> row = sample.REQUIREMENT_R02
     >>> away = ("vetting.md", "| S-01 section 2 | C-01 |", "| S-01 section 2 | boundary: recovery |")
     >>> second = ("vetting.md", "| S-02 section 4 | C-02 |", "| S-02 section 4 | C-01 |")
@@ -1845,11 +2105,33 @@ def report(data, found, remains, previous_given):
     >>> print("\n".join([lines[0], lines[6], *lines[8:]]))
     No check fails.
     - storage: requirements: 2, to an item: 0, to a decision: 0, to an implementation skill: 0,
-      to a boundary: 2, duplicates: 0.
+      to a boundary: 2, duplicates: 0, a proposed boundary would take: 0.
     What remains:
     - Items that need judgement: C-04.
     - More than half of the requirements of the view 'storage' go to a boundary.
     - Views with fewer than two sources of their own field that were read: storage.
+    Accepted: A. Person, 2026-01-15.
+
+    A proposed boundary remains, with the number of requirements that it would take. The part
+    "Requirements" gives that number for each view. A stakeholder that a proposed boundary would
+    leave with no requirement in the aspect remains, with one line for each.
+
+    >>> named = ("spec.md", sample.BOUNDARIES, sample.BOUNDARIES_NAMED)
+    >>> row = sample.PROPOSED_ARCHIVE
+    >>> more = ("vetting.md", row, row.replace("| none | none |", "| R-01, R-02 | owners of the data |"))
+    >>> data = sample.load(named, sample.PROPOSED_TABLE, more)
+    >>> lines = report(data, *run_checks(data), previous_given=True).splitlines()
+    >>> print("\n".join([lines[0], *lines[5:7], *lines[8:]]))
+    No check fails.
+    - operation: requirements: 6, to an item: 3, to a decision: 1, to an implementation skill: 1,
+      to a boundary: 0, duplicates: 1, a proposed boundary would take: 1.
+    - storage: requirements: 2, to an item: 2, to a decision: 0, to an implementation skill: 0,
+      to a boundary: 0, duplicates: 0, a proposed boundary would take: 2.
+    What remains:
+    - Items that need judgement: C-04.
+    - Boundaries that wait for the decision of the owner: tests (1 requirements), archive (2 requirements).
+    - The boundary 'archive' would leave the stakeholder 'owners of the data' with no requirement in the
+      aspect.
     Accepted: A. Person, 2026-01-15.
 
     An open finding of a trial remains. A recipe without a trial remains also.
@@ -1921,7 +2203,7 @@ def report(data, found, remains, previous_given):
     views = ["- " + MESSAGES["view-line"].format(*(v[k] for k in keys)) for v in view_counts(data)]
     if views:
         lines += [MESSAGES["views-head"], *views]
-    keys = ("view", "requirements", *EXIT_WORDS.values())
+    keys = ("view", "requirements", *EXIT_WORDS.values(), WOULD_TAKE)
     counts = requirement_counts(data) if data["requirements"] else []
     if counts:
         lines.append(MESSAGES["requirements-head"])
@@ -1929,9 +2211,11 @@ def report(data, found, remains, previous_given):
     lines += answer_lines(data)
     rest = [] if intent_asked(data) else [MESSAGES["remains-intent"]]
     for key, ids in remains.items():
-        # The key "boundaries" gives one line for each view.
-        groups = [[name] for name in ids] if key == "boundaries" else [ids]
-        rest += [MESSAGES[f"remains-{key}"].format(", ".join(group)) for group in groups if group]
+        if key in ONE_LINE_EACH:
+            # One line for each entry. An entry is one name, or a list with one name for each place.
+            rest += [MESSAGES[f"remains-{key}"].format(*([e] if isinstance(e, str) else e)) for e in ids]
+        elif ids:
+            rest.append(MESSAGES[f"remains-{key}"].format(", ".join(ids)))
     if reading_absent(data):
         rest.append(MESSAGES["remains-no-reading"])
     if not data["trials"]:
@@ -2056,8 +2340,10 @@ def main(argv=None):
     {'items': 2, 'level 1': 1, 'level 2': 0, 'level 3': 1, 'not admitted': 0, 'pending': 0, 'sources': 2,
      'sources read for the view': 2, 'stakeholders': 1, 'view': 'storage'}
     >>> result["requirements"][1]
-    {'duplicates': 0, 'requirements': 2, 'to a boundary': 0, 'to a decision': 0,
-     'to an implementation skill': 0, 'to an item': 2, 'view': 'storage'}
+    {'a proposed boundary would take': 0, 'duplicates': 0, 'requirements': 2, 'to a boundary': 0,
+     'to a decision': 0, 'to an implementation skill': 0, 'to an item': 2, 'view': 'storage'}
+    >>> result["remains"]["proposed-boundaries"], result["remains"]["left-stakeholders"]
+    ([], [])
 
     --previous compares with an earlier revision, and --words finds product words.
 

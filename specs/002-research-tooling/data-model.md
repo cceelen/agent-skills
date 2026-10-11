@@ -43,14 +43,15 @@ check reads the id, the supports cell and the date. It does not judge the summar
 ## Vetting record (`vetting.md`)
 
 Written by `vet.py score` and `place.py`, corrected by the owner. The session writes the
-table "Requirements". `index.py unread --write` writes the table "Reading". Four tables,
-formats in `contracts/files.md`.
+table "Requirements" and the table "Proposed boundaries". `index.py unread --write` writes
+the table "Reading". Five tables, formats in `contracts/files.md`.
 
 | Table | Row | Fields |
 |---|---|---|
 | Sources | one independent source | source id, kind (`repository` or `page`), gate result, signals, answers with their URL, score, rubric version, date, confirmed by |
 | Items | one checklist item | item id, the six answers with their source, return, cost, score, admitted, level, rubric version |
 | Requirements | one requirement that a source states for a stakeholder | id `R-<nn>`, requirement, stakeholder, view, source with its location, goes to |
+| Proposed boundaries | one boundary of section 1 with the state `proposed` | boundary, requirements that it would take (ids of the table "Requirements", or `none`), stakeholders that it would leave with no requirement, reason |
 | Reading | one converted document of one source of section 2 | source id, document id or `none`, pages, given to readers (ranges or `none`), not read (ranges or `none`) |
 
 The cell "Goes to" of a requirement is `C-<nn>`, `3.3: <decision>`, `5`, `boundary: <name>` or
@@ -58,6 +59,17 @@ The cell "Goes to" of a requirement is `C-<nn>`, `3.3: <decision>`, `5`, `bounda
 does not exist, for an item without a requirement that is not admitted by `own rule`, and for
 a stakeholder without a requirement. A view with more than half of its requirements at a
 boundary is listed under "what remains".
+
+State of a boundary of section 1: `proposed` (written by the session; a line without a state
+is `proposed`) → `decided` (by the owner, with the date), or the boundary is removed (declined
+by the owner). The state is in the line of the boundary: `(proposed)` or
+`(decided by the owner on <YYYY-MM-DD>)`. Only a `decided` boundary takes a requirement. The
+check fails for a requirement that goes to a boundary that is not `decided`, for a state of a
+different form, for a decided state without a date, for a `proposed` boundary without a row
+in the table "Proposed boundaries", for a row of a boundary that section 1 does not have or
+that is `decided`, and for a row that names a requirement that the register does not have.
+Each `proposed` boundary, with the number of requirements that it would take, and each
+stakeholder that it would leave with no requirement are listed under "what remains".
 
 The check fails for a source with `full` in the cell Read whose row in "Reading" has pages in
 the cell "Not read", and for a source with `all` in the cell Views that has no row in a table

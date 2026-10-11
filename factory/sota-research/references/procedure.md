@@ -259,10 +259,25 @@ its reason and its date in section 7.
        its row in section 3.3.
      - `5`: the requirement is knowledge of one product, for an implementation skill.
      - `boundary: <name>`: a neighbouring aspect owns the requirement. Write the name of a
-       boundary of section 1.
+       boundary of section 1 that has the state `(decided by the owner on <date>)`.
      - `duplicate: R-<nn>`: a second source states the same requirement. Write the row
        that has the exit of the requirement.
    - Do not use a different exit. Do not write a different text into the cell.
+   - Write the state `(proposed)` into the line of each boundary that you write into section
+     1. Do not write the state `(decided by the owner on <date>)`. Only the owner decides a
+     boundary.
+   - Do not give a requirement the exit of a boundary that the owner did not decide. Give it
+     one of the other exits.
+   - If you think that a neighbouring aspect owns a concern, write the boundary into section
+     1 with the state `(proposed)`. Write one row for it into the table "Proposed boundaries"
+     of `vetting.md`. The format is below this list of steps.
+     - Write the name of the boundary into the cell "Boundary".
+     - Write the identifier of each requirement that the boundary would take into the cell
+       "Requirements that it would take", or `none`. For a range, write `R-<nn> to R-<nn>`.
+     - Write each stakeholder of section 1 that would have no other requirement into the
+       cell "Stakeholders that it would leave with no requirement", or `none`.
+     - Write into the cell "Reason" why you think that the neighbouring aspect owns the
+       concern, with the source.
    - If a requirement is basic in its view, make it a checklist item, also when its cost is
      high. The calculation of risk and reward places the item or does not admit it.
    - Make sure that each checklist item holds a requirement. An item without a requirement
@@ -303,6 +318,16 @@ The format of the table "Requirements" in `vetting.md`:
 | R-01 | <one sentence> | <stakeholder> | <view> | <source and location> | <exit> |
 ```
 
+The format of the table "Proposed boundaries" in `vetting.md`:
+
+```markdown
+## Proposed boundaries
+
+| Boundary | Requirements that it would take | Stakeholders that it would leave with no requirement | Reason |
+|---|---|---|---|
+| <name> | <identifiers, or none> | <stakeholders, or none> | <reason and source> |
+```
+
 ## Phase 3: review of the owner
 
 Stop. A model does not accept a recipe. Give the owner, in this order:
@@ -311,20 +336,37 @@ Stop. A model does not accept a recipe. Give the owner, in this order:
    targets that the research found, each with its source. Give each difference between the
    intent and these findings. Give the part "Views" and the part "Requirements" of the
    check, as they are. The owner can add, remove or rename a stakeholder or a view.
-2. The contexts, the risk dimensions and the boundaries that the research found, each with
-   its source. The owner sees them here for the first time and can correct each one.
-3. The strategy: the goals, the order of the work and the decisions that depend on context.
-4. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
+2. The proposed boundaries: the table "Proposed boundaries" of `vetting.md`, as it is. Give
+   also the line "Boundaries that wait for the decision of the owner" of the check, and each
+   line of the check that names a stakeholder that a boundary would leave with no
+   requirement. Ask the owner to decide or to decline each boundary.
+3. The contexts, the risk dimensions and the boundaries that the research found, each with
+   its state and its source. The owner sees them here for the first time and can correct
+   each one.
+4. The strategy: the goals, the order of the work and the decisions that depend on context.
+5. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
    Give the line "Answers of risk and reward" of the check, as it is.
-5. The points where the sources disagree, and how the recipe handles each.
-6. The independent sources with their signals and scores, for the confirmation.
-7. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
+6. The points where the sources disagree, and how the recipe handles each.
+7. The independent sources with their signals and scores, for the confirmation.
+8. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
    give it, do step 15 of phase 2 again.
-8. The list "What remains" of the check, as it is.
-9. What was not verified.
+9. The list "What remains" of the check, as it is.
+10. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
-change an item, change a view, change a stakeholder.
+change an item, change a view, change a stakeholder, decide or decline a boundary.
+
+- If the owner decides a boundary, do these steps:
+  1. Write the state `(decided by the owner on <date>)` into the line of the boundary, with
+     the date of the decision.
+  2. Write `boundary: <name>` into the cell "Goes to" of each requirement that the boundary
+     takes.
+  3. Remove the row of the boundary from the table "Proposed boundaries".
+  4. Do the steps of "The calculation of risk and reward" again. Then run the check.
+  5. If the check reports an item without a requirement, give the item to the owner for a
+     decision.
+- If the owner declines a boundary, remove the line of the boundary from section 1 and its
+  row from the table "Proposed boundaries". Then run the check.
 
 - If the owner adds a stakeholder, do step 2 of phase 2 for that stakeholder.
 - If the owner adds a view, do step 8 of phase 2 for that view.
@@ -441,12 +483,15 @@ The owner starts a refresh. Nothing runs on a schedule.
    `git show HEAD:specs/<number>-<name>/spec.md`.
 4. Change the rows that the new text touches. Keep the row of an item that is no longer
    valid, and set its level to `retired`. Do not use its identifier again.
-5. Write the table "Reading" again: do step 15 of phase 2.
-6. Run the check with `--previous <file>`.
-7. Show the owner each changed item. Show also each item that a project can have declined:
+5. Keep each boundary that the owner decided, with its state and its date. Give a new
+   boundary the state `(proposed)` and a row in the table "Proposed boundaries", as in step
+   10 of phase 2.
+6. Write the table "Reading" again: do step 15 of phase 2.
+7. Run the check with `--previous <file>`.
+8. Show the owner each changed item. Show also each item that a project can have declined:
    the selection of a project keeps a declined item with its reason.
-8. Continue with phase 3. A refresh without a change updates the research date only.
-9. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
+9. Continue with phase 3. A refresh without a change updates the research date only.
+10. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
    again. The new trial shows if the correction changes the plan.
 
 ## The check
@@ -475,6 +520,14 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 - The part "Requirements" gives, for each view, the number of requirements and the number for
   each exit. Give it to the owner as it is.
 - The list names each view with more than half of its requirements at a boundary.
+- If a requirement goes to a boundary that the owner did not decide, give the requirement
+  one of the other exits. Write its identifier into the row of the boundary in the table
+  "Proposed boundaries".
+- If a proposed boundary has no row in the table "Proposed boundaries", write the row, as in
+  step 10 of phase 2.
+- The list names each boundary that waits for the decision of the owner, and each
+  stakeholder that such a boundary would leave with no requirement. Give these lines to the
+  owner as they are.
 - If a stakeholder has no requirement, search and read for the concerns of that stakeholder,
   as in steps 4 to 7 of phase 2. Then do steps 9 and 10 of phase 2 for the new requirements.
 - If an item holds no requirement, find its requirement in the reports of the readers. Do

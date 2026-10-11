@@ -227,7 +227,8 @@ The report has two parts.
   sources, items that need judgement, items with a changed text, findings of a trial that are
   open, findings with a viewpoint that was not checked, stakeholders that are in no view, a recipe without a trial, and a missing acceptance.
   A view that the boundaries emptied and a view with few sources of its own field are in this
-  list also. A source with pages that no reader got and an absent table "Reading" are in this
+  list also. A boundary that waits for your decision is in this list also: see "The boundaries
+  of an aspect". A source with pages that no reader got and an absent table "Reading" are in this
   list also: see "The pages that the readers got".
 
 Between the two parts, the report gives one line for the answers of risk and reward:
@@ -320,7 +321,7 @@ The cell `Goes to` holds the one exit of the requirement:
 | `C-<nn>` | The checklist item that holds the requirement. The calculation places the item. |
 | `3.3: <decision>` | The requirement depends on context. The name is the cell `Decision` of a row of section 3.3. |
 | `5` | The requirement is knowledge of one product, for an implementation skill. |
-| `boundary: <name>` | A neighbouring aspect owns the requirement. The name is a boundary of section 1. |
+| `boundary: <name>` | A neighbouring aspect owns the requirement. The name is a boundary of section 1 that you decided. |
 | `duplicate: R-<nn>` | A second source states the same requirement. The row that it names is not a duplicate. |
 
 The check fails in these cases:
@@ -336,6 +337,43 @@ The report has a part "Requirements". For each view, it gives the number of requ
 the number for each exit. If more than half of the requirements of a view go to a boundary,
 the list "What remains" says so. Examine such a view in the review. With `--json`, the numbers
 are in the key `requirements`.
+
+### The boundaries of an aspect
+
+A boundary says what a neighbouring aspect owns. A requirement that goes to a boundary leaves
+the aspect. Thus only you decide a boundary. The agent proposes it.
+
+Each boundary of section 1 has its state in its line:
+
+| Form | Meaning |
+|---|---|
+| `(proposed)` | The agent proposes the boundary. No requirement goes to it. |
+| `(decided by the owner on <YYYY-MM-DD>)` | You decided the boundary on that date. A requirement can go to it. |
+
+A line without a state is proposed. For each proposed boundary, the agent writes one row into
+the table "Proposed boundaries" of `vetting.md`. The columns are Boundary, Requirements that it
+would take, Stakeholders that it would leave with no requirement, and Reason.
+
+In the review, you get this table directly after your intent, the stakeholders and the views.
+Decide or decline each boundary. If you decide a boundary, the agent writes the state with the
+date and changes the exit of the requirements that the boundary takes. If you decline a
+boundary, the agent removes it.
+
+The check fails in these cases:
+
+- A requirement goes to a boundary that you did not decide.
+- A state has a different form, or a decided state has no date.
+- A proposed boundary has no row in the table.
+- A row names a boundary that section 1 does not have, or a boundary that you decided.
+- A row names a requirement that the table "Requirements" does not have.
+
+The list "What remains" names each boundary that waits for your decision, with the number of
+requirements that it would take:
+`Boundaries that wait for the decision of the owner: <name> (<n> requirements).`
+It has one line for each stakeholder that a proposed boundary would leave with no requirement
+in the aspect. Each line of the part "Requirements" ends with the number of requirements of
+the view that a proposed boundary would take. With `--json`, the keys are `proposed-boundaries`
+and `left-stakeholders` in `remains`.
 
 ### The measured targets of an aspect
 
