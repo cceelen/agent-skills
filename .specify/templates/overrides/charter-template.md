@@ -7,8 +7,8 @@ constraints of the owner. The session reads it before the triage, and the owner 
 in the review. Only the owner changes it. The file is `charter.md`, beside `spec.md`.
 
 Write the state in one of these forms: `draft`, or `reviewed by the owner on <YYYY-MM-DD>`.
-Write each line from the words of the owner, with the date. Do not write a line that the owner
-did not state.
+Write the words of the owner, with the date, into the cell "Comes from" of each row. Do not
+write a row that has no words of the owner.
 
 ## Target
 

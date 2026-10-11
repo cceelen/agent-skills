@@ -361,12 +361,11 @@ specification whose check reports no failure other than "not accepted".
   MUST NOT write documentation, tests, specifications or a different skill. Given a list of
   words, it MUST write nothing when an exported file holds a word, and MUST give the file and
   the line. The procedure MUST work in such a kit.
-- **FR-040**: Before the research, the skill MUST ask the owner six questions about the
+- **FR-040**: Before the research, the skill MUST ask the owner three questions about the
   intent, each one time and only if the owner did not answer it already: what the owner means
   by the aspect and which concerns it brings together; what a project must be able to show
   after it applied the recipe, and whether there is a measurable target; what the owner does
-  not want; which principles the recipe must follow and which one wins; what the owner
-  looks at in the review for each principle; what cannot be traded. The skill MUST write each answer as a quote with its date into the field "Intent
+  not want. The skill MUST write each answer as a quote with its date into the field "Intent
   of the owner" of section 1, MUST NOT change the words, and MUST write `(no answer)` when
   there is none. It MUST NOT ask for and MUST NOT propose a use case, a first user, a
   reference project, an industry, a product, stakeholders, viewpoints, views, contexts, risk
@@ -578,9 +577,11 @@ sent each requirement of one concern to a boundary that it wrote itself.
   takes; it removes a boundary that the owner declined. In a refresh, a decided boundary
   stays and a new boundary starts as proposed.
 - **FR-058**: An aspect specification MAY have a charter of the owner in `charter.md`: the
-  target, the principles with their priority, and the constraints. The procedure MUST write
-  it in phase 1 from the answers of the owner to the questions of the intent, MUST write
-  only the lines that the owner stated, and MUST give it to the owner before the research. The session MUST read the charter before the triage,
+  target, the principles with their priority, and the constraints. The session MUST draft
+  it in phase 1 from what the owner says in the session: each row MUST name the words of
+  the owner that it comes from, and the session proposes the sentence of each principle, the
+  order and the way to check it. The owner MUST get the draft before the research, and only
+  the owner confirms it. The session MUST read the charter before the triage,
   and the owner MUST get it first in the review. No program reads the charter. (The stage
   test ST-1 refuted a cell that ties each requirement to a line of the charter.)
 - **FR-059**: The index MUST keep the lines `REQ` and `USE` of the reports of the readers. A
@@ -611,7 +612,7 @@ sent each requirement of one concern to a boundary that it wrote itself.
 - **Vetting record**: for each independent source, the signals, the score, the version of the
   rubric and the confirmation of the owner. For each item, the answers and the result of the
   calculation of risk and reward.
-- **Intent of the owner**: the answers of the owner to six questions before the research,
+- **Intent of the owner**: the answers of the owner to three questions before the research,
   each as a quote with its date.
 - **Stakeholder**: one group of persons that has an interest in the result or carries a duty
   for it, with its concerns for the aspect and its source.
