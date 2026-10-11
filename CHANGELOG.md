@@ -12,6 +12,8 @@ reports are not comparable with new reports.
   state of the art of one aspect of software engineering into a recipe skill. Users of the
   kit do not install it.
 - The tooling uses the latest stable Python and runs with `uv`.
+- The tooling converts a web page into a converted file with `web.py`. The readers get the text
+  of a web source through the index, as for a PDF source.
 - The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
   the plan from eight viewpoints, and the check reports the findings that are open. One
   viewpoint is the integrity of each asset, from the source to the system of the user.

@@ -346,6 +346,27 @@ project, keeps each other key, and names the file under `written`. The output ha
 `reads_converted_files`. If the agent product has no such hook, `apply` does not write the
 agent file of `file-reader`, and the `note` says that a PDF source cannot be read.
 
+## scripts/web.py
+
+```text
+web.py SOURCE OUT
+```
+
+- `SOURCE`: an http or https address, or a file of HTML, Markdown or plain text. `OUT`: the
+  converted file to write.
+- Writes the text of the source in the form of a converted file of `pdf.py`, through its
+  functions: the head lines `Source`, `sha256` and `Pages`, and one heading `## Page <n>` for
+  each part of 60 lines. A line of the text that starts with `#` is escaped.
+- HTML: the program drops `head`, `script`, `style` and the other elements without text of
+  the page, keeps headings, paragraphs, list items, table cells and code, and writes a link as
+  its text.
+- The rules for `OUT` are the rules of `pdf.py`: refuses a target in a git repository and a
+  folder with other files and no marker, writes the marker `.reader-may-read`, prints
+  `Written: <OUT> (<n> pages, sha256 <digest>)`.
+- Result code `1` with the reason: a source that is not text (a PDF file gives a message that
+  names `pdf.py`), a source without text, a network error, an HTTP error, a target that is
+  refused. Result code `2`: wrong arguments.
+
 ## scripts/guard.py
 
 ```text

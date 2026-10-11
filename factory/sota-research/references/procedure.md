@@ -264,6 +264,12 @@ with their priority and the constraints of the owner. It is optional.
      `uv run factory/sota-research/scripts/pdf.py <file or address> <work folder>/converted/<source id>.md`.
      The work folder is outside the repository. Keep only converted files in the folder
      `converted`.
+   - If a source is a web page, convert it:
+     `uv run factory/sota-research/scripts/web.py <address or file> <work folder>/converted/<source id>.md`.
+     Give the converted file to a reader of the type `sota-file-reader` by page ranges, as for
+     each converted document. The converted text stays in the work folder. Do not commit it.
+   - If the conversion of a web page fails, record the reason, use the web reader for that
+     source and write `part` into the cell `Read`.
    - If section 2 has the sources already, retrieve and convert each PDF source in one step:
      `uv run factory/sota-research/scripts/seed.py get <work folder> --from <folder of the specification>`.
    - After each conversion, build the index: do step 1 of "The reading of a converted

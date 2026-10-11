@@ -601,6 +601,13 @@ sent each requirement of one concern to a boundary that it wrote itself.
   table "Requirements" from the stored lines. The check MUST be able to compare that table
   with the stored requirement lines: a line without a row and a row without a line with the
   same source and the same words MUST fail.
+- **FR-060**: A reader MUST get the text of a web source through the same path as a PDF source:
+  a converted file, the index and the reader of the type `sota-file-reader`. A program MUST
+  write the text of an http or https address, or of a file of HTML, Markdown or plain text, as
+  a converted file with parts of a fixed number of lines as pages, under the rules of the
+  target of the PDF converter. The converted text MUST NOT be committed. If the conversion
+  fails, the procedure MUST record the reason, use the web reader and write `part` into the
+  cell Read.
 
 ### Key Entities
 

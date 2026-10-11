@@ -136,7 +136,7 @@ def pages(text):
     return parts
 
 
-def markdown(parts, source, digest):
+def markdown(parts, source, digest, kind="a PDF source"):
     r"""The Markdown text: the source, its digest, and one heading for each page.
 
     A line of the source that starts with "#" does not become a heading.
@@ -161,7 +161,7 @@ def markdown(parts, source, digest):
     <BLANKLINE>
     """
     out = [
-        "# Text of a PDF source\n",
+        f"# Text of {kind}\n",
         f"- Source: {source}",
         f"- sha256: {digest}",
         f"- Pages: {len(parts)}\n",
