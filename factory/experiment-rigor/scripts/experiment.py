@@ -73,6 +73,7 @@ INSTRUCTION_FOLDERS = (".agents", ".claude", ".codex", ".cursor")
 MIN_RUNS = 5
 POOL = 4
 MAX_RESULTS = 200_000
+JUDGE_TASK = pathlib.Path(__file__).resolve().parent.parent / "prompts" / "judge.md"
 # A file of a run that a criterion names is stored up to this size. The limit was 100,000
 # characters; a file of 207,740 characters lost its last table, and a criterion gave a wrong "no".
 MAX_FILE = 5_000_000
@@ -1520,6 +1521,11 @@ def blind(folder, work):
     >>> (work / "packets" / code / "final-1.md").read_text()
     'Hello and welcome.'
 
+    The task of the judge is in the folder of the packets.
+
+    >>> (work / "packets" / "judge-task.md").read_text() == JUDGE_TASK.read_text()
+    True
+
     A second call writes the same packets. A file that a run did not write is not in its packet.
 
     >>> (folder / "results.jsonl").write_text((folder / "results.jsonl").read_text().replace('"A note for the colleague.\\n"', "null")) > 0
@@ -1570,6 +1576,8 @@ def blind(folder, work):
             if row["files"][name] is not None:
                 (target / "files" / name).parent.mkdir(parents=True, exist_ok=True)
                 (target / "files" / name).write_text(row["files"][name], encoding="utf-8")
+    # The task of the judge goes with the packets: the judge needs no other folder.
+    (work / "packets" / "judge-task.md").write_text(JUDGE_TASK.read_text(encoding="utf-8"), encoding="utf-8")
     (folder / "blind-key.json").write_text(json.dumps(key, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(MESSAGES["packets"].format(len(key), (work / "packets").resolve()))
     return 0

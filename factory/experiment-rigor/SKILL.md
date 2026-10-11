@@ -23,8 +23,8 @@ Do these steps in this order. The program is `scripts/experiment.py`. Run it wit
    Do not look at a result before all runs are done. Do not add a run. Do not leave out a run.
 8. Run `uv run scripts/experiment.py blind <folder> --work <work folder>`. If the command wrote
    packets, start a judge that did not see the registration (for example with your subagent
-   tool). Tell the judge to read `prompts/judge.md`. Give it only the path of the folder
-   `packets`. Copy the file `judgements.md` that the judge wrote into the folder of the
+   tool). Give it only the path of the folder `packets`. Tell it to read the file
+   `judge-task.md` in that folder and to do its steps. Copy the file `judgements.md` that the judge wrote into the folder of the
    experiment. Do not change it.
 9. Run `uv run scripts/experiment.py score <folder>`.
 10. Report the counts, the intervals and the verdict as `result.md` gives them. Mark each
