@@ -97,7 +97,7 @@ def kit(root=ROOT):
 
     >>> names = check.viewpoints()
     >>> len(names), [path for path, (text, _) in files.items() if all(n.encode() in text for n in names)]
-    (7, [])
+    (8, [])
     >>> "references/seeds.md" in tooling
     True
 

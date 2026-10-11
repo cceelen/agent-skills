@@ -83,6 +83,31 @@ project, and give the file and the line that show this.
 1. Which basic practices of the aspect does the plan leave out?
 2. Does the plan give the reason for each practice that it leaves out?
 
+### integrity
+
+First list the assets: each thing that the result depends on, and each thing that the result
+changes. Find them in the plan and in the project. Examine these kinds, and each other asset
+that you find: the source; each input from outside; the build; the tests; the results of the
+tests and of the other checks; the released result; the thing that the user gets, installs
+or runs; the system on which that thing runs; the data that it reads and writes; the
+pipeline itself; the records of the project.
+
+Answer questions 1 to 3 for each asset, one row for each asset and question.
+
+1. Who or what can change this asset and leave no trace?
+2. What shows a change of this asset: which check, record or signature of the plan?
+3. Is that check tied to this asset, for example by a digest or a commit, or can its result
+   be shown for a different asset?
+
+Answer questions 4 to 7 one time.
+
+4. Where does the chain of evidence end before the thing that the user gets, installs or
+   runs?
+5. Which results of the checks are kept as evidence, and which are lost after the run?
+6. Can one change weaken a check, for example a test, an analysis or a limit, and pass?
+7. Does the risk analysis of the selection ask what the result can do to the system on which
+   it runs and to the data that it changes?
+
 ### product owner
 
 1. Which decisions does the plan leave to the owner?
@@ -114,7 +139,7 @@ gave no reference state, write `not applicable` for them.
    finding has three parts:
    - one sentence of 25 words or less, with its evidence as a file and a line,
    - the viewpoint: `architecture`, `operations`, `quality`, `development`, `security`,
-     `product owner` or `views of the recipe`,
+     `integrity`, `product owner` or `views of the recipe`,
    - a proposed route, one of the three below.
 3. One line with each file that you read, and one line with what you did not verify.
 

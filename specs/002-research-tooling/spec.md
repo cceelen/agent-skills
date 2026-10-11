@@ -321,9 +321,10 @@ specification whose check reports no failure other than "not accepted".
   renderer MUST behave as before.
 - **FR-034**: The tooling MUST hold the task for a reviewer that did not write the plan. The
   reviewer reads the plan and the selection in the trial project and, if there is one, a
-  reference state of the same project. It answers fixed questions from seven viewpoints:
-  architecture, operations, quality, development, security, product owner, and the views of
-  the recipe. Each answer MUST be `yes`, `partly`, `no` or `not applicable`, with a file and a
+  reference state of the same project. It answers fixed questions from eight viewpoints:
+  architecture, operations, quality, development, security, integrity, product owner, and the
+  views of the recipe. For the viewpoint integrity, the reviewer lists the assets and answers
+  for each one who can change it without a trace and what shows the change. Each answer MUST be `yes`, `partly`, `no` or `not applicable`, with a file and a
   line of the trial project and one sentence. The reviewer MUST end with a list of findings,
   each with its viewpoint and a proposed route: `recipe`, `tooling` or `implementation skill`.
   The reviewer MUST NOT correct anything.

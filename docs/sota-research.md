@@ -504,11 +504,12 @@ uv run factory/sota-research/scripts/export.py <folder> [--words <file>]
 
 ### The viewpoints of the review
 
-The reviewer answers fixed questions from seven viewpoints. Each answer is `yes`, `partly`,
+The reviewer answers fixed questions from eight viewpoints. Each answer is `yes`, `partly`,
 `no` or `not applicable`, with a file and a line of the trial project as evidence.
 
 | Viewpoint | What the questions examine |
 |---|---|
+| `integrity` | For each asset, from the source to the system and the data of the user: who can change it without a trace, what shows the change, where the chain of evidence ends. |
 | `architecture` | Technical debt, maintained components in place of own construction, reuse in a second project, changes of the project, silent failures. |
 | `operations` | The practices for delivery, who learns that the pipeline is defective, the time of a run. |
 | `quality` | The checks of the quality of the code, and which of them stop a change. |
@@ -552,7 +553,7 @@ The status is `open`, `corrected in <revision or commit>` or `declined: <reason>
 The check fails in these cases:
 
 - A finding names a trial that the table "Trials" does not have.
-- A finding names a viewpoint that is not one of the seven viewpoints. Use lowercase letters.
+- A finding names a viewpoint that is not one of the eight viewpoints. Use lowercase letters.
   In a neutral kit, the check does not examine the viewpoint. The list "What remains" then
   says: `Trial findings with a viewpoint that was not checked: F-01. The list is absent.`
 - A finding has no text.

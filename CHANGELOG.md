@@ -13,7 +13,8 @@ reports are not comparable with new reports.
   kit do not install it.
 - The tooling uses the latest stable Python and runs with `uv`.
 - The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
-  the plan from seven viewpoints, and the check reports the findings that are open.
+  the plan from eight viewpoints, and the check reports the findings that are open. One
+  viewpoint is the integrity of each asset, from the source to the system of the user.
 - An aspect specification names the measured targets of its aspect. The check fails for an
   empty field `Targets`.
 - The tooling asks the owner for the intent before the research, and compares it with the

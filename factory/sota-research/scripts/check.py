@@ -71,7 +71,7 @@ reader got remains. A specification without the table remains also. --scope does
 the table.
 
 The file trial.md records each trial of the recipe on a project, and each finding of the review of
-the plan. A finding names its trial, one of seven viewpoints, one of three routes and its status.
+the plan. A finding names its trial, one of the viewpoints, one of three routes and its status.
 The names of the viewpoints are in the file references/viewpoints.txt, one in each line. A kit
 that export.py made does not hold this file. Without the file, the viewpoint of a finding is not
 checked, and the list of what remains says so.
@@ -226,7 +226,7 @@ MESSAGES = {
     "skill-field-empty": "The field '{0}' of the recipe skill in section 5 is empty.",
     "skill-refers-to-section": "The field '{0}' of the recipe skill refers to a section of spec.md.",
     "trial-unknown": "The finding names the trial '{0}'. The table Trials does not have this trial.",
-    "trial-viewpoint-unknown": "The viewpoint '{0}' is not one of the seven viewpoints.",
+    "trial-viewpoint-unknown": "The viewpoint '{0}' is not one of the viewpoints of the review.",
     "trial-finding-empty": "The finding of the trial has no text.",
     "trial-route-unknown": "The route '{0}' is not permitted. Use recipe, tooling or implementation skill.",
     "trial-status-unknown": (
@@ -1634,7 +1634,7 @@ def viewpoints(path=VIEWPOINTS_FILE):
     r"""The names of the viewpoints of the review, or None if the file is absent.
 
     >>> len(viewpoints()), len(set(viewpoints()))
-    (7, 7)
+    (8, 8)
     >>> import sample
     >>> path = sample.folder() / "viewpoints.txt"
     >>> viewpoints(path)
@@ -1674,7 +1674,7 @@ def check_trials(data, path=VIEWPOINTS_FILE):
      "The finding names the trial 'T-07'. The table Trials does not have this trial.")
     >>> viewpoint = sample.load()["trial_findings"][0]["viewpoint"]
     >>> planted(f"| {viewpoint} |", "| No Such Viewpoint |")[0]["text"]
-    "The viewpoint 'No Such Viewpoint' is not one of the seven viewpoints."
+    "The viewpoint 'No Such Viewpoint' is not one of the viewpoints of the review."
 
     Without the list of the viewpoints, as in a kit that export.py made, the viewpoint is not checked.
 
