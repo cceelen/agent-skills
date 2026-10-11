@@ -23,8 +23,8 @@ Rules for all phases:
 - Do not write a level, a score or a confirmation by hand. Programs compute the levels and
   the scores, and only the owner confirms.
 - Start each phase in a new session. Give the session the folder of the specification, not a
-  summary of its files. Read `spec.md`, `charter.md`, `evidence.md` and `vetting.md` before
-  you write.
+  summary of its files. Read `spec.md`, `evidence.md` and `vetting.md` before you write. If
+  the specification has the file `charter.md`, read it also.
 - If the session had a compaction, read those files again before you write.
 - Do not write a statement about a source from your memory. Use only the reports of the
   readers of this run.
@@ -63,7 +63,7 @@ Rules for all phases:
 
 ## Phase 1: what to build
 
-Settle only the intent of the owner, the charter, the field and the thing to build.
+Settle only the intent of the owner, the field and the thing to build.
 
 - Do not narrow the aspect. Do not ask for these, and do not propose them: a use case, a first
   user, a reference project, an industry, a product, stakeholders, viewpoints, views,
@@ -84,27 +84,19 @@ Settle only the intent of the owner, the charter, the field and the thing to bui
    - If the owner gives no answer to a question, write `(no answer)`.
    - If the owner is not in the session, do not invent an answer. Write `(no answer)` in each
      line.
-3. Ask the owner for the charter of the aspect: the target, the principles and the
-   constraints.
-   - If the owner gives a charter file, do not ask the questions of this step.
-   - Ask each question one time. Do not ask a question that the owner answered already.
-     1. Which target must a project reach with the recipe? Name each part of the target.
-     2. Which principles govern the selection of the practices, and in which order?
-     3. Which constraints cannot be traded?
-   - If the owner is not in the session, do not invent an answer.
-4. Ask the owner which field and which thing to build. If the owner named them, do not ask
+3. Ask the owner which field and which thing to build. If the owner named them, do not ask
    again. Settle only these points:
    - The aspect, in one line, as wide as the owner states it.
    - The field and the disciplines that the aspect covers.
    - The short name of the aspect, in lowercase letters, digits and hyphens. It becomes the
      name of the branch, of the folder and of the recipe skill. Propose one.
-5. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
+4. Make sure that `main` has the folder `factory/sota-research/`. If it does not, stop and tell
    the owner: the tooling must be delivered to `main` first.
-6. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
+5. Find the next number. Look at all branches, local and remote (`git branch -a`). Take the
    highest number at the start of a branch name, and add one. A step branch such as
    `002-name-plan` counts also, thus the number is never used two times.
-7. Make the branch `<number>-<name>` from `main`.
-8. Copy `.specify/templates/overrides/aspect-spec-template.md` to
+6. Make the branch `<number>-<name>` from `main`.
+7. Copy `.specify/templates/overrides/aspect-spec-template.md` to
    `specs/<number>-<name>/spec.md`. Fill the head line and the first four fields of section 1
    only: "Aspect", "Field and disciplines", "Intent of the owner" and "Agreed with the owner
    on".
@@ -117,41 +109,33 @@ Settle only the intent of the owner, the charter, the field and the thing to bui
      on".
    - Leave "Stakeholders", "Views", "Contexts", "Risk dimensions", "Boundaries" and "Targets"
      as the template has them.
-9. Write the charter into `specs/<number>-<name>/charter.md`.
-   - If the owner gave a charter file, copy it to `charter.md` without a change. Do not do
-     the other points of this step.
-   - If the owner is not in the session and gave no file, write no charter. Add a row to
-     section 7 with the date of today. Write there that the specification has no charter.
-     Do not do the other points of this step, and do not do step 11.
-   - Copy `.specify/templates/overrides/charter-template.md` to `charter.md`.
-   - Write one row for each part of the target, for each principle and for each constraint
-     that the owner stated. Use the words of the owner. Write the date of the answer into the
-     cell "Comes from".
-   - Do not write a principle, a constraint or a part of the target that the owner did not
-     state.
-   - Write the priority of each principle in the order that the owner gave. If the owner
-     gave no order, propose one, and tell the owner that the order is a proposal.
-   - Write the cell "Effect" of each line in a form of the section "The cell Effect" of the
-     template. If the words of the owner give no effect, write `none`.
-   - Write the state `draft` into the head line.
-10. Run the check for this phase:
+8. Run the check for this phase:
    `uv run factory/sota-research/scripts/check.py specs/<number>-<name> --scope`.
-   Correct each line that starts with `FAIL`. If a line of a charter file of the owner
-   fails, do not change the file. Give the failure to the owner.
-11. Give the owner the charter as it is written, with each cell "Effect". Ask the owner to
-   review it.
-   - If the owner corrects a line, write the correction in the words of the owner.
-   - If the owner confirms the charter, write `reviewed by the owner on <date>` into the head
-     line, with the date of the confirmation.
-   - If the owner does not confirm it, leave the state `draft`.
-12. Tell the owner the four fields as they are written, and that the research starts now. If
-   the owner does not object, commit `spec.md` and `charter.md` on the branch. If the
-   repository has a remote, push the branch. This first commit makes the branch of the
-   specification. Each later step is a pull request into it.
+   Correct each line that starts with `FAIL`.
+9. Tell the owner the four fields as they are written, and that the research starts now. If
+   the owner does not object, commit `spec.md` on the branch. If the repository has a remote,
+   push the branch. This first commit makes the branch of the specification. Each later step
+   is a pull request into it.
 
 If the owner changes the intent, the field or the thing to build later, record the change with
-its reason and its date in section 7. If the owner changes the charter later, do the steps
-of "A change of the charter".
+its reason and its date in section 7.
+
+### The charter of the owner
+
+The charter is the file `charter.md`, beside `spec.md`. It holds the target, the principles
+with their priority and the constraints of the owner. It is optional.
+
+- If the owner gives a charter file, copy it to `charter.md` without a change.
+- If the owner states a target, a principle or a constraint in the session, copy
+  `.specify/templates/overrides/charter-template.md` to `charter.md`. Write one row for each
+  statement, in the words of the owner, with the date. Write the state `draft`.
+- Do not write a line that the owner did not state. Do not ask the owner for a charter.
+- Give the owner a charter that you wrote, as it is written. If the owner confirms it, write
+  `reviewed by the owner on <date>` into the head line.
+- If the owner gave no file and stated no line, write no charter.
+- Commit `charter.md` together with `spec.md`.
+- If the owner changes the charter later, write the change in the words of the owner, with
+  the date. Then do step 10 of phase 2 again.
 
 ## Phase 2: research
 
@@ -272,15 +256,12 @@ of "A change of the charter".
    - Write the stakeholder of section 1 that the requirement serves into the cell
      "Stakeholder", and one view of section 1 into the cell "View".
    - Write the source with the location into the cell "Source".
-   - If the specification has the file `charter.md`, write the cell "Serves": the identifier
-     of each line of the charter that the requirement serves, with a comma between two
-     identifiers.
-   - A requirement serves a line of the charter only if the words of the requirement and the
-     words of the line show it. If no line fits, write `none`.
-   - Do not change the charter. Do not write the cell "Serves" to get a level for an item.
    - Do not judge a requirement here. Do not leave out a requirement.
    - Leave the cell "Goes to" empty. Step 10 fills it.
-10. **Distil.**
+10. **Distil.** If the specification has the file `charter.md`, read it before this step.
+   - Where two requirements disagree, the principle with the lower priority number decides.
+     Write the identifier of the principle into the row of section 3.4.
+   - Do not trade a constraint of the charter against cost.
    - Fill the rest of section 1 from the sources: the contexts that change the strategy, the
      risk dimensions with their question and the opinion of the kit, and the boundaries to
      the neighbouring aspects. Each line names its source, or says `(judgement)`. Cover the
@@ -306,9 +287,6 @@ of "A change of the charter".
      - `duplicate: R-<nn>`: a second source states the same requirement. Write the row
        that has the exit of the requirement.
    - Do not use a different exit. Do not write a different text into the cell.
-   - If a requirement serves a line of the charter with the effect `no exit: 3.3`, do not
-     give it the exit `3.3: <decision>`. If the line has the effect `no exit: boundary`, do
-     not give it the exit `boundary: <name>`.
    - Write the state `(proposed)` into the line of each boundary that you write into section
      1. Do not write the state `(decided by the owner on <date>)`. Only the owner decides a
      boundary.
@@ -325,8 +303,7 @@ of "A change of the charter".
      - Write into the cell "Reason" why you think that the neighbouring aspect owns the
        concern, with the source.
    - If a requirement is basic in its view, make it a checklist item, also when its cost is
-     high. A rule of the charter places the item before the calculation of risk and reward.
-     If no rule places it, the calculation places the item or does not admit it.
+     high. The calculation of risk and reward places the item or does not admit it.
    - Make sure that each checklist item holds a requirement. An item without a requirement
      has `own rule` in the cell "Admitted by".
    - Write where the sources disagree into section 3.4, with the two positions.
@@ -360,9 +337,9 @@ The format of the table "Requirements" in `vetting.md`:
 ```markdown
 ## Requirements
 
-| Id | Requirement | Stakeholder | View | Source | Serves | Goes to |
-|---|---|---|---|---|---|---|
-| R-01 | <one sentence> | <stakeholder> | <view> | <source and location> | <lines of the charter, or none> | <exit> |
+| Id | Requirement | Stakeholder | View | Source | Goes to |
+|---|---|---|---|---|---|
+| R-01 | <one sentence> | <stakeholder> | <view> | <source and location> | <exit> |
 ```
 
 The format of the table "Proposed boundaries" in `vetting.md`:
@@ -377,40 +354,33 @@ The format of the table "Proposed boundaries" in `vetting.md`:
 
 ## Phase 3: review of the owner
 
-Stop. A model does not accept a recipe. Give the owner, in this order:
+Stop. A model does not accept a recipe. If the specification has a charter, give it first,
+as it is written. For each principle, give what its cell "How it is checked" asks for, from
+the checklist and from the check. Then give the owner, in this order:
 
-1. The charter: the file `charter.md`, as it is, and the part "Charter" of the check, as it
-   is. If the state of the charter is `draft`, ask the owner to review it. If the
-   specification has no charter, tell the owner.
-2. The intent of the owner, as it is written, beside the stakeholders, the views and the
+1. The intent of the owner, as it is written, beside the stakeholders, the views and the
    targets that the research found, each with its source. Give each difference between the
    intent and these findings. Give the part "Views" and the part "Requirements" of the
    check, as they are. The owner can add, remove or rename a stakeholder or a view.
-3. The proposed boundaries: the table "Proposed boundaries" of `vetting.md`, as it is. Give
+2. The proposed boundaries: the table "Proposed boundaries" of `vetting.md`, as it is. Give
    also the line "Boundaries that wait for the decision of the owner" of the check, and each
    line of the check that names a stakeholder that a boundary would leave with no
    requirement. Ask the owner to decide or to decline each boundary.
-4. The contexts, the risk dimensions and the boundaries that the research found, each with
+3. The contexts, the risk dimensions and the boundaries that the research found, each with
    its state and its source. The owner sees them here for the first time and can correct
    each one.
-5. The strategy: the goals, the order of the work and the decisions that depend on context.
-6. The checklist with its levels and with the cell "Placed by" of each item, and the table
-   "Items" of `vetting.md` with the answers. Give the line "Answers of risk and reward" of
-   the check, as it is. Give the line "Requirements that serve no line of the charter" of
-   the check, as it is, and the rows of the table "Requirements" with `none` in the cell
-   "Serves".
-7. The points where the sources disagree, and how the recipe handles each.
-8. The independent sources with their signals and scores, for the confirmation.
-9. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
+4. The strategy: the goals, the order of the work and the decisions that depend on context.
+5. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
+   Give the line "Answers of risk and reward" of the check, as it is.
+6. The points where the sources disagree, and how the recipe handles each.
+7. The independent sources with their signals and scores, for the confirmation.
+8. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
    give it, do step 15 of phase 2 again.
-10. The list "What remains" of the check, as it is.
-11. What was not verified.
+9. The list "What remains" of the check, as it is.
+10. What was not verified.
 
 Then do what the owner decides: correct an answer and run `place.py` again, remove a source,
-change an item, change a view, change a stakeholder, decide or decline a boundary, change the
-charter.
-
-- If the owner reviews or changes the charter, do the steps of "A change of the charter".
+change an item, change a view, change a stakeholder, decide or decline a boundary.
 
 - If the owner decides a boundary, do these steps:
   1. Write the state `(decided by the owner on <date>)` into the line of the boundary, with
@@ -542,31 +512,13 @@ The owner starts a refresh. Nothing runs on a schedule.
 5. Keep each boundary that the owner decided, with its state and its date. Give a new
    boundary the state `(proposed)` and a row in the table "Proposed boundaries", as in step
    10 of phase 2.
-6. Keep `charter.md` as it is. Only the owner changes the charter. Write the cell "Serves"
-   of each new requirement, as in step 9 of phase 2. If the owner changed the charter, do
-   the steps of "A change of the charter".
-7. Write the table "Reading" again: do step 15 of phase 2.
-8. Run the check with `--previous <file>`.
-9. Show the owner each changed item. Show also each item that a project can have declined:
+6. Write the table "Reading" again: do step 15 of phase 2.
+7. Run the check with `--previous <file>`.
+8. Show the owner each changed item. Show also each item that a project can have declined:
    the selection of a project keeps a declined item with its reason.
-10. Continue with phase 3. A refresh without a change updates the research date only.
-11. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
+9. Continue with phase 3. A refresh without a change updates the research date only.
+10. If the refresh corrects a finding of a trial, do the steps of "The trial of a recipe"
    again. The new trial shows if the correction changes the plan.
-
-## A change of the charter
-
-Do these steps when the owner reviews or changes the charter. Do not change the charter
-without the words of the owner.
-
-1. Write the change into `charter.md` in the words of the owner, with the date. If the owner
-   gives a new file, copy it to `charter.md` without a change.
-2. If the owner reviewed the charter as it is written, write `reviewed by the owner on <date>`
-   into the head line.
-3. Record the change with its date in section 7 of `spec.md`.
-4. If the register has requirements, examine the cell "Serves" of each requirement again for
-   each line that changed, as in step 9 of phase 2.
-5. Run `uv run factory/sota-research/scripts/place.py <folder of the specification> --write`.
-6. Run the check. Correct each failure.
 
 ## The check
 
@@ -577,27 +529,7 @@ uv run factory/sota-research/scripts/check.py <folder of the specification>
 ```
 
 - Correct each line that starts with `FAIL`. Do not stop for the owner while a check fails.
-- In phase 1, add `--scope`: it examines only what is settled before the research, and the
-  form of a charter that exists.
-- The list says so if the specification has no charter, or if the owner did not review the
-  charter. Give these lines to the owner as they are.
-- The part "Charter" gives, for each line of the charter, the number of requirements that
-  serve it and the number of items that it placed. Give it to the owner as it is.
-- If a line of `charter.md` fails, correct only a cell that you wrote in phase 1. Do not
-  change a line of the owner. Give that failure to the owner.
-- If a requirement has an empty cell "Serves", or the cell names a line that the charter
-  does not have, correct the cell, as in step 9 of phase 2.
-- If a requirement serves a line of the charter that does not permit its exit, give the
-  requirement a different exit, as in step 10 of phase 2. Do not change the cell "Serves".
-- If the level of an item is above the level that the charter gives, if an item is not
-  admitted and the charter does not permit that, or if a cell "Placed by" differs, run
-  `place.py` with `--write`.
-- If no requirement serves a line of the charter, search and read for the words of that
-  line, as in steps 4 to 7 of phase 2. Then do steps 9 and 10 of phase 2 for the new
-  requirements. If the sources state no such requirement, record the line in section 7 as
-  not verified, and give the line of the check to the owner.
-- The list gives, for each view, the number of requirements that serve no line of the
-  charter. Give it to the owner as it is.
+- In phase 1, add `--scope`: it examines only what is settled before the research.
 - Give the list "What remains" to the owner as it is.
 - The list says so if the intent of the owner was not asked. It names each stakeholder that
   is in no view.
@@ -717,15 +649,8 @@ Do this after the checklist is distilled and before the stop for the owner.
 1. Read `prompts/risk-answers.md` and do its steps: record the six answers for each item in
    the table "Items" of `vetting.md`.
 2. Run `uv run factory/sota-research/scripts/place.py <folder of the specification>`.
-   - A rule of the charter places an item before the calculation. The line of the output
-     names the line of the charter that placed the item.
-   - Do not move an item that a rule of the charter placed. Do not change an answer, an exit
-     or a cell "Serves" to move it.
-   - If you think that a rule of the charter gives a wrong level, record the item, the line
-     of the charter and your reason in section 7, for the owner. Do not change the level.
 3. Correct each item that is pending. Do not write a level by hand.
-4. Run the program with `--write`. It fills the cells "Level" and "Placed by" of the
-   checklist. Do not write a cell "Placed by" by hand.
+4. Run the program with `--write`. It fills the Level cells of the checklist.
 
 ## The rendering and the delivery
 

@@ -38,6 +38,7 @@ M-08 and M-09 use the answer key in the registration of each trial. The key of `
 | I-4 | 2026-10-11 | `002-research-tooling-tasks`, this commit | the research reads each converted source in the page ranges of the index, one range for one reader; the index records each range that a reader got; a program writes the table "Reading" into `vetting.md`, and the check examines it; the search, the references and the synonyms of the index are steps of the procedure | a large document was given to one reader; a knowledge area was not read; nobody saw it | none yet |
 | I-5 | 2026-10-11 | `002-research-tooling-tasks`, this commit | each boundary of section 1 has a state, proposed or decided by the owner with a date; a requirement goes only to a boundary that the owner decided, and the check examines it; the table "Proposed boundaries" of `vetting.md` names the requirements that each proposed boundary would take; the owner gets the proposed boundaries directly after the intent, the stakeholders and the views | the session sent each requirement of one concern to a boundary that it wrote itself | none yet |
 | I-6 | 2026-10-11 | `002-research-tooling-tasks`, this commit | an aspect specification can have a charter of the owner in `charter.md`: the target, the principles with their priority and the constraints; each requirement names the lines of the charter that it serves; the charter places an item before the calculation, and closes the exit to a decision, to a boundary and to "not admitted" for a requirement that serves a line with that effect; the cell "Placed by" of each item names the line that placed it; the check examines it and reports each line of the charter | the triage decides without a reference to what the owner wants: a requirement left through a decision, one was folded and put on level 2 by the calculation | none yet |
+| I-7 | 2026-10-11 | `002-research-tooling-tasks`, this commit | the cell "Serves", the cell "Effect" of the charter, the cell "Placed by" and their checks are removed; the charter stays as a file of the owner that the session reads before the triage and that the owner gets first in the review; no program reads it | the stage test ST-1 refuted the cell "Serves": a session ties about 10 of 151 requirements to a line of the charter, and no basic practice | none; stage tests first |
 
 The metric that must move in I-3 is M-08, from 2 of 4.
 
@@ -46,6 +47,8 @@ The metrics that must move in I-4 are M-15 and the probe C-6 of the trials.
 The metrics that must move in I-5 are the probe C-6 of the trials and M-09.
 
 The metrics that must move in I-6 are M-08, from 2 of 4, and M-06.
+
+I-7 removes the mechanism of I-6. No metric must move: the change removes what a stage test refuted.
 
 Decision of the owner, 2026-10-11: the change of I-3 stays. The registration of its trial said that it stays only if no metric is lower than in the trial I-2; two values are lower. The owner keeps the register of requirements, because it shows where a requirement is lost.
 

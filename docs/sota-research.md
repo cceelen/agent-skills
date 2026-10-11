@@ -211,8 +211,8 @@ Run each program with `uv run`. A program without an argument prints its usage t
 
 ## Check an aspect specification
 
-Use `check.py` after each change of an aspect specification. It reads `spec.md`, `charter.md`,
-`evidence.md`, `vetting.md` and `trial.md` in the folder of the specification.
+Use `check.py` after each change of an aspect specification. It reads `spec.md`, `evidence.md`,
+`vetting.md` and `trial.md` in the folder of the specification.
 
 ```text
 uv run factory/sota-research/scripts/check.py specs/<number>-<name>
@@ -312,8 +312,7 @@ The check fails for a cell `Views` that is empty or names a view that section 1 
 
 A requirement is a thing that a source says a project must or should do. The agent writes each
 requirement into the table "Requirements" of `vetting.md`. It does not judge a requirement
-there. The columns are Id, Requirement, Stakeholder, View, Source, Serves and Goes to. The cell
-`Serves` is for the charter: see "The charter of an aspect".
+there. The columns are Id, Requirement, Stakeholder, View, Source and Goes to.
 
 The cell `Goes to` holds the one exit of the requirement:
 
@@ -338,73 +337,6 @@ The report has a part "Requirements". For each view, it gives the number of requ
 the number for each exit. If more than half of the requirements of a view go to a boundary,
 the list "What remains" says so. Examine such a view in the review. With `--json`, the numbers
 are in the key `requirements`.
-
-### The charter of an aspect
-
-The charter is the "why" of an aspect: your target, your principles with their priority, and
-your constraints. It governs the triage of each requirement. Only you change it. The file is
-`charter.md`, beside `spec.md`. Its template is
-`.specify/templates/overrides/charter-template.md`. The file is optional.
-
-In phase 1, give the agent a charter file, or answer its questions. The agent writes each line
-from your words and gives you the file for a review. The head line has the state: `draft`, or
-`reviewed by the owner on <YYYY-MM-DD>`.
-
-Each row of the tables "Target", "Principles" and "Constraints" is one line of the charter.
-
-| Table | Identifier | Cells that a program reads |
-|---|---|---|
-| Target | `T-<n>` | `Level of the recipe`: 1, 2 or 3 |
-| Principles | `P-<n>` | `Priority`: a whole number that no other principle has; `Effect` |
-| Constraints | `K-<n>` | `Effect` |
-
-The cell `Effect` tells what a line does in the triage. Write one or more of these forms, with a
-semicolon between two forms:
-
-| Form | Meaning |
-|---|---|
-| `level <n>` | Each item that holds a requirement that serves the line is admitted, and is on level n or on a lower level. A target part has this effect through its cell `Level of the recipe`. |
-| `no exit: 3.3` | A requirement that serves the line does not go to a decision that depends on context. |
-| `no exit: boundary` | A requirement that serves the line does not go to a boundary. |
-| `no exit: not admitted` | An item that holds a requirement that serves the line is admitted. |
-| `none` | The line has no effect that a program examines. Write this form alone. |
-| `none: rule of the factory` | The line is a rule for the factory, not for the content of the recipe. No requirement must serve it. Write this form alone. |
-
-The cell `Serves` of a requirement names the lines of the charter that the requirement serves,
-with a comma between two identifiers, or `none`. A duplicate has the exit of the row that it
-names.
-
-`place.py` applies the charter before the calculation. If two or more lines give a level to an
-item, the lowest level applies. The cell `Placed by` of a checklist item names the line that
-placed the item, or `calculation`. A line places an item when the item is on the level that the
-line gives. If two lines give that level, a constraint comes before a target part, and a target
-part before a principle. Then the lowest identifier decides.
-
-With a charter, the check fails in these cases:
-
-- The state has a different form, or the charter has no line.
-- An identifier or a priority is used two times, or a principle has no priority.
-- An effect has a different form, or a level is not 1, 2 or 3.
-- A requirement has an empty cell `Serves`, or the cell names a line that the charter does not
-  have.
-- A requirement serves a line with `no exit: 3.3` and goes to a decision. The same applies to
-  `no exit: boundary` and a boundary.
-- An item is not admitted, and it holds a requirement that serves a line with
-  `no exit: not admitted` or with a level.
-- The level of an item is above the lowest level that the charter gives to it.
-- A cell `Placed by` differs from the result of `place.py`.
-- You reviewed the charter, and no requirement serves one of its lines.
-
-The report has a part "Charter". For each line, it gives the number of requirements that serve
-it and the number of items that it placed. The list "What remains" can have these lines:
-
-- `The specification has no charter.` Then no rule of the charter applies, and nothing fails.
-- `The owner did not review the charter.`
-- `Lines of the charter that no requirement serves: <identifiers>.` This line is for a draft.
-- `Requirements that serve no line of the charter, for each view: <view>: <n>.`
-
-With `--scope`, the check examines only the form of a charter that exists. With `--json`, the
-key `charter` has the state and the numbers of each line.
 
 ### The boundaries of an aspect
 
@@ -442,6 +374,21 @@ It has one line for each stakeholder that a proposed boundary would leave with n
 in the aspect. Each line of the part "Requirements" ends with the number of requirements of
 the view that a proposed boundary would take. With `--json`, the keys are `proposed-boundaries`
 and `left-stakeholders` in `remains`.
+
+### The charter of an aspect
+
+The charter is the "why" of an aspect: your target, your principles with their priority, and
+your constraints. The file is `charter.md`, beside `spec.md`. It is optional. Its template is
+`.specify/templates/overrides/charter-template.md`.
+
+- Give the agent a charter file, or state the lines in the session.
+- The agent writes only the lines that you stated, in your words.
+- The agent reads the charter before the triage of the requirements.
+- A principle with a lower number decides when two requirements disagree.
+- In the review, you get the charter first, with the facts for each principle.
+- Only you change the charter.
+
+No program reads the charter.
 
 ### The measured targets of an aspect
 
@@ -532,9 +479,8 @@ uv run factory/sota-research/scripts/export.py <folder> [--words <file>]
 ```
 
 - The folder must be outside each git repository. It must be new or empty.
-- The program writes the tooling, the template of an aspect specification, the template of a
-  charter, the folder `rules/`, and the two programs of `library-vetting` that the tooling
-  loads.
+- The program writes the tooling, the template of an aspect specification, the folder `rules/`,
+  and the two programs of `library-vetting` that the tooling loads.
 - The program writes an `AGENTS.md` and a `CLAUDE.md` with these rules only: the language for
   the owner, the rule for commit messages, the rules of the kit, and where the procedure is.
 - The program does not write the sample specification, the task of the reviewer, the list of
@@ -640,11 +586,6 @@ The program computes `return = severity x probability x breadth`, `cost = adopt 
 The thresholds and the cost limit are in the rubric file. If you change the rubric, increase
 its version. As the owner, you can correct each answer in `vetting.md`. Then run the program
 again.
-
-If the specification has a charter, the charter applies before this table. See "The charter of
-an aspect". A line of the output ends with `placed by <identifier>` when a line of the charter
-placed the item. It ends with `admitted by the charter` when only the charter admits the item.
-With `--write`, the program fills the cells `Level` and `Placed by` of the checklist.
 
 ## Vet an independent source
 

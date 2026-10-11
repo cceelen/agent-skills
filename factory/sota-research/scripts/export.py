@@ -120,18 +120,6 @@ def kit(root=ROOT):
     >>> [path.relative_to(ROOT).as_posix() in files for path in needed]
     [True, True, True, True, True]
 
-    The template of a charter has one line in each table, and a placeholder in each cell that a
-    program reads: the kit holds no line of the charter of an aspect.
-
-    >>> import tempfile
-    >>> folder = pathlib.Path(tempfile.mkdtemp(prefix="sota-charter-"))
-    >>> _ = (folder / aspect.CHARTER_FILE).write_bytes(files[CHARTER_TEMPLATE][0])
-    >>> charter = aspect.read_charter(folder)
-    >>> charter["state"], [(line["id"], line["text"]) for line in charter["lines"]]
-    ('draft', [('T-1', '[part of the target]'), ('P-1', '[principle]'), ('K-1', '[constraint]')])
-    >>> check.brief(check.check_charter({"charter": charter}))
-    [('charter-level-unknown', 'T-1'), ('charter-effect-unknown', 'P-1'), ('charter-effect-unknown', 'K-1')]
-
     A program keeps its mode. The instruction files hold the rules of the kit and no other rule
     of this repository.
 

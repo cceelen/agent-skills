@@ -575,54 +575,11 @@ sent each requirement of one concern to a boundary that it wrote itself.
   writes the state with the date and changes the exit of the requirements that the boundary
   takes; it removes a boundary that the owner declined. In a refresh, a decided boundary
   stays and a new boundary starts as proposed.
-
-Decision of the owner, 2026-10-11, after the trial of the iteration I-4: "as long as you
-retain the charter for the triage and prioritization you can do recursive and agile discover
-and divide and conquor". In that trial no decision of the triage referred to what the owner
-wants: one requirement left through a decision that depends on context, and one was folded
-into an item that the calculation put on level 2.
-
-- **FR-058**: An aspect specification MAY have a charter of the owner in the file
-  `charter.md`, beside `spec.md`: the target, the principles with their priority and the
-  constraints. The charter governs the triage, and only the owner changes it. Its head line
-  MUST hold the state: `draft`, or `reviewed by the owner on <YYYY-MM-DD>`. Each row of the
-  tables "Target", "Principles" and "Constraints" is one line of the charter, with the
-  identifier `T-<n>`, `P-<n>` or `K-<n>`. Each principle MUST have a priority, a whole number
-  that no other principle has. The cell "Effect" of a principle and of a constraint MUST hold
-  one or more of these forms, with a semicolon between two forms: `level <n>`, `no exit: 3.3`,
-  `no exit: boundary`, `no exit: not admitted`; or `none`; or `none: rule of the factory` for
-  a line that is a rule for the factory and not for the content. A target part has the effect
-  `level <n>` through its cell "Level of the recipe". With a charter, each requirement of the
-  register MUST name in the cell "Serves" the lines of the charter that it serves, or `none`.
-  A duplicate has the exit of its row. Before the calculation of risk and reward, the program
-  MUST apply the charter: an item that holds a requirement that serves a line with a level is
-  admitted, and its level is not higher than the lowest such level; an item that holds a
-  requirement that serves a line with `no exit: not admitted` is admitted. The program MUST
-  write into the cell "Placed by" of each item the line of the charter that placed it, or
-  `calculation`. A line places an item when the item is on the level that the line gives. If
-  two lines give that level, a constraint comes before a target part, and a target part
-  before a principle; then the lowest identifier decides. The placement and the check MUST
-  use one function for this rule. The check MUST fail, in each mode, for a charter with a
-  state of a different form, with no line, with an identifier or a priority that is used two
-  times, with a principle without a priority, with an effect of a different form, or with a
-  level that is not 1, 2 or 3. The check MUST fail, outside the check of phase 1, when a
-  requirement has no cell "Serves" or names a line that the charter does not have; when a
-  requirement serves a line with `no exit: 3.3` and goes to a decision, or a line with
-  `no exit: boundary` and goes to a boundary; when an item is not admitted and holds a
-  requirement that serves a line with `no exit: not admitted`; when the level of an item is
-  higher than the lowest level that the charter gives to it; and when a cell "Placed by"
-  differs from the result of the placement. A line that no requirement serves MUST be listed
-  under "What remains" while the state is `draft`, and MUST fail the check after the review
-  of the owner; a line with `none: rule of the factory` is not examined. The check MUST list
-  under "What remains" a charter in the state `draft`, and the number of requirements that
-  serve no line, for each view. The report MUST give, for each line of the charter, the
-  number of requirements that serve it and the number of items that it placed, also in the
-  JSON report. A specification without a charter MUST get one line under "What remains" and
-  no failure, and the cell "Serves" is then not necessary. The rendered skill MUST NOT hold
-  content of the charter. In phase 1 the session copies a charter file of the owner without
-  a change, or writes each line from the words of the owner, and writes no line that the
-  owner did not state. In the review, the owner MUST get the charter and the part "Charter"
-  of the report first.
+- **FR-058**: An aspect specification MAY have a charter of the owner in `charter.md`: the
+  target, the principles with their priority, and the constraints. The procedure MUST write
+  only the lines that the owner stated. The session MUST read the charter before the triage,
+  and the owner MUST get it first in the review. No program reads the charter. (The stage
+  test ST-1 refuted a cell that ties each requirement to a line of the charter.)
 
 ### Key Entities
 
