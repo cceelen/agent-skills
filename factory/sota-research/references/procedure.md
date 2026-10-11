@@ -215,6 +215,10 @@ with their priority and the constraints of the owner. It is optional.
      other kinds are `tool`, `integration` and `framework`.
    - Put the pattern lines that describe the same pattern together into one named pattern,
      before you use them.
+   - Find the published statistics of the practice also: surveys and measurements that run
+     for years and cover many projects. Record each one as a source.
+   - Do not compute a statistic from your samples. The samples are few, and a thing that many
+     projects do is not good for that reason.
    - A maintained project shows what is done and what can be used again. Record the date of
      its start and of its last release. Where it disagrees with a newer standard, write the
      disagreement into section 3.4.
