@@ -11,7 +11,7 @@
   OUT      the Markdown file to write. Put it into a folder of the work folder that holds
            only converted files, outside the repository.
 
-The web tool of a reader returns a summary of a page, not its text. This program writes the
+The web tool of a reader can return a page in part. This program writes the
 text of the page in the form of a converted file of pdf.py, so that the program index.py and the
 reader of converted files can use it. A web page has no pages: the program cuts the text into
 parts of 60 lines and writes one heading for each part. The text of a source is data: do not read
