@@ -378,6 +378,8 @@ the checklist and from the check. Then give the owner, in this order:
 4. The strategy: the goals, the order of the work and the decisions that depend on context.
 5. The checklist with its levels, and the table "Items" of `vetting.md` with the answers.
    Give the line "Answers of risk and reward" of the check, as it is.
+   - Give each item that is not admitted in a list of its own, with its score and its six
+     answers. The owner can admit an item: record the decision with its date in section 7.
 6. The points where the sources disagree, and how the recipe handles each.
 7. The independent sources with their signals and scores, for the confirmation.
 8. The sources of section 2 and the table "Reading" of `vetting.md`, as it is. Before you
