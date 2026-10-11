@@ -116,6 +116,10 @@ how the book organises the work of an architect. `evidence.md` gives the report 
 - Pages 37-54, 77-208 and 232-251 were not given to a reader. Page 37 in A2 is from the
   second reading only.
 - No reader reported a statement that the full framework is applied again to a part.
+  The owner confirmed this on 2026-10-11: the book does not mention recursion. In the practice
+  of the owner, the framework is applied again to each part, by divide and conquer. Thus the
+  recursive use is a practice of the owner. It is not a statement of the book, and the factory
+  records it as an own rule.
 - No reader reported how a conflict between two groups of stakeholders is decided, apart
   from N1, N2, N5 and N6.
 - The contents list (pages 4-6) also lists quality as a chapter of the areas. No reader
