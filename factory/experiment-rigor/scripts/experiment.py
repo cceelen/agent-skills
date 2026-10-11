@@ -73,7 +73,9 @@ INSTRUCTION_FOLDERS = (".agents", ".claude", ".codex", ".cursor")
 MIN_RUNS = 5
 POOL = 4
 MAX_RESULTS = 200_000
-MAX_FILE = 100_000
+# A file of a run that a criterion names is stored up to this size. The limit was 100,000
+# characters; a file of 207,740 characters lost its last table, and a criterion gave a wrong "no".
+MAX_FILE = 5_000_000
 
 HEADING = re.compile(r"^##\s+(\d+)\.\s")
 FIELD = re.compile(r"^- \*\*([^*]+)\*\*:\s*(.*)$")
