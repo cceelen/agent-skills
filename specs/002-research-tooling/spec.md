@@ -571,7 +571,10 @@ sent each requirement of one concern to a boundary that it wrote itself.
   item. The rendered skill MUST ask the owner of a project which regulation and which
   governance bind the project: an item that names one of them is necessary for that project.
 - **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
-  MUST give the entries that hold all the words of a query. A catalogue is a list that its
+  MUST give the entries that hold all the terms of a query. The program MUST keep the entries
+  in a table of their own in the index of FR-051, and MUST search them with the full-text
+  search and the synonyms of the index. The search in the converted documents MUST NOT give
+  an entry of a catalogue. A catalogue is a list that its
   issuer keeps, without a ranking. An entry is a candidate: a
   reader reads its page before the session records a source. A catalogue that fails MUST NOT
   stop the program. The setup of a new environment MUST retrieve the catalogues. The check

@@ -179,6 +179,9 @@ CREATE TABLE IF NOT EXISTS given (
 CREATE TABLE IF NOT EXISTS lines (
   source TEXT, report TEXT, line INTEGER, kind TEXT, text TEXT, who TEXT, purpose TEXT,
   location TEXT, PRIMARY KEY (source, report, line)) WITHOUT ROWID;
+CREATE VIRTUAL TABLE IF NOT EXISTS candidates USING fts5(
+  catalog UNINDEXED, address UNINDEXED, name, category, text,
+  tokenize = 'porter unicode61 remove_diacritics 2');
 """
 TABLES = ("documents", "pages", "sections", "refs", "acronyms", "aliases", "synonyms")
 # The table of the vetting record that names the pages that the readers got.
@@ -1279,6 +1282,40 @@ def query_terms(query, known):
     return list(dict.fromkeys(terms))
 
 
+def term_groups(db, query, synonyms=True):
+    """The groups of a query: each term with its synonyms of the index.
+
+    >>> import sample
+    >>> work = sample.converted()
+    >>> _ = build(work)
+    >>> with contextlib.closing(connect(work)) as db:
+    ...     term_groups(db, "RPO target"), term_groups(db, "RPO", synonyms=False)
+    ([['RPO', 'recovery point objective'], ['target']], [['RPO']])
+    """
+    rows = db.execute("SELECT DISTINCT grp, term FROM synonyms ORDER BY grp, term") if synonyms else ()
+    members = collections.defaultdict(list)
+    for group, term in rows:
+        members[group].append(term)
+    known = {term: terms for terms in members.values() for term in terms}
+    groups = []
+    for term in query_terms(query, known):
+        groups.append(
+            [term, *(other for other in known.get(term.casefold(), ()) if other != term.casefold())]
+        )
+    if not groups:
+        raise ValueError(MESSAGES["no-words"])
+    return groups
+
+
+def match_of(groups, operator=" AND "):
+    """The full-text query of the groups of a query.
+
+    >>> print(match_of([["RPO", "recovery point objective"], ["target"]]))
+    ("RPO" OR "recovery point objective") AND ("target")
+    """
+    return operator.join("(" + " OR ".join(quoted(term) for term in group) + ")" for group in groups)
+
+
 def search(db, query, doc=None, limit=LIMIT, synonyms=True):
     """The pages that hold the terms of a query. Returns a dictionary with the results.
 
@@ -1331,21 +1368,10 @@ def search(db, query, doc=None, limit=LIMIT, synonyms=True):
     ValueError: the query has no word
     >>> db.close()
     """
-    rows = db.execute("SELECT DISTINCT grp, term FROM synonyms ORDER BY grp, term") if synonyms else ()
-    members = collections.defaultdict(list)
-    for group, term in rows:
-        members[group].append(term)
-    known = {term: terms for terms in members.values() for term in terms}
-    groups = []
-    for term in query_terms(query, known):
-        groups.append(
-            [term, *(other for other in known.get(term.casefold(), ()) if other != term.casefold())]
-        )
-    if not groups:
-        raise ValueError(MESSAGES["no-words"])
+    groups = term_groups(db, query, synonyms)
 
     def pages(operator):
-        match = operator.join("(" + " OR ".join(quoted(term) for term in group) + ")" for group in groups)
+        match = match_of(groups, operator)
         where = "pages MATCH ?" + (" AND document = ?" if doc else "")
         cells = "rowid, document, CAST(page AS INTEGER)"
         sql = f"SELECT {cells} FROM pages WHERE {where} ORDER BY rank, 2, 3 LIMIT ?"
