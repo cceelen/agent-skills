@@ -27,6 +27,9 @@ reports are not comparable with new reports.
   bind your project.
 - The research searches also for the regulation, the governance and the public recommendations
   of an aspect.
+- The research finds candidates in public catalogues with `catalog.py`: the projects of public
+  funds and of foundations. It searches also for the public data services of an aspect. A page
+  of a vendor or a blog is only a pointer to the page of an issuer.
 - The check names each item whose harm has no source. The rendered checklist marks a level
   that rests on no source.
 - An aspect specification names the measured targets of its aspect. The check fails for an

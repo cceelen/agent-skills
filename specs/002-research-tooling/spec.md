@@ -570,6 +570,17 @@ sent each requirement of one concern to a boundary that it wrote itself.
   MUST name, for each item, the sources of these two classes whose requirement rows go to the
   item. The rendered skill MUST ask the owner of a project which regulation and which
   governance bind the project: an item that names one of them is necessary for that project.
+- **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
+  MUST give the entries that hold all the words of a query. A catalogue is a list that its
+  issuer keeps, without a ranking and without an advertisement. An entry is a candidate: a
+  reader reads its page before the session records a source. A catalogue that fails MUST NOT
+  stop the program.
+- **FR-066**: For each kind of thing that the research searches for, and for each view, the
+  session MUST make one query at the minimum without the name of a document, a project, an
+  organization or a product. The research MUST search also for the public data services of
+  the aspect. A page of a vendor, a blog or a list of products is a pointer only: the source is
+  the page of the issuer. The text that a search tool writes about its results is not a
+  finding.
 
 ### Key Entities
 
