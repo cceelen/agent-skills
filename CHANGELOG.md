@@ -29,7 +29,8 @@ reports are not comparable with new reports.
   of an aspect.
 - The research finds candidates in public catalogues with `catalog.py`: the projects of public
   funds and of foundations. It searches also for the public data services of an aspect. A page
-  of a vendor or a blog is only a pointer to the page of an issuer.
+  of a vendor or a blog is only a pointer to the page of an issuer. `init.py` retrieves the
+  catalogues. The check tells you when a research did not use them.
 - The check names each item whose harm has no source. The rendered checklist marks a level
   that rests on no source.
 - An aspect specification names the measured targets of its aspect. The check fails for an

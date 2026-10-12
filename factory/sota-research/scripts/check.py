@@ -272,6 +272,7 @@ MESSAGES = {
     "remains-own-sources": "Views with fewer than two sources of their own field that were read: {0}.",
     "remains-unread": "Sources with pages that no reader got: {0}.",
     "remains-no-reading": "The table Reading is absent. Run index.py unread with --write.",
+    "remains-no-catalogues": "The list Searches has no query of the catalogues. Run catalog.py find.",
     "pages-left": "{0} ({1} pages)",
     "remains-no-trial": "The recipe has no trial.",
     "remains-accepted": "The owner did not accept the specification.",
@@ -984,6 +985,19 @@ def reading_absent(data):
     return bool(data["sources"]) and not data["has_reading"]
 
 
+def catalogues_absent(data):
+    """True if the specification has sources and its list "Searches" has no query of the catalogues.
+
+    >>> import sample
+    >>> line = ("vetting.md", "- operation, catalogues: `backup restore`", "- operation: `backup restore`")
+    >>> catalogues_absent(sample.load()), catalogues_absent(sample.load(line))
+    (False, True)
+    >>> catalogues_absent({"searches": [], "sources": []})
+    False
+    """
+    return bool(data["sources"]) and not any("catalogues:" in line for line in data["searches"])
+
+
 def check_reading(data):
     """The table "Reading" of vetting.md agrees with section 2.
 
@@ -1190,14 +1204,14 @@ def check_boundaries(data):
     A row names a proposed boundary of section 1, and requirements of the register.
 
     >>> planted("| tests | R-03 |", "| quality | R-03 |", "vetting.md")[1]
-    ('proposed-row-unknown', 'quality', 'vetting.md', 29,
+    ('proposed-row-unknown', 'quality', 'vetting.md', 34,
      "The table 'Proposed boundaries' has a row for 'quality'. Section 1 does not have this boundary.")
     >>> planted("| tests | R-03 |", "| recovery | R-03 |", "vetting.md")[1]
-    ('proposed-row-decided', 'recovery', 'vetting.md', 29,
+    ('proposed-row-decided', 'recovery', 'vetting.md', 34,
      "The table 'Proposed boundaries' has a row for 'recovery'. The owner decided this boundary. Remove the
      row.")
     >>> planted("| tests | R-03 |", "| tests | R-03, R-19 |", "vetting.md")
-    [('proposed-requirement-unknown', 'tests', 'vetting.md', 29,
+    [('proposed-requirement-unknown', 'tests', 'vetting.md', 34,
       "The row of the boundary 'tests' names 'R-19'. The table Requirements does not have this row.")]
     """
     out = []
@@ -2246,6 +2260,8 @@ def report(data, found, remains, previous_given):
             rest.append(MESSAGES[f"remains-{key}"].format(", ".join(ids)))
     if reading_absent(data):
         rest.append(MESSAGES["remains-no-reading"])
+    if catalogues_absent(data):
+        rest.append(MESSAGES["remains-no-catalogues"])
     if not data["trials"]:
         rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):

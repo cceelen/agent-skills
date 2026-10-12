@@ -815,8 +815,8 @@ def write(data, results):
 
     >>> short = sample.folder(("vetting.md", " | 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |", " |"))
     >>> write(aspect.load(short), results[:1])
-    ["The program cannot write the cell 'score' in line 9 of vetting.md. Correct the table.",
-     "The program cannot write the cell 'date' in line 9 of vetting.md. Correct the table."]
+    ["The program cannot write the cell 'score' in line 14 of vetting.md. Correct the table.",
+     "The program cannot write the cell 'date' in line 14 of vetting.md. Correct the table."]
     """
     path = pathlib.Path(data["folder"]) / "vetting.md"
     rows = {r.get("source"): r for r in data["vetting_sources"]}
@@ -904,7 +904,7 @@ def cmd_score(data, args):
     (0, True)
     >>> short = sample.folder(("vetting.md", " | 9 of 10 | 2026-01-10 | A. Person, 2026-01-15 |", " |"))
     >>> score(short, sample.work(), "--write")[1].splitlines()[-3]
-    "The program cannot write the cell 'score' in line 9 of vetting.md. Correct the table."
+    "The program cannot write the cell 'score' in line 14 of vetting.md. Correct the table."
 
     A source with a wrong identifier is reported. A wrong option gives the result code 2.
 

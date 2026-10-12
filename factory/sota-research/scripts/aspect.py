@@ -573,6 +573,11 @@ def load(folder):
     [('tests', 'R-03', 'vetting.md'), ('archive', 'none', 'vetting.md')]
     >>> data = load(sample.folder())
 
+    The list "Searches" of vetting.md has one line for each query of the research.
+
+    >>> data["searches"]
+    ['storage: `backup copies standard`', 'operation, catalogues: `backup restore`']
+
     The table "Reading" of vetting.md has one row for each converted document of a source.
 
     >>> data["has_reading"], [(r["source"], r["document"], r["pages"]) for r in data["reading"]]
@@ -647,6 +652,7 @@ def load(folder):
         "reading": [],
         "has_reading": False,
         "has_vetting": False,
+        "searches": [],
         "trials": [],
         "trial_findings": [],
     }
@@ -683,6 +689,9 @@ def load(folder):
                 found = record.titled(title_)
                 data[key] = record.table(found[1]) if found else []
                 data["has_reading"] = data["has_reading"] or bool(found and key == "reading")
+            found = record.titled("Searches")
+            lines = record.text(found[1]).splitlines() if found else []
+            data["searches"] += [line.strip()[2:] for line in lines if line.strip().startswith("- ")]
     return data
 
 

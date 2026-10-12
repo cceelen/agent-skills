@@ -574,7 +574,8 @@ sent each requirement of one concern to a boundary that it wrote itself.
   MUST give the entries that hold all the words of a query. A catalogue is a list that its
   issuer keeps, without a ranking. An entry is a candidate: a
   reader reads its page before the session records a source. A catalogue that fails MUST NOT
-  stop the program.
+  stop the program. The setup of a new environment MUST retrieve the catalogues. The check
+  MUST list under "What remains" a list "Searches" without a query of the catalogues.
 - **FR-066**: For each kind of thing that the research searches for, and for each view, the
   session MUST make one query at the minimum without the name of a document, a project, an
   organization or a product. The research MUST search also for the public data services of

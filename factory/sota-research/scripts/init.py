@@ -24,14 +24,15 @@ The program does these steps in this order:
 3. It makes KIT a git repository with the branch `main` and one commit. Without the program
    `git`, it says so and continues.
 4. It retrieves the seeds into WORK and builds the index of their text, as `seed.py get` does.
-5. It prints what a person does next.
+5. It retrieves the catalogues into WORK, as `catalog.py get` does.
+6. It prints what a person does next.
 
 The program removes only a folder that holds the marker file. No seed document and no converted
 text is written into KIT.
 
 Result code 0: the kit is made, and each seed is retrieved or recorded. Result code 1: the kit is
-made, and a seed failed, changed or waits for the owner. Result code 2: nothing was made, because
-the arguments are wrong or the input cannot be read.
+made, and a seed failed, changed or waits for the owner, or a catalogue failed. Result code 2:
+nothing was made, because the arguments are wrong or the input cannot be read.
 """
 
 import json
@@ -40,6 +41,8 @@ import pathlib
 import shutil
 import subprocess
 import sys
+
+import catalog
 
 import aspect
 import export
@@ -252,11 +255,11 @@ def next_steps(kit, work):
     ]
 
 
-def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
+def main(argv=None, run=subprocess.run, download=pdf.download, ask=None, catalogs=None):
     r"""The command line. See the text at the start of this file. Returns the result code.
 
-    The examples use a manifest with three seeds, and functions in the place of git, of the
-    converter and of the network.
+    The examples use a manifest with three seeds, one catalogue, and functions in the place of
+    git, of the converter and of the network.
 
     >>> import tempfile
     >>> import sample
@@ -274,11 +277,13 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     >>> def tools(args, **options):
     ...     calls.append(args[len(GIT)] if args[0] == "git" else args[0])
     ...     return Git if args[0] == "git" else Converter
+    >>> listed = b"items:\n  - name: Scan\n    homepage_url: https://s.example/\n"
     >>> def network(address):
     ...     calls.append(address)
-    ...     return b"%PDF-1.7"
+    ...     return listed if address.endswith(".yml") else b"%PDF-1.7"
+    >>> one = [{"id": "t", "form": "landscape", "address": "https://a.example/l.yml"}]
     >>> def init(*args, run=tools, download=network):
-    ...     program = lambda argv: main(argv, run=run, download=download)
+    ...     program = lambda argv: main(argv, run=run, download=download, catalogs=one)
     ...     code, out, err = sample.run(program, kit, work, "--manifest", manifest, *args)
     ...     print((out + err).replace(str(outside), "OUTSIDE").strip())
     ...     return code
@@ -291,6 +296,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     c: recorded: a web reader reads the page https://a.example/c.
     Written: seeds.json
     Index: documents ...
+    t: retrieved: 1 entries.
     Do these steps next:
     - Go into the folder OUTSIDE/kit. Run: uv run factory/sota-research/scripts/models.py apply
     - Get the file of the seed 'b'. Then run: uv run factory/sota-research/scripts/seed.py get OUTSIDE/work
@@ -298,7 +304,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     - Start the session of the research in the folder OUTSIDE/kit.
     1
     >>> calls
-    ['rev-parse', 'init', 'add', 'commit', 'https://a.example/a', 'pdftotext']
+    ['rev-parse', 'init', 'add', 'commit', 'https://a.example/a', 'pdftotext', 'https://a.example/l.yml']
 
     The kit holds the files of the export and the marker with the commit. It holds no seed.
 
@@ -306,7 +312,8 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     >>> written == sorted([*export.kit(), MARKER]), (kit / MARKER).read_text().splitlines()[1]
     (True, 'Commit of the repository: abc1234')
     >>> sorted(p.relative_to(work).as_posix() for p in work.rglob("*") if p.is_file())
-    ['converted/.reader-may-read', 'converted/a.md', 'index.sqlite', 'seeds.json', 'seeds/a.pdf']
+    ['catalogs/t.json', 'converted/.reader-may-read', 'converted/a.md', 'index.sqlite', 'seeds.json',
+     'seeds/a.pdf']
     >>> json.loads((work / "seeds.json").read_text())["date"]
     '2026-01-05'
 
@@ -331,6 +338,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     c: recorded: a web reader reads the page https://a.example/c.
     Written: seeds.json
     Index: documents ...
+    t: retrieved before: 1 entries. Nothing was retrieved again.
     Do these steps next:
     - Go into the folder OUTSIDE/kit. Run: uv run factory/sota-research/scripts/models.py apply
     - Start the session of the research in the folder OUTSIDE/kit.
@@ -409,8 +417,10 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None):
     print(make_repository(run, kit))
     files = seed.ask_owner(seeds, files, work, ask if argv is not None else seed.person_at_the_keyboard())
     code, lines = seed.get(work, seeds, files, today, False, download, run)
-    print("\n".join(lines + next_steps(kit, work)))
-    return code
+    listed, problems = catalog.read_manifest() if catalogs is None else (catalogs, [])
+    more, failed = catalog.get(work, listed, False, download)
+    print("\n".join(lines + problems + more + next_steps(kit, work)))
+    return 1 if code or failed or problems else 0
 
 
 if __name__ == "__main__":

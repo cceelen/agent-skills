@@ -149,6 +149,11 @@ VETTING = """\
 
 Rubric for sources: version 1. Rubric for items: version 5.
 
+## Searches
+
+- storage: `backup copies standard`
+- operation, catalogues: `backup restore`
+
 ## Sources
 
 | Source | Kind | Gates | Signals | Answers | Score | Date | Confirmed by |
