@@ -572,7 +572,7 @@ sent each requirement of one concern to a boundary that it wrote itself.
   governance bind the project: an item that names one of them is necessary for that project.
 - **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
   MUST give the entries that hold all the words of a query. A catalogue is a list that its
-  issuer keeps, without a ranking and without an advertisement. An entry is a candidate: a
+  issuer keeps, without a ranking. An entry is a candidate: a
   reader reads its page before the session records a source. A catalogue that fails MUST NOT
   stop the program.
 - **FR-066**: For each kind of thing that the research searches for, and for each view, the

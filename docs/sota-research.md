@@ -644,9 +644,10 @@ For a source that is a repository, the program runs the collector of the skill
 ## Find candidates in the catalogues
 
 A search engine ranks its results, and a vendor can write a page for a high rank. A catalogue
-is a list that its issuer keeps: the projects that a public fund paid for, or the projects of
-a foundation. It has no ranking and no advertisement. The program `catalog.py` reads the
-catalogues of the table in `factory/sota-research/references/catalogs.md`.
+is a list that its issuer keeps: the projects that a public fund paid for, or the projects and
+the tools of a field that a foundation lists. It has no ranking. A landscape lists also the
+products of vendors: an entry shows that a thing exists, not that it is good. The program
+`catalog.py` reads the catalogues of the table in `factory/sota-research/references/catalogs.md`.
 
 ```
 uv run factory/sota-research/scripts/catalog.py list
@@ -662,6 +663,8 @@ uv run factory/sota-research/scripts/catalog.py find <work folder> <word> ... [-
 - If a catalogue fails, the program records the reason and continues.
 
 To add a catalogue, add one row to the table. The form `landscape` is a file `landscape.yml`.
+The repository `cncf/landscape2-sites` names the landscapes that the CNCF builds. The program
+does not read a category of members or of adopters.
 The form `rows:tr` or `rows:li` is a page of HTML whose entries are rows with a link.
 
 The research makes also one query for each kind of thing without the name of a known

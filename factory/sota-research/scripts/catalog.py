@@ -20,11 +20,12 @@
   --manifest FILE  a different manifest, for tests. The default is references/catalogs.md.
 
 A catalogue is a list that its issuer keeps: the projects that a public fund paid for, or the
-projects and the tools of a foundation. It has no ranking and no advertisement. The manifest
-gives the form of each catalogue:
+projects and the tools of a field that a foundation lists. It has no ranking. A landscape lists
+also the products of vendors: an entry shows that a thing exists, not that it is good. The
+manifest gives the form of each catalogue:
 
-  landscape        a file "landscape.yml" of a landscape. An entry is an item. A category of
-                   members is not read.
+  landscape        a file "landscape.yml" of a landscape, in one of its two forms. An entry is
+                   an item. A category of members or of adopters is not read.
   rows:TAG         a page of HTML. An entry is an element TAG (tr or li) with a link to an
                    address below the cell "Entries below".
 
@@ -56,6 +57,7 @@ FORM = re.compile(r"landscape|rows:(tr|li)")
 DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 KEY = re.compile(r"^( *)(- )?([a-z_]+):(?: (.*))?$")
 BLOCK = {">", ">-", ">+", "|", "|-", "|+"}
+NOT_READ = ("member", "adopter")
 TEXT_LENGTH = 200
 LIMIT = 40
 
@@ -184,6 +186,8 @@ def clean(text, length=TEXT_LENGTH):
 def landscape(text):
     r"""The entries of a file "landscape.yml": the items that are not in a category of members.
 
+    A category of adopters is not read also: its items are organizations, not things to use.
+
     The program reads the lines of the file: the standard library has no reader for YAML.
 
     >>> text = '''landscape:
@@ -224,8 +228,39 @@ def landscape(text):
     ...     print(" | ".join(found.values()))
     A scanner | https://a.example/ | Tools / Scan | It reads a tree of files.
     B | https://code.example/b | Tools / Scan | One line.
+
+    A landscape can have a second form: a category and an item start with their name.
+
+    >>> text = '''categories:
+    ...   - name: Members
+    ...     subcategories:
+    ...       - name: Gold
+    ...         items:
+    ...           - name: A company
+    ...             homepage_url: https://company.example/
+    ...   - name: An Adopter
+    ...     subcategories:
+    ...       - name: All
+    ...         items:
+    ...           - name: A user
+    ...             homepage_url: https://user.example/
+    ...   - name: Projects
+    ...     subcategories:
+    ...       - name: Hosted
+    ...         items:
+    ...           - name: C
+    ...             homepage_url: https://c.example/
+    ...             extra:
+    ...               - name: not an item
+    ...           - item:
+    ...             name: D
+    ...             repo_url: https://code.example/d
+    ... '''
+    >>> [" | ".join(found.values()) for found in landscape(text)]
+    ['C | https://c.example/ | Projects / Hosted | ', 'D | https://code.example/d | Projects / Hosted | ']
     """
-    entries, names, wait, item, depth, block = [], ["", ""], None, None, 0, None
+    entries, names, item, block = [], ["", ""], None, None
+    below, items, depth = -1, None, 0
     for line in [*text.splitlines(), "end:"]:
         found = KEY.match(line)
         if block and (not found or len(found[1]) > depth):
@@ -234,23 +269,29 @@ def landscape(text):
         block = None
         if not found:
             continue
-        indent, dash, key, value = len(found[1]), found[2], found[3], (found[4] or "").strip()
+        dash, key, value = found[2], found[3], (found[4] or "").strip()
+        column = len(found[1]) + (2 if dash else 0)
         value = value[1:-1] if value[:1] in ("'", '"') and value[:1] == value[-1:] else value
-        if item is not None and indent < depth:
+        if items is not None and column <= items:
+            items, item = None, None
+        if items is None:
+            if key == "items":
+                items, depth = column, 0
+            elif key == "subcategories":
+                below = column
+            elif key == "name":
+                names = [value, ""] if below < 0 or column <= below else [names[0], value]
+            continue
+        if dash and column >= depth and (not depth or column == depth):
+            depth, item = column, {"group": " / ".join(name for name in names if name)}
             entries.append(item)
-            item = None
-        if dash and key == "item":
-            item, depth, wait = {"group": " / ".join(name for name in names if name)}, indent + 2, None
-        elif dash and key in ("category", "subcategory"):
-            wait = 0 if key == "category" else 1
-        elif item is not None and indent == depth and not dash:
+        if item is not None and column == depth and key != "item":
             item[key], block = ("", key) if value in BLOCK else (value, None)
-        elif item is None and wait is not None and key == "name" and not dash:
-            names, wait = ([value, ""] if wait == 0 else [names[0], value]), None
     out = []
     for item in entries:
         address = item.get("homepage_url") or item.get("repo_url")
-        if address and item.get("name") and "member" not in item["group"].split(" / ")[0].lower():
+        category = item["group"].split(" / ")[0].lower()
+        if address and item.get("name") and not any(word in category for word in NOT_READ):
             out.append(entry(item["name"], address, item["group"], item.get("description", "")))
     return out
 
@@ -442,7 +483,7 @@ def main(argv=None, fetch=pdf.download):
     r"""Run one command. Returns the result code.
 
     >>> main(["list"])
-    cncf-landscape | ...
+    cdf-landscape | ...
     0
     >>> import tempfile
     >>> folder = pathlib.Path(tempfile.mkdtemp(prefix="sota-catalog-"))
@@ -452,7 +493,7 @@ def main(argv=None, fetch=pdf.download):
     ...     "|---|---|---|---|---|---|---|---|\n"
     ...     "| a | A list | An issuer | tools | landscape | https://a.example/l.yml |  | 2026-01-05 |\n"
     ... )
-    >>> text = b"- category:\n  name: Tools\n  - item:\n    name: Scan\n    homepage_url: https://s.example/\n"
+    >>> text = b"- category:\n  name: Tools\n  items:\n    - item:\n      name: Scan\n      homepage_url: https://s.example/\n"
     >>> main(["get", str(folder / "work"), "--manifest", str(manifest)], fetch=lambda url: text)
     a: retrieved: 1 entries.
     0

@@ -250,7 +250,8 @@ with their priority and the constraints of the owner. It is optional.
      - public data services that the tools or the practices of the aspect read their data
        from. Record who operates each one and who pays for it.
    - Search the catalogues also. A catalogue is a list that its issuer keeps, without a
-     ranking and without an advertisement. Run
+     ranking. A landscape lists also the products of vendors: an entry shows that a thing
+     exists, not that it is good. Run
      `uv run factory/sota-research/scripts/catalog.py get <work folder>`. Then, for each view
      and for each kind of this step, run
      `uv run factory/sota-research/scripts/catalog.py find <work folder> <word> ...` with the
