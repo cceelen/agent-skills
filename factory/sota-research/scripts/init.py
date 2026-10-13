@@ -43,6 +43,7 @@ import subprocess
 import sys
 
 import catalog
+import web
 
 import aspect
 import export
@@ -85,6 +86,7 @@ MESSAGES = {
         "- Get the file of the seed '{0}'. "
         "Then run: uv run factory/sota-research/scripts/seed.py get {1} --file {0}=PATH"
     ),
+    "next-browser": "- Install the headless browser. Run: uvx playwright install chromium-headless-shell",
     "next-session": "- Start the session of the research in the folder {0}.",
     "unreadable": "The input cannot be read: {0}",
 }
@@ -229,7 +231,7 @@ def refusal(kit, work, again):
     return None if again else MESSAGES["is-a-kit"].format(kit)
 
 
-def next_steps(kit, work):
+def next_steps(kit, work, browser=True):
     r"""The lines that tell a person what to do next. A seed that waits for the owner gets one line.
 
     >>> import tempfile
@@ -242,6 +244,12 @@ def next_steps(kit, work):
     - Get the file of the seed 'b'. Then run: uv run factory/sota-research/scripts/seed.py get WORK
       --file b=PATH
     - Start the session of the research in the folder KIT.
+
+    Without a headless browser, the converter `web.py` cannot retrieve a page that answers a
+    program with an empty text.
+
+    >>> next_steps("KIT", work, browser=None)[-2]
+    '- Install the headless browser. Run: uvx playwright install chromium-headless-shell'
     >>> aspect.long_sentences(MESSAGES), aspect.long_sentences({"a": MARKER_TEXT})
     ([], [])
     """
@@ -251,11 +259,12 @@ def next_steps(kit, work):
         MESSAGES["next-head"],
         MESSAGES["next-models"].format(kit),
         *(MESSAGES["next-file"].format(ident, work) for ident in waiting),
+        *([] if browser else [MESSAGES["next-browser"]]),
         MESSAGES["next-session"].format(kit),
     ]
 
 
-def main(argv=None, run=subprocess.run, download=pdf.download, ask=None, catalogs=None):
+def main(argv=None, run=subprocess.run, download=pdf.download, ask=None, catalogs=None, browser=web.browser):
     r"""The command line. See the text at the start of this file. Returns the result code.
 
     The examples use a manifest with three seeds, one catalogue, and functions in the place of
@@ -283,7 +292,8 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None, catalog
     ...     return listed if address.endswith(".yml") else b"%PDF-1.7"
     >>> one = [{"id": "t", "form": "landscape", "address": "https://a.example/l.yml"}]
     >>> def init(*args, run=tools, download=network):
-    ...     program = lambda argv: main(argv, run=run, download=download, catalogs=one)
+    ...     shell = lambda: "shell"
+    ...     program = lambda argv: main(argv, run=run, download=download, catalogs=one, browser=shell)
     ...     code, out, err = sample.run(program, kit, work, "--manifest", manifest, *args)
     ...     print((out + err).replace(str(outside), "OUTSIDE").strip())
     ...     return code
@@ -419,7 +429,7 @@ def main(argv=None, run=subprocess.run, download=pdf.download, ask=None, catalog
     code, lines = seed.get(work, seeds, files, today, False, download, run)
     listed, problems = catalog.read_manifest() if catalogs is None else (catalogs, [])
     more, failed = catalog.get(work, listed, False, download)
-    print("\n".join(lines + problems + more + next_steps(kit, work)))
+    print("\n".join(lines + problems + more + next_steps(kit, work, browser())))
     return 1 if code or failed or problems else 0
 
 

@@ -560,7 +560,13 @@ sent each requirement of one concern to a boundary that it wrote itself.
   target of the PDF converter. The converted text MUST NOT be committed. The procedure asks
   for the conversion when a page came back empty or in part, or when its words must be
   examined. (The stage test ST-13 found no more requirement lines from the text than from
-  the web tool.)
+  the web tool.) If the request for an address gives no text, the program MUST retrieve the
+  page with a headless browser that has a new, empty profile, and MUST write that into the
+  first line of the converted file. Without a browser, the program MUST give the reason and
+  the command that installs the browser, and MUST continue. The setup of a new environment
+  MUST name the missing browser as a step. A source of the class `regulation` or
+  `governance` that gives no text to a reader MUST NOT stay "not verified" before each
+  address of its issuer was converted and the owner was asked for the file.
 - **FR-061**: Removed in iteration I-22 with the answers of risk and reward.
 - **FR-062**: Removed in iteration I-22. FR-011 gives the value of an item.
 - **FR-063**: The research MUST search for the regulation, the governance and the public

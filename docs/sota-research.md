@@ -725,6 +725,13 @@ uv run factory/sota-research/scripts/web.py <address or file> <work folder>/conv
 - Do not read the result in your session. Give its path to an agent of the type
   `sota-file-reader`.
 - A PDF file or an image gives no result. For a PDF file, use `pdf.py`.
+- A server can answer a program with an empty page: it examines the caller, or scripts write
+  the text. If the request gives no text, the program retrieves the page with a headless
+  browser. The first line of the result says that.
+- The headless browser is the headless shell of Chromium. Install it with
+  `uvx playwright install chromium-headless-shell`. The tooling does not install it. To use a
+  different browser, put its command into the variable `SOTA_RESEARCH_BROWSER`.
+- The browser gets a new, empty profile for each page. It runs the scripts of the page.
 - A network error or an HTTP error gives result code 1 with the reason. Then write `part` into the
   cell `Read` of the source.
 - After you convert a file with `web.py`, run `index.py build`.
