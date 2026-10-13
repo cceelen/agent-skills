@@ -15,6 +15,8 @@ reports are not comparable with new reports.
 - The tooling converts a web page into a converted file with `web.py`. The readers get the text
   of a web source through the index, as for a PDF source.
 - If a web page gives no text to a request, `web.py` retrieves it with a headless browser.
+- The checklist of a recipe names the classes of the sources that ask for each item. The recipe
+  asks where the product is used when the owner names the regulation and the governance.
 - The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
   the plan from eight viewpoints, and the check reports the findings that are open. One
   viewpoint is the integrity of each asset, from the source to the system of the user.

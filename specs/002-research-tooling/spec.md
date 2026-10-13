@@ -576,6 +576,12 @@ sent each requirement of one concern to a boundary that it wrote itself.
   MUST name, for each item, the sources of these two classes whose requirement rows go to the
   item. The rendered skill MUST ask the owner of a project which regulation and which
   governance bind the project: an item that names one of them is necessary for that project.
+  The rendered skill MUST ask also where the product is used. If the owner cannot know that,
+  as for an open project, the skill MUST NOT record "none": it shows each regulation and each
+  governance of the checklist with its items, and the owner decides for each of them if the
+  project prepares for it. The rendered checklist MUST name, for each item, the classes of
+  the sources that ask for it, and MUST give for each class who states it and what it means
+  for the item.
 - **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
   MUST give the entries that hold all the terms of a query. The program MUST keep the entries
   in a table of their own in the index of FR-051, and MUST search them with the full-text

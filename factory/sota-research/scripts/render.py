@@ -106,6 +106,29 @@ TRIAL_NOTE = {
 }
 
 BINDING_HEAD = "Regulation and governance"
+CLASSES_HEAD = "Asked for by"
+
+# What the class of a source says about an item that the source asks for.
+CLASS_MEANING = {
+    "regulation": (
+        "a law or a regulation of a state",
+        "a duty where the law binds the project or a user of the product",
+    ),
+    "governance": (
+        "a framework of governance or of audit, or a rule of an industry",
+        "a condition of the audit where the framework binds the project or a user of the product",
+    ),
+    "own rule": ("a rule of this kit", "the kit does not trade it"),
+    "standard": (
+        "a standards body or a public authority",
+        "the agreed practice; a customer or an auditor can ask for it",
+    ),
+    "foundation": ("an open foundation", "the practice of a community; no duty"),
+    "vendor": ("the vendor of a platform, on its own platform", "applies on that platform only"),
+    "research": ("peer-reviewed research or a recognized book", "evidence that the practice helps; no duty"),
+    "trusted-data": ("a data source that is recorded as trusted", "measured data; no duty"),
+    "independent": ("a different source that passed the source vetting", "one opinion; no duty"),
+}
 
 RISK_ANALYSIS = """\
 A practice of the state of the art answers a specific result of a risk analysis. Thus do the
@@ -114,6 +137,13 @@ risk analysis first, together with the owner of the project.
 1. Find out the contexts of the project. Read the project before you ask.
 2. Ask the owner which regulation and which governance bind the project. Each item of the
    checklist that names one of them is necessary for the project.
+   - Ask also where the product is used. A regulation or a governance that binds a user of the
+     product puts its items on the product.
+   - If the owner cannot know where the product is used, do not record "none". An open
+     project is such a case.
+   - Then show each regulation and each governance of the checklist with its items. Let the
+     owner decide for each of them if the project prepares for it.
+   - Record each answer in the selection.
 3. For each risk dimension in the table, ask the owner the question. Ask about their software,
    their market, their context, their users and their data.
 4. Give the opinion of the kit for the answer, with its reason.
@@ -128,8 +158,9 @@ The kit recommends. The owner of the project decides.
 - The selection of the project is the file `.agents/kit/{name}.md` in the project. Commit it.
 - If the file does not exist, do the risk analysis and write it.
 - The file names this recipe with its stamp. It holds the table of the risk analysis:
-  dimension, question, answer and target level. It holds one line for each item of
-  `references/checklist.md`.
+  dimension, question, answer and target level. It holds the regulation and the governance
+  that bind the project, and those that the owner prepares for. It holds one line for each
+  item of `references/checklist.md`.
 - Write `- [x] <id> <item>` for an adopted item.
 - Write `- [ ] <id> <item> (declined: <reason>)` for an item that the owner declines. Ask for
   the reason.
@@ -407,14 +438,45 @@ def binding_sources(data):
     return {item: sorted(found[item]) for item in sorted(found)}
 
 
+def asking_classes(data):
+    """For each item, the classes of the sources that ask for it, the highest value of the ladder first.
+
+    An item of an own rule has the class `own rule`.
+
+    >>> import sample
+    >>> asking_classes(sample.load())["C-01"]
+    ['standard']
+    >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
+    >>> sorted(set(map(tuple, asking_classes(law).values())))
+    [('independent',), ('regulation',), ('research',)]
+    >>> own = sample.load(("spec.md", "| 1 | standard (S-01) | the list", "| 1 | own rule (IX) | the list"))
+    >>> [classes for classes in asking_classes(own).values() if "own rule" in classes]
+    [['own rule', 'standard']]
+    """
+    rubric = place.read_rubric(pathlib.Path(__file__).with_name("rubric-items.txt"))
+    classes = {s["id"]: s.get("class", "") for s in data["sources"]}
+    found = {}
+    for row in data["requirements"]:
+        for ident in aspect.source_ids(row.get("source", "")):
+            if classes.get(ident) in check.CLASSES:
+                found.setdefault(row.get("goes to", "").strip(), set()).add(classes[ident])
+    for row in data["checklist"]:
+        if row.get("strongest source", "").strip().startswith(check.OWN_RULE):
+            found.setdefault(row.get("id"), set()).add(check.OWN_RULE)
+
+    def order(name):
+        return (-rubric["values"].get(name.replace(" ", "-"), 0), list(CLASS_MEANING).index(name))
+
+    return {item: sorted(found[item], key=order) for item in sorted(found)}
+
+
 def render_checklist(data, mark):
     """The reference file with the checklist: each item with its risk, its view, its level and its check.
 
     >>> import sample
     >>> text = render_checklist(sample.load(), "<stamp>")
-    >>> print("\\n".join(line[:43] for line in text.splitlines() if line.startswith("|")))
+    >>> print("\\n".join(line[:43] for line in text.splitlines() if line.startswith(("| Id", "| C-"))))
     | Id | Item | Risk that it answers | View |
-    |---|---|---|---|---|---|---|
     | C-01 | A backup of the data that cannot b
     | C-03 | A copy of the backup is kept in a
     | C-05 | The backup is made by a program, n
@@ -434,14 +496,27 @@ def render_checklist(data, mark):
 
     >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
     >>> text = render_checklist(law, "<stamp>")
-    >>> [line.split(" | ")[6].strip(" |") for line in text.splitlines() if line.startswith("| C-")]
+    >>> [line.split(" | ")[7].strip(" |") for line in text.splitlines() if line.startswith("| C-")]
     ['Guide to backups', 'Guide to backups', 'Guide to backups', '']
+
+    The cell before it names the classes of the sources that ask for the item. A table gives
+    the meaning of each class.
+
+    >>> [line.split(" | ")[6] for line in text.splitlines() if line.startswith("| C-")]
+    ['regulation', 'regulation', 'regulation', 'research']
+    >>> classes = [line.split(" | ")[0][3:-1] for line in text.splitlines() if line.startswith("| `")]
+    >>> classes == list(CLASS_MEANING)
+    True
+    >>> aspect.long_sentences({name: ". ".join(cells) for name, cells in CLASS_MEANING.items()})
+    []
     """
     binding = binding_sources(data)
+    asking = asking_classes(data)
     rows = [
         [r.get(k, "") for k in ("id", "item", "why")]
         + [aspect.view_of(r), r.get("level", "")]
-        + [r.get("check", ""), "; ".join(binding.get(r.get("id"), []))]
+        + [r.get("check", ""), ", ".join(asking.get(r.get("id"), []))]
+        + ["; ".join(binding.get(r.get("id"), []))]
         for r in rendered_items(data)
     ]
     return "\n".join(
@@ -454,7 +529,18 @@ def render_checklist(data, mark):
             "`judgement` needs a person or a review. The view of an item is the set of concerns that",
             "the item belongs to. The last cell names the regulation and the governance that ask for",
             "the item. If one of them binds the project, the item is necessary for the project.\n",
-            table(["Id", "Item", "Risk that it answers", "View", "Level", "Check", BINDING_HEAD], rows),
+            f'The cell "{CLASSES_HEAD}" names the classes of the sources that ask for the item. The class',
+            "of the strongest source gives the level. Use the classes when the owner sorts the items or",
+            "declines one: they show who asks for the item and what follows from it.\n",
+            table(
+                ["Class", "Who states it", "What it means for the item"],
+                [[f"`{name}`", *cells] for name, cells in CLASS_MEANING.items()],
+            ),
+            "",
+            table(
+                ["Id", "Item", "Risk that it answers", "View", "Level", "Check", CLASSES_HEAD, BINDING_HEAD],
+                rows,
+            ),
         ]
     )
 
@@ -799,7 +885,7 @@ def main(argv=None):
     >>> edit = ("spec.md", order, order + " See specs/900-backups/.")
     >>> refused("--commit", "abc1234", edits=[edit])
     (1, False, "Nothing was rendered: a skill must work alone. The file skills/backups/SKILL.md holds 'specs/'
-                in line 88.")
+                in line 96.")
 
     The target folder of section 5 is used.
 

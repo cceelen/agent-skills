@@ -426,6 +426,11 @@ uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <c
   folder of the skill. It writes the documentation to `docs/<name>.md`.
 - The checklist shows the view of each item. The skill tells its agent to show a selection in
   groups, one group for each view. The table of the views names the stakeholders of each view.
+- The checklist names the classes of the sources that ask for each item. A table gives the
+  meaning of each class. The last cell names the regulation and the governance.
+- The skill asks which regulation and which governance bind the project, and where the product
+  is used. If the owner cannot know the place of use, the skill shows each of them with its
+  items, and the owner decides.
 - The folder of the skill is `skills/<name>/`. A different folder comes from the field
   `Target folder` in section 5 of the specification.
 - Each rendered file starts with a stamp: the branch, the commit and the digest of the
