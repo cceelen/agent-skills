@@ -201,8 +201,8 @@ Terms that mean different things in the sources. One preferred form per meaning.
   the owner's confirmation.
   - The table "Requirements" has one row for each requirement that a source states for a
     stakeholder. Its columns are Id, Requirement, Stakeholder, View, Source and Goes to.
-  - The cell "Goes to" has one of these forms: `C-<nn>`, `5`, `boundary: <name>` or
-    `duplicate: R-<nn>`. A requirement has no other exit.
+  - The cell "Goes to" has one of these forms: `C-<nn>`, `5`, `boundary: <name>`,
+    `duplicate: R-<nn>` or `other party: <who>`. A requirement has no other exit.
   - A requirement does not go to a decision of section 3.3.
   - A requirement goes only to a boundary that the owner decided.
   - The table "Proposed boundaries" has one row for each boundary of section 1 with the state

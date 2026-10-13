@@ -55,6 +55,7 @@ EXITS = (
     ("skill", re.compile(r"(5)")),
     ("boundary", re.compile(r"boundary:\s*(\S.*)")),
     ("duplicate", re.compile(r"duplicate:\s*(R-\d+)")),
+    ("other", re.compile(r"other party:\s*(\S.*)")),
 )
 
 

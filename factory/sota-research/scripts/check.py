@@ -41,6 +41,8 @@ forms, and no other:
   boundary: <name>    a neighbouring aspect owns the requirement; a boundary of section 1 that
                       the owner decided
   duplicate: R-<nn>   the same requirement from a second source; a row that is not a duplicate
+  other party: <who>  a duty of a party that is not in a project, for example an authority; the
+                      requirement stays in the table and raises no item
 
 A requirement does not go to a decision of section 3.3.
 
@@ -104,6 +106,7 @@ EXIT_WORDS = {
     "skill": "to an implementation skill",
     "boundary": "to a boundary",
     "duplicate": "duplicates",
+    "other": "of another party",
 }
 OWN_RULE = "own rule"
 # The words of the report for the requirements of a view that a proposed boundary would take.
@@ -180,7 +183,8 @@ MESSAGES = {
     "requirement-cell-empty": "The cell '{0}' of the requirement is empty.",
     "requirement-id-twice": "The identifier of the requirement is used two times.",
     "requirement-exit-unknown": (
-        "The cell 'Goes to' is '{0}'. Use 'C-<nn>', '5', 'boundary: <name>' or 'duplicate: R-<nn>'."
+        "The cell 'Goes to' is '{0}'. "
+        "Use 'C-<nn>', '5', 'boundary: <name>', 'duplicate: R-<nn>' or 'other party: <who>'."
     ),
     "requirement-item-unknown": "The requirement goes to '{0}'. The checklist does not have this item.",
     "requirement-item-retired": "The requirement goes to '{0}'. This item is retired.",
@@ -250,7 +254,7 @@ MESSAGES = {
     "requirements-head": "Requirements of the sources, with the number for each view and where they go:",
     "requirement-line": (
         "{0}: requirements: {1}, to an item: {2}, to an implementation skill: {3}, to a boundary: {4}, "
-        "duplicates: {5}, a proposed boundary would take: {6}."
+        "duplicates: {5}, of another party: {6}, a proposed boundary would take: {7}."
     ),
     "remains-head": "What remains:",
     "remains-intent": "The intent of the owner was not asked.",
@@ -1301,19 +1305,19 @@ def check_requirements(data):
     >>> for cell in ("one source only states it", "depends on context", "3.3", ""):
     ...     print(goes(cell)[0][::2])
     ('requirement-exit-unknown', "The cell 'Goes to' is 'one source only states it'. Use 'C-<nn>', '5',
-    'boundary: <name>' or 'duplicate: R-<nn>'.")
+    'boundary: <name>', 'duplicate: R-<nn>' or 'other party: <who>'.")
     ('requirement-exit-unknown', "The cell 'Goes to' is 'depends on context'. Use 'C-<nn>', '5',
-    'boundary: <name>' or 'duplicate: R-<nn>'.")
-    ('requirement-exit-unknown', "The cell 'Goes to' is '3.3'. Use 'C-<nn>', '5', 'boundary: <name>' or
-    'duplicate: R-<nn>'.")
+    'boundary: <name>', 'duplicate: R-<nn>' or 'other party: <who>'.")
+    ('requirement-exit-unknown', "The cell 'Goes to' is '3.3'. Use 'C-<nn>', '5', 'boundary: <name>',
+    'duplicate: R-<nn>' or 'other party: <who>'.")
     ('requirement-cell-empty', "The cell 'goes to' of the requirement is empty.")
 
     A requirement does not go to a decision of section 3.3.
 
     >>> goes("3.3: How frequently to make a backup")
     [('requirement-exit-unknown', 'R-07',
-      "The cell 'Goes to' is '3.3: How frequently to make a backup'. Use 'C-<nn>', '5', 'boundary: <name>'
-      or 'duplicate: R-<nn>'.")]
+      "The cell 'Goes to' is '3.3: How frequently to make a backup'. Use 'C-<nn>', '5', 'boundary: <name>',
+      'duplicate: R-<nn>' or 'other party: <who>'.")]
 
     An exit names a row that exists: an item that is not retired, a boundary of section 1 that
     the owner decided, or a requirement that is not a duplicate.
@@ -1437,11 +1441,20 @@ def requirement_counts(data):
     >>> import sample
     >>> for view in requirement_counts(sample.load()):
     ...     print(*view.values())
-    operation 6 4 1 0 1 0
-    storage 2 2 0 0 0 0
+    operation 6 4 1 0 1 0 0
+    storage 2 2 0 0 0 0 0
+
+    A duty of a party that is not in a project keeps its row and goes to no item. In the sample,
+    the item of that row then holds no requirement.
+
+    >>> other = ("vetting.md", "| S-01 section 5 | C-03 |", "| S-01 section 5 | other party: the authority |")
+    >>> [view["of another party"] for view in requirement_counts(sample.load(other))]
+    [0, 1]
+    >>> [f["rule"] for f in check_requirements(sample.load(other))]
+    ['item-without-requirement']
     >>> list(view)
     ['view', 'requirements', 'to an item', 'to an implementation skill', 'to a boundary', 'duplicates',
-     'a proposed boundary would take']
+     'of another party', 'a proposed boundary would take']
 
     The last number is the number of requirements of the view that a proposed boundary would take.
 
@@ -2072,9 +2085,9 @@ def report(data, found, remains, previous_given):
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
-      duplicates: 1, a proposed boundary would take: 0.
+      duplicates: 1, of another party: 0, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
-      duplicates: 0, a proposed boundary would take: 0.
+      duplicates: 0, of another party: 0, a proposed boundary would take: 0.
     What remains:
     - Items that need judgement: C-04.
     Accepted: A. Person, 2026-01-15.
@@ -2095,9 +2108,9 @@ def report(data, found, remains, previous_given):
       sources read for the view: 2.
     Requirements of the sources, with the number for each view and where they go:
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
-      duplicates: 1, a proposed boundary would take: 0.
+      duplicates: 1, of another party: 0, a proposed boundary would take: 0.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
-      duplicates: 0, a proposed boundary would take: 0.
+      duplicates: 0, of another party: 0, a proposed boundary would take: 0.
     What remains:
     - The owner did not accept the specification.
 
@@ -2146,7 +2159,7 @@ def report(data, found, remains, previous_given):
     >>> print("\n".join([lines[0], lines[6], *lines[7:]]))
     No check fails.
     - storage: requirements: 2, to an item: 0, to an implementation skill: 0, to a boundary: 2,
-      duplicates: 0, a proposed boundary would take: 0.
+      duplicates: 0, of another party: 0, a proposed boundary would take: 0.
     What remains:
     - Items that need judgement: C-04.
     - More than half of the requirements of the view 'storage' go to a boundary.
@@ -2165,9 +2178,9 @@ def report(data, found, remains, previous_given):
     >>> print("\n".join([lines[0], *lines[5:7], *lines[7:]]))
     No check fails.
     - operation: requirements: 6, to an item: 4, to an implementation skill: 1, to a boundary: 0,
-      duplicates: 1, a proposed boundary would take: 1.
+      duplicates: 1, of another party: 0, a proposed boundary would take: 1.
     - storage: requirements: 2, to an item: 2, to an implementation skill: 0, to a boundary: 0,
-      duplicates: 0, a proposed boundary would take: 2.
+      duplicates: 0, of another party: 0, a proposed boundary would take: 2.
     What remains:
     - Items that need judgement: C-04.
     - Boundaries that wait for the decision of the owner: tests (1 requirements), archive (2 requirements).
@@ -2363,8 +2376,8 @@ def main(argv=None):
     {'items': 2, 'level 1': 2, 'level 2': 0, 'level 3': 0, 'not admitted': 0, 'pending': 0, 'sources': 2,
      'sources read for the view': 2, 'stakeholders': 1, 'view': 'storage'}
     >>> result["requirements"][1]
-    {'a proposed boundary would take': 0, 'duplicates': 0, 'requirements': 2, 'to a boundary': 0,
-     'to an implementation skill': 0, 'to an item': 2, 'view': 'storage'}
+    {'a proposed boundary would take': 0, 'duplicates': 0, 'of another party': 0, 'requirements': 2,
+     'to a boundary': 0, 'to an implementation skill': 0, 'to an item': 2, 'view': 'storage'}
     >>> result["remains"]["proposed-boundaries"], result["remains"]["left-stakeholders"]
     ([], [])
 

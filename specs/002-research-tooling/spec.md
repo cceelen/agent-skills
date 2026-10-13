@@ -438,6 +438,46 @@ specification whose check reports no failure other than "not accepted".
   of a finding, and MUST list under "What remains" the findings whose viewpoint was not
   checked.
 
+Iteration I-3, 2026-10-11. The registered trial of I-2 was refuted, and its registration
+fixed this change: how the research finds the basic practices of each view. The session
+dropped requirements of the sources before the placing, one requirement of the evidence
+record became no item, and one view had no source of its own field. The iteration I-22
+removed these two requirements by error. The iteration I-26 restores them.
+
+- **FR-048**: `vetting.md` MUST hold a table "Requirements" with one row for each requirement
+  that a source states for a stakeholder: the identifier `R-<nn>`, the requirement in one
+  sentence, the stakeholder, the view, the source with its location, and the cell "Goes to".
+  The reader of a source MUST report each requirement of the source as its own point, with
+  the group of persons that it serves and the location. The session MUST record each one
+  without a judgement. The cell "Goes to" MUST have one of five forms: `C-<nn>`, a checklist
+  item; `5`, an implementation skill; `boundary: <name>`, a boundary of section 1;
+  `duplicate: R-<nn>`, a row that is not a duplicate; `other party: <who>`, a duty of a party
+  that is not in a project, for example an authority. No other exit is permitted. A
+  requirement of another party stays in the table and raises no item. For each requirement
+  of a source of the class `regulation` or `governance`, the session MUST find who has the
+  duty before it gives the requirement to an item. A
+  requirement MUST NOT go to a decision of section 3.3. A requirement that is basic in its
+  view becomes an item, and the ladder places it. The check
+  MUST fail, outside
+  the check of phase 1, when the table is absent or empty; when a cell is empty; when an
+  identifier is used two times; when the cell "Goes to" has no such form or names a row that
+  does not exist or an item that is retired; when a stakeholder or a view is not in section
+  1; when the source is not in section 2; when an item that is not retired holds no
+  requirement and has no `own rule`; and when a stakeholder of section 1 has no
+  requirement. The report MUST give, for each view, the number of requirements and the number
+  for each exit, also in the JSON report. The check MUST list under "What remains" each view
+  with more than half of its requirements at a boundary. In the review, the owner MUST get
+  this part with the views.
+- **FR-049**: Each source of section 2 MUST name, in the cell `Views`, the views that it was
+  read for, or `all` for a body of knowledge. For each view, the skill MUST find and read the
+  references of the field of that view: the standards and references that the body of
+  knowledge names for the knowledge areas of the view, and the results of a search in the
+  words of the view. The check MUST fail when the cell names a view that section 1 does not
+  have, and when the cell is present and empty. A specification without the cell MUST NOT
+  fail for it. The check MUST list under "What remains" each view with fewer than two sources
+  that were read in full or in part for it and do not say `all`, and MUST give this number in
+  the part "Views".
+
 **An index of the converted documents**
 
 Decision of the owner, 2026-10-11: the factory does not use embeddings now. It uses a

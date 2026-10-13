@@ -403,9 +403,16 @@ with their priority and the constraints of the owner. It is optional.
      - `5`: the requirement is knowledge of one product, for an implementation skill.
      - `boundary: <name>`: a neighbouring aspect owns the requirement. Write the name of a
        boundary of section 1 that has the state `(decided by the owner on <date>)`.
+     - `other party: <who>`: the duty is of a party that is not in a project. Examples are
+       an authority, a state, a legislator and an assessment body. Write the party. The
+       requirement stays in the table and raises no item.
      - `duplicate: R-<nn>`: a second source states the same requirement. Write the row
        that has the exit of the requirement.
    - Do not use a different exit. Do not write a different text into the cell.
+   - For each requirement of a source of the class `regulation` or `governance`, find who has
+     the duty before you give the requirement to an item. The cell "Stakeholder" and the
+     words of the requirement name the party. Only a duty of the producer or of a person in
+     the project goes to an item.
    - Write the state `(proposed)` into the line of each boundary that you write into section
      1. Do not write the state `(decided by the owner on <date>)`. Only the owner decides a
      boundary.
