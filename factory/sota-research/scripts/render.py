@@ -137,6 +137,8 @@ risk analysis first, together with the owner of the project.
 1. Find out the contexts of the project. Read the project before you ask.
 2. Ask the owner which regulation and which governance bind the project. Each item of the
    checklist that names one of them is necessary for the project.
+   - The checklist says whom each regulation and each governance binds. Compare that with
+     the kind of the project before you ask.
    - Ask also where the product is used. A regulation or a governance that binds a user of the
      product puts its items on the product.
    - If the owner cannot know where the product is used, do not record "none". An open
@@ -162,6 +164,9 @@ The kit recommends. The owner of the project decides.
   that bind the project, and those that the owner prepares for. It holds one line for each
   item of `references/checklist.md`.
 - Write `- [x] <id> <item>` for an adopted item.
+- Add `(necessary: <regulation or governance>)` to the line of an item when one that binds
+  the project asks for it. Add `(prepared: <regulation or governance>)` when the owner
+  prepares for it.
 - Write `- [ ] <id> <item> (declined: <reason>)` for an item that the owner declines. Ask for
   the reason.
 - Write `- [ ] <id> <item> (above the target level)` for an item above the target of its
@@ -438,6 +443,26 @@ def binding_sources(data):
     return {item: sorted(found[item]) for item in sorted(found)}
 
 
+def binding_scopes(data):
+    """The regulation and the governance that ask for an item, each with whom it binds.
+
+    The table "Binding sources" of vetting.md gives the scope. A source without a row has an
+    empty scope.
+
+    >>> import sample
+    >>> law = ("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |")
+    >>> binding_scopes(sample.load()), binding_scopes(sample.load(law))
+    ([], [['Guide to backups', '']])
+    >>> binding_scopes(sample.load(law, sample.BINDING_TABLE))
+    [['Guide to backups', 'each organization that keeps the data of other persons']]
+    """
+    asked = {name for names in binding_sources(data).values() for name in names}
+    scope = {r.get("source", "").strip(): r.get("binds", "").strip() for r in data["binding_sources"]}
+    binding = [s for s in data["sources"] if s.get("class") in check.BINDING]
+    rows = [[s.get("source", ""), scope.get(s["id"], "")] for s in binding]
+    return sorted(row for row in rows if row[0] in asked)
+
+
 def asking_classes(data):
     """For each item, the classes of the sources that ask for it, the highest value of the ladder first.
 
@@ -494,10 +519,19 @@ def render_checklist(data, mark):
 
     The last cell of a row names the regulation and the governance that ask for the item.
 
-    >>> law = sample.load(("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |"))
+    >>> law_edit = ("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |")
+    >>> law = sample.load(law_edit)
     >>> text = render_checklist(law, "<stamp>")
     >>> [line.split(" | ")[7].strip(" |") for line in text.splitlines() if line.startswith("| C-")]
     ['Guide to backups', 'Guide to backups', 'Guide to backups', '']
+
+    A table says whom each regulation and each governance binds.
+
+    >>> scoped = render_checklist(sample.load(law_edit, sample.BINDING_TABLE), "<stamp>")
+    >>> [line for line in scoped.splitlines() if line.startswith("| Guide")]
+    ['| Guide to backups | each organization that keeps the data of other persons |']
+    >>> "This table says whom" in render_checklist(sample.load(), "<stamp>")
+    False
 
     The cell before it names the classes of the sources that ask for the item. A table gives
     the meaning of each class.
@@ -512,6 +546,13 @@ def render_checklist(data, mark):
     """
     binding = binding_sources(data)
     asking = asking_classes(data)
+    scopes = binding_scopes(data)
+    scope_part = [
+        "A regulation or a governance binds only the projects in its scope. This table says whom",
+        "each one binds.\n",
+        table([BINDING_HEAD, "Binds"], scopes),
+        "",
+    ]
     rows = [
         [r.get(k, "") for k in ("id", "item", "why")]
         + [aspect.view_of(r), r.get("level", "")]
@@ -537,6 +578,7 @@ def render_checklist(data, mark):
                 [[f"`{name}`", *cells] for name, cells in CLASS_MEANING.items()],
             ),
             "",
+            *(scope_part if scopes else []),
             table(
                 ["Id", "Item", "Risk that it answers", "View", "Level", "Check", CLASSES_HEAD, BINDING_HEAD],
                 rows,
@@ -885,7 +927,7 @@ def main(argv=None):
     >>> edit = ("spec.md", order, order + " See specs/900-backups/.")
     >>> refused("--commit", "abc1234", edits=[edit])
     (1, False, "Nothing was rendered: a skill must work alone. The file skills/backups/SKILL.md holds 'specs/'
-                in line 96.")
+                in line 101.")
 
     The target folder of section 5 is used.
 

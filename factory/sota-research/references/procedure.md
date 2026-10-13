@@ -324,7 +324,11 @@ with their priority and the constraints of the owner. It is optional.
      See "The lines of the reports".
    - If the program names a line without the form, give the report back to the reader one
      time. Save the corrected report into the same file and run the command again.
-6. **Record the sources** in section 2, each with its class. The classes of the fast lane are
+6. **Record the sources** in section 2, each with its class. For each source of the class
+   `regulation` or `governance`, write one row into the table "Binding sources" of
+   `vetting.md`: whom the source binds, and where the source says that. Take both from the
+   report of a reader: give the reader the question "Whom does the source bind?". Do not
+   write the cell from your memory. The format is below this list of steps. The classes of the fast lane are
    `standard`, `regulation`, `governance`, `foundation`, `vendor`, `research` and
    `trusted-data`. Each other source is `independent`. A law, a regulation, a directive or an
    order of a state is a `regulation`. A framework of governance or of audit, or a rule of an
@@ -466,6 +470,16 @@ The format of the table "Requirements" in `vetting.md`:
 | R-01 | <one sentence> | <stakeholder> | <view> | <source and location> | <exit> |
 ```
 
+The format of the table "Binding sources" in `vetting.md`:
+
+```markdown
+## Binding sources
+
+| Source | Binds | Where |
+|---|---|---|
+| S-01 | <the products, the organizations or the sector that the source binds> | <location> |
+```
+
 The format of the table "Proposed boundaries" in `vetting.md`:
 
 ```markdown
@@ -496,6 +510,9 @@ the checklist and from the check. Then give the owner, in this order:
 4. The strategy: the goals, the order of the work and the decisions that depend on context.
 5. The checklist in the order of `place.py`, with the level and the strongest source of each
    item. Give the ladder of `scripts/rubric-items.txt`, as it is.
+   - Give the table "Binding sources" of `vetting.md`, as it is. For each of its sources,
+     give the items that the source raises. The owner sees which items are necessary for
+     which kind of project.
    - Settle the order with the owner. The owner can move an item to a different level, or
      decline it: write the level or `not admitted` into the cell "Level". Record the decision
      with its date in section 7. A declined item stays in the checklist.

@@ -621,7 +621,13 @@ sent each requirement of one concern to a boundary that it wrote itself.
   governance of the checklist with its items, and the owner decides for each of them if the
   project prepares for it. The rendered checklist MUST name, for each item, the classes of
   the sources that ask for it, and MUST give for each class who states it and what it means
-  for the item.
+  for the item. `vetting.md` MUST hold a table "Binding sources" with one row for each source
+  of these two classes: the source, whom it binds and where the source says that. The cell
+  comes from the report of a reader. The check MUST list under "What remains" each such
+  source that raises an item and has no row. The rendered checklist MUST give this table,
+  and the rendered skill MUST mark, in the selection, each item that a binding source asks
+  for as `necessary`, and each item of a source that the owner prepares for as `prepared`.
+  In the review, the owner MUST get the table with the items that each source raises.
 - **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
   MUST give the entries that hold all the terms of a query. The program MUST keep the entries
   in a table of their own in the index of FR-051, and MUST search them with the full-text

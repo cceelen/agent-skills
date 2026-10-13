@@ -276,6 +276,10 @@ MESSAGES = {
     "remains-own-sources": "Views with fewer than two sources of their own field that were read: {0}.",
     "remains-unread": "Sources with pages that no reader got: {0}.",
     "remains-no-reading": "The table Reading is absent. Run index.py unread with --write.",
+    "remains-no-scope": (
+        "Sources of regulation or governance without a row in the table 'Binding sources' that says "
+        "whom they bind: {0}."
+    ),
     "remains-no-catalogues": "The list Searches has no query of the catalogues. Run catalog.py find.",
     "pages-left": "{0} ({1} pages)",
     "remains-no-trial": "The recipe has no trial.",
@@ -987,6 +991,33 @@ def reading_absent(data):
     False
     """
     return bool(data["sources"]) and not data["has_reading"]
+
+
+def scope_absent(data):
+    """The sources of regulation or governance that raise an item and have no scope.
+
+    A source raises an item when one of its requirements goes to the item. The table "Binding
+    sources" of vetting.md says whom such a source binds.
+
+    >>> import sample
+    >>> scope_absent(sample.load())
+    []
+    >>> law = ("spec.md", "| 2.0, 2025-03 | standard |", "| 2.0, 2025-03 | regulation |")
+    >>> scope_absent(sample.load(law))
+    ['S-01']
+    >>> scope_absent(sample.load(law, sample.BINDING_TABLE))
+    []
+    >>> empty = ("vetting.md", "| each organization that keeps the data of other persons |", "|  |")
+    >>> scope_absent(sample.load(law, sample.BINDING_TABLE, empty))
+    ['S-01']
+    """
+    binding = {s["id"] for s in data["sources"] if s.get("class") in BINDING}
+    asked = set()
+    for row in data["requirements"]:
+        if aspect.exit_of(row.get("goes to"))[0] == "item":
+            asked.update(aspect.source_ids(row.get("source", "")))
+    known = {r.get("source", "").strip() for r in data["binding_sources"] if r.get("binds", "").strip()}
+    return sorted((binding & asked) - known)
 
 
 def catalogues_absent(data):
@@ -2275,6 +2306,8 @@ def report(data, found, remains, previous_given):
         rest.append(MESSAGES["remains-no-reading"])
     if catalogues_absent(data):
         rest.append(MESSAGES["remains-no-catalogues"])
+    if scope_absent(data):
+        rest.append(MESSAGES["remains-no-scope"].format(", ".join(scope_absent(data))))
     if not data["trials"]:
         rest.append(MESSAGES["remains-no-trial"])
     if not is_accepted(data):

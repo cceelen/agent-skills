@@ -429,6 +429,10 @@ uv run factory/sota-research/scripts/render.py specs/<number>-<name> --commit <c
   groups, one group for each view. The table of the views names the stakeholders of each view.
 - The checklist names the classes of the sources that ask for each item. A table gives the
   meaning of each class. The last cell names the regulation and the governance.
+- The checklist says whom each regulation and each governance binds. The agent writes this
+  into the table "Binding sources" of `vetting.md`, from the report of a reader.
+- In the selection, an item gets the mark `necessary` when a regulation or a governance that
+  binds the project asks for it, and the mark `prepared` when you prepare for one.
 - The skill asks which regulation and which governance bind the project, and where the product
   is used. If the owner cannot know the place of use, the skill shows each of them with its
   items, and the owner decides.

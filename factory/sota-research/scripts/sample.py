@@ -308,6 +308,13 @@ PROPOSED_TABLE = (
     )
     + "\n\n## Reading",
 )
+BINDING_HEAD = "| Source | Binds | Where |"
+BINDING_S01 = "| S-01 | each organization that keeps the data of other persons | section 1 |"
+BINDING_TABLE = (
+    "vetting.md",
+    "## Reading",
+    "\n".join(("## Binding sources", "", BINDING_HEAD, "|---|---|---|", BINDING_S01)) + "\n\n## Reading",
+)
 READING_S01 = "| S-01 | S-01 | 6 | 1-6 | none |"
 FINDING_F01 = "| F-01 | T-01 | operations | The plan has no step that examines the restored data. | recipe | corrected in abc1235 |"
 

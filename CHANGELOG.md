@@ -19,6 +19,8 @@ reports are not comparable with new reports.
   asks where the product is used when the owner names the regulation and the governance.
 - A requirement that is a duty of another party, for example an authority, stays in the table
   and raises no item.
+- The checklist of a recipe says whom each regulation and each governance binds. The selection
+  of a project marks the items that are necessary for it.
 - The tooling can try a recipe on a project before the owner accepts it. A reviewer examines
   the plan from eight viewpoints, and the check reports the findings that are open. One
   viewpoint is the integrity of each asset, from the source to the system of the user.

@@ -209,6 +209,9 @@ Terms that mean different things in the sources. One preferred form per meaning.
     `(proposed)`. Its columns are Boundary, Requirements that it would take, Stakeholders that
     it would leave with no requirement, and Reason. The cell of the requirements holds
     identifiers of the table "Requirements", or `none`.
+  - The table "Binding sources" has one row for each source of the class `regulation` or
+    `governance`. Its columns are Source, Binds and Where. The cell Binds says which
+    products, organizations or sector the source binds.
   - Each checklist item holds a requirement, or its cell "Strongest source" is `own rule`.
 - `trial.md`: the record of the trials of the recipe on a project. This file is optional.
   - The table "Trials" has one row for each trial. Its columns are Id, Date, Project, Commit
