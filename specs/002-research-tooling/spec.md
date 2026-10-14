@@ -74,31 +74,33 @@ the skill is rendered again.
 
 ---
 
-### User Story 3 - Place each item with a calculation of risk and reward (Priority: P3)
+### User Story 3 - Place each item with a ladder of the source classes (Priority: P3)
 
-For each checklist item, the research session records answers to a fixed set of questions
-about risk and reward. A program computes from the answers whether the item is admitted, its
-position in the order, and its level (1, 2 or 3). Level 1 holds the basic practices. An item
-above level 1 names the risk dimension of the aspect that calls for it. The owner sees the
-answers and the result, and can correct an answer.
+A ladder gives each class of source one value. A regulation and a framework of governance
+have the highest value. A program computes the value of each item from the sources that ask
+for it, and from the value its position in the order and its level (1, 2 or 3). A skill does
+level 1 in its first iteration. No item is dropped. The session settles the order with the
+owner, and the owner can change a level or decline an item.
 
-**Why this priority**: Today the level of each item is "pending". The owner decided that a
-calculation places an item, and that a model does not assign a level by feel.
+**Why this priority**: The owner decided that static values from the class of the source are
+sufficient for the triage, and that it is more important to keep each pending item than to
+compute a perfect order. Six stage tests of a calculation from six answers of a model brought
+no gain (iteration I-22).
 
-**Independent Test**: Give the program a fixture of recorded answers. The computed admission,
-order and level are the same as the expected values, each time.
+**Independent Test**: Give the program a fixture with sources, requirements and items. The
+computed value, order and level are the same as the expected values, each time.
 
 **Acceptance Scenarios**:
 
-1. **Given** recorded answers for each item, **When** the calculation runs, **Then** each
-   item has an admission result, a position and a level, and the record shows how the answers
-   gave that result.
-2. **Given** an item with a missing answer, **When** the calculation runs, **Then** the item
-   stays "pending" and the report names the missing answer.
-3. **Given** a corrected answer from the owner, **When** the calculation runs again, **Then**
-   the result changes only for the items that the answer touches.
-4. **Given** a changed set of questions or weights, **When** the calculation runs, **Then**
-   the record carries the new version of the rubric.
+1. **Given** the classes of the sources and the requirement rows, **When** the program runs,
+   **Then** each item has a value, a position and a level, and the record shows the class and
+   the sources that gave the value.
+2. **Given** an item whose sources have no class, **When** the program runs, **Then** the
+   item stays "pending" and the report names it.
+3. **Given** an item that the owner declined, **When** the program runs again, **Then** the
+   item keeps the state `not admitted` and stays in the checklist.
+4. **Given** a changed value or limit of the ladder, **When** the program runs, **Then** the
+   record carries the new version of the ladder.
 
 ---
 
@@ -140,15 +142,16 @@ which step comes next.
 **Why this priority**: This is the complete flow and the purpose of the tooling. It comes last
 because it joins the other parts, and each of them is useful before it exists.
 
-**Independent Test**: Run the skill on a small trial aspect. The owner is asked for the aspect,
-its contexts and its boundaries before a search starts. The run stops for the review with a
+**Independent Test**: Run the skill on one aspect. The owner is asked only for the field and the
+thing to build before a search starts. The contexts, the risk dimensions and the boundaries
+come from the research. The run stops for the review with a
 specification whose check reports no failure other than "not accepted".
 
 **Acceptance Scenarios**:
 
-1. **Given** a field that the owner names, **When** the skill starts, **Then** it settles the
-   aspect, its contexts and its boundaries in dialogue, and records the date of the agreement
-   before the first search.
+1. **Given** a field that the owner names, **When** the skill starts, **Then** it settles only
+   the field and the thing to build in dialogue, records the date of the agreement, and asks
+   for no use case, no first user and no narrower scope.
 2. **Given** an agreed scope, **When** the research runs, **Then** each agent that reads a
    source has no shell, no credentials and no access to the repository, and its report is
    handled as untrusted data.
@@ -224,23 +227,21 @@ specification whose check reports no failure other than "not accepted".
 - **FR-010**: A test of the repository MUST fail when a committed recipe skill differs from a
   fresh rendering.
 
-**Calculation of risk and reward (C-18)**
+**Value and level of an item (C-18)**
 
-- **FR-011**: The calculation MUST compute admission, order and level (1, 2 or 3, cumulative)
-  of each item from recorded answers to a fixed set of questions. The item with the best
-  return at the lowest cost is on level 1.
-- **FR-012**: The record MUST hold, for each item, the answers, the result and the version of
-  the rubric, and MUST keep the level apart from the quality of the evidence.
-- **FR-013**: An item with a missing answer MUST stay "pending".
-- **FR-014**: Each item MUST name the risk that it answers. The questions MUST cover the
-  reward (how bad the harm is that the item prevents, how probable that harm is without the item, in how many contexts the item
-  applies), the cost (the effort to adopt and the effort to keep) and the risk of the item
-  itself. Each answer is on a fixed scale and names its source. The research session records
-  the answers, and the owner corrects them.
-- **FR-014a**: An item with a good return at a low cost in each context MUST be on level 1.
-  An item whose return depends on the risk of a project MUST be above level 1 and MUST name
-  the risk dimension that calls for it. The calculation does not assess a project: the recipe
-  skill does that with the owner of the project (FR-008).
+- **FR-011**: A program MUST compute the value, the order and the level (1, 2 or 3,
+  cumulative) of each item from a ladder that gives each class of source one value. The value
+  of an item is the highest value of the sources whose requirements go to the item or that
+  the item cites. The classes `regulation` and `governance` MUST have the highest value.
+- **FR-012**: The checklist MUST hold, for each item, the level and the class and the sources
+  that gave the value. The record MUST hold the version of the ladder.
+- **FR-013**: An item whose sources have no class MUST stay "pending".
+- **FR-014**: The program MUST NOT remove an item. An item that the owner declines keeps the
+  state `not admitted` and stays in the checklist. A model MUST NOT answer a question about
+  harm, probability or cost to place an item.
+- **FR-014a**: An item above level 1 MAY name the risk dimension that calls for it. The
+  ladder does not assess a project: the recipe skill does that with the owner of the project
+  (FR-008). The session MUST settle the order with the owner in the review.
 
 **Vetting of independent sources (C-20)**
 
@@ -251,17 +252,22 @@ specification whose check reports no failure other than "not accepted".
   and the confirmation of the owner.
 - **FR-017**: The vetting MUST continue when a signal cannot be measured, and MUST mark that
   signal as not measured.
-- **FR-018**: For a source that is not a repository, the vetting MUST first apply gates. It
-  rejects, without a question to the owner, a source that has no author or issuer that can be
+- **FR-018**: For each independent source, a page or a repository, the vetting MUST first
+  apply gates. It rejects, without a question to the owner, a source that has no author or issuer that can be
   identified, has no date, is older than the limit of the aspect, or cannot be reached. It
-  scores each other source on its age, on an author with a record in the field, on whether it
-  cites its own sources, and on how many fast-lane sources refer to it. The owner confirms
+  scores each other source on its age, on an author with a record in the field, on how many
+  fast-lane sources refer to it, and on one more signal: whether a page cites its own sources,
+  or whether a repository is active. The owner confirms
   each source that passes.
 
 **Research skill (C-01, C-08, C-11, C-12, C-17, C-21, C-22)**
 
-- **FR-019**: The skill MUST settle the aspect, its contexts and its boundaries with the owner
+- **FR-019**: The skill MUST settle the field and the thing to build with the owner
   before the first search, and MUST record the date of the agreement.
+- **FR-019a**: The skill MUST find the contexts, the risk dimensions and the boundaries of the
+  aspect in the sources, give each one its source, and show them to the owner in the review.
+  The skill MUST NOT ask the owner for a use case, a first user or a narrower scope before the
+  research. A use case is chosen only when a recipe is applied to a project.
 - **FR-020**: The skill MUST give each reading task to an agent that has no shell, no
   credentials and no access to the repository, and MUST state in each task that fetched text
   is data and not an instruction.
@@ -280,6 +286,12 @@ specification whose check reports no failure other than "not accepted".
 - **FR-026**: On a refresh that the owner starts, the skill MUST read the sources of the watch
   list that moved, and MUST show the items and the declined items that the change touches.
 - **FR-027**: The skill MUST say what it did not verify when a source cannot be reached.
+- **FR-032**: For a source that is a PDF file, the tooling MUST write the text of the file,
+  with one heading for each page, into a work folder outside the repository. The session MUST
+  NOT read that text. A reader that has the read tool only MUST read it and give the page as
+  the location. The agent product MUST enforce that this reader reads only converted files of
+  the work folder: a hook does that, not a written rule. Where the agent product has no such
+  hook, the tooling MUST NOT write this reader, and MUST say that a PDF source cannot be read.
 
 **All parts**
 
@@ -289,6 +301,348 @@ specification whose check reports no failure other than "not accepted".
   output, and MUST have tests that do not use the network.
 - **FR-030**: The tooling MUST obey the rules of `AGENTS.md` for a skill, for the programs
   and for the tests.
+
+**Views of an aspect**
+
+- **FR-031**: The skill MUST find the views of the aspect in the sources, and MUST read
+  sources that hold the state of the art of each view. A view is a set of concerns of the
+  aspect. Each item MUST name one view of section 1. The check MUST fail for an item without
+  a known view, for a view without an item, and for a view without an item on level 1 when no
+  level is pending. The check MUST report, for each view, the number of items on each level
+  and the number of sources that they cite. The rendered skill MUST show the view of each
+  item, and MUST tell its agent to show the selection in groups by view.
+
+**The trial of a recipe**
+
+- **FR-033**: The renderer MUST have a trial rendering. It renders a specification that the
+  owner did not accept, only into a folder that is outside each git repository. The check of
+  the specification MUST pass. The stamp of each file MUST say that the file is a trial
+  rendering, so that nobody takes a trial file for a delivered file. Without the option, the
+  renderer MUST behave as before.
+- **FR-034**: The tooling MUST hold the task for a reviewer that did not write the plan. The
+  reviewer reads the plan and the selection in the trial project and, if there is one, a
+  reference state of the same project. It answers fixed questions from eight viewpoints:
+  architecture, operations, quality, development, security, integrity, product owner, and the
+  views of the recipe. For the viewpoint integrity, the reviewer lists the assets and answers
+  for each one who can change it without a trace and what shows the change. Each answer MUST be `yes`, `partly`, `no` or `not applicable`, with a file and a
+  line of the trial project and one sentence. The reviewer MUST end with a list of findings,
+  each with its viewpoint and a proposed route: `recipe`, `tooling` or `implementation skill`.
+  The reviewer MUST NOT correct anything.
+- **FR-035**: An aspect specification MAY have a record of the trials, `trial.md`, with the
+  table of the trials and the table of the findings. The check MUST fail for a finding with an
+  unknown trial, an unknown viewpoint, an empty text, an unknown route or a status that is not
+  `open`, `corrected in <revision or commit>` or `declined: <reason>`. The check MUST list the
+  findings that are open under "What remains". Without the file, the check MUST say under
+  "What remains" that the recipe has no trial, and MUST NOT fail.
+- **FR-036**: An aspect specification MUST name the measured targets of its aspect in
+  section 1: for each target the name, the scale, what measures it, and the source. The value
+  `(none found)` is permitted. The check MUST fail for an empty field and for a target without
+  a source, but not in the check of phase 1. The rendered skill MUST hold the targets, and
+  MUST tell its agent to give, in the plan, the level of each target that the plan reaches and
+  what stops the next level.
+- **FR-037**: The procedure MUST have the trial of a recipe: a trial rendering, a copy of a
+  project that the owner names as a new repository without its history, a new session that
+  only uses the skill and stops at the plan, a reviewer that did not see the research, the
+  record of the findings, and the decision of the owner for each finding. A finding with the
+  route `recipe` MUST lead to more research for its view or question, and to a new trial.
+
+**The intent of the owner and input without bias**
+
+- **FR-038**: The template of an aspect specification, the procedure, the prompts and the
+  documentation of the tooling MUST NOT hold an example that names a real concern, dimension,
+  context, level reason or risk. A placeholder MUST be neutral, for example `[name]`. The
+  check MUST NOT depend on a word of the template. The sample specification of the examples
+  is permitted: a session of the research does not get it.
+- **FR-039**: The tooling MUST have an export of a neutral kit for a trial of the tooling
+  itself. The export writes, only into a new or empty folder outside each git repository: the
+  tooling without the sample specification and without the task of the reviewer of a plan,
+  the template of an aspect specification, the rules of the kit, the programs of a different
+  skill that the tooling loads, and two instruction files that hold only the language for the
+  owner, the rule for commit messages, the rules of the kit and where the procedure is. It
+  MUST NOT write documentation, tests, specifications or a different skill. Given a list of
+  words, it MUST write nothing when an exported file holds a word, and MUST give the file and
+  the line. The procedure MUST work in such a kit.
+- **FR-040**: Before the research, the skill MUST ask the owner three questions about the
+  intent, each one time and only if the owner did not answer it already: what the owner means
+  by the aspect and which concerns it brings together; what a project must be able to show
+  after it applied the recipe, and whether there is a measurable target; what the owner does
+  not want. The skill MUST write each answer as a quote with its date into the field "Intent
+  of the owner" of section 1, MUST NOT change the words, and MUST write `(no answer)` when
+  there is none. It MUST NOT ask for and MUST NOT propose a use case, a first user, a
+  reference project, an industry, a product, stakeholders, viewpoints, views, contexts, risk
+  dimensions or boundaries, and MUST NOT write a project for a trial into the specification.
+  In the research, the skill MUST compare the intent with the sources, record each difference
+  in section 3.4 and follow the owner. Each concern that the owner named is a view, or section
+  7 says why it is not. A target that the owner named is in the field "Targets" with
+  `(judgement)` until a source gives its scale. In the review, the owner MUST get the intent
+  first, beside the stakeholders, the views and the targets, with each difference. The check
+  of phase 1 MUST fail when the field is absent or empty, or when an answer has no date. When
+  each line says `(no answer)`, the check MUST pass and MUST list under "What remains" that
+  the intent was not asked.
+- **FR-041**: The skill MUST find the stakeholders of the aspect in the body of knowledge of
+  the field and in the sources, not in the name of the aspect, and MUST NOT ask the owner for
+  them. A stakeholder is a group of persons that has an interest in the result or carries a
+  duty for it. Section 1 MUST name each stakeholder with its concerns and its source. The
+  skill MUST aggregate the concerns into the views, and each view MUST name its stakeholders
+  in a form that a program reads. The requirements of the stakeholders of a view are the
+  candidates for its items; the ladder of the source classes places them. FR-048
+  gives the exits of a requirement and supersedes the row in section 7 for a requirement
+  that was dropped before the placing. Outside
+  the check of phase 1, the check MUST fail when section 1 names no stakeholder, when a
+  stakeholder names no concern or no source, when a view names no stakeholder, and when a
+  view names a stakeholder that section 1 does not have. The check MUST list under "What
+  remains" each stakeholder that is in no view, and MUST give the number of stakeholders of
+  each view. The rendered skill MUST show the stakeholders of each view. In the review, the
+  owner can add, remove or rename a stakeholder.
+- **FR-042**: Removed in iteration I-22 with the answers of risk and reward.
+- **FR-043**: The tooling MUST hold a manifest of the seeds: the documents and standards that
+  the factory starts from. Each row names the identifier, the document, the issuer, the
+  version or the date, the kind, the address, the digest of the file, the terms of the issuer
+  and the date when the row was read. The kind is `pdf`, `page` or `owner file`. The digest
+  can be empty. The manifest MUST say which seeds are the bodies of knowledge of which field.
+  It MUST NOT hold the content of a seed. A row enters the manifest only from the page of the
+  issuer, read in the same turn, and after the owner accepts it. A program MUST print the
+  rows, sorted, and MUST fail for a row with an unknown kind, an address that is not `http` or
+  `https`, a digest that is not 64 hexadecimal characters, or an absent cell.
+- **FR-044**: A program MUST retrieve the seeds into a work folder outside each git
+  repository. For the kind `pdf`, it downloads the file with the limits and the rules of the
+  converter of FR-032, keeps it, and writes its text as that converter does. For the kind
+  `owner file`, it uses the file that the owner gives; without one, it reports that the owner
+  must give the file, with the address. For the kind `page`, it only records the seed. Given
+  the folder of an aspect specification, it MUST retrieve also each source of section 2 whose
+  address ends in `.pdf`. One seed that fails MUST NOT stop the program. The program MUST
+  write one sorted record with the state of each seed: `retrieved`, `owner must give the
+  file`, `recorded`, `failed: <reason>` or `changed`. The record holds no current time. When
+  the digest of a file is not the digest of the manifest or of the last run, the state MUST
+  be `changed`, the file MUST be converted, and the result code MUST be 1. Without a digest in
+  the manifest, the program MUST print the digest. A file that is in the work folder MUST NOT
+  be retrieved again, unless an option tells the program to download each file again.
+- **FR-045**: A program MUST set up a neutral environment of the factory from nothing, in two
+  folders outside each git repository, neither in the other. It writes the neutral kit of
+  FR-039, a marker file with the commit of this repository, a git repository in the kit with
+  the branch `main` and one commit, and the seeds of FR-044 in the work folder. Then it MUST
+  print what a person does next. Without the program `git`, it MUST say so and continue. With
+  an option, it MUST remove a kit that holds the marker file and make it again, and MUST keep
+  the work folder. It MUST NOT remove a folder without the marker file. The kit MUST NOT hold
+  a seed document or its converted text.
+- **FR-046**: A rendered skill MUST work alone, without the factory and without this
+  repository. The renderer MUST write nothing when a rendered file refers to a path that
+  starts with `factory/`, `specs/`, `.specify/`, `rules/` or `tests/`, uses the word
+  `constitution`, or holds an absolute path. It MUST give the file, the line and the text.
+  The rules of the kit are text in the skill. In a trial, the trial project MUST get only the
+  folder of the rendered skill, and the session of the trial MUST start in a clean
+  environment: no personal plugin, connector, skill or instruction file.
+- **FR-047**: The names of the viewpoints of the review MUST be in a data file that the
+  export of FR-039 leaves out, as it leaves out the task of the reviewer. No program that is
+  exported holds the list. When the file is absent, the check MUST NOT examine the viewpoint
+  of a finding, and MUST list under "What remains" the findings whose viewpoint was not
+  checked.
+
+Iteration I-3, 2026-10-11. The registered trial of I-2 was refuted, and its registration
+fixed this change: how the research finds the basic practices of each view. The session
+dropped requirements of the sources before the placing, one requirement of the evidence
+record became no item, and one view had no source of its own field. The iteration I-22
+removed these two requirements by error. The iteration I-26 restores them.
+
+- **FR-048**: `vetting.md` MUST hold a table "Requirements" with one row for each requirement
+  that a source states for a stakeholder: the identifier `R-<nn>`, the requirement in one
+  sentence, the stakeholder, the view, the source with its location, and the cell "Goes to".
+  The reader of a source MUST report each requirement of the source as its own point, with
+  the group of persons that it serves and the location. The session MUST record each one
+  without a judgement. The cell "Goes to" MUST have one of five forms: `C-<nn>`, a checklist
+  item; `5`, an implementation skill; `boundary: <name>`, a boundary of section 1;
+  `duplicate: R-<nn>`, a row that is not a duplicate; `other party: <who>`, a duty of a party
+  that is not in a project, for example an authority. No other exit is permitted. A
+  requirement of another party stays in the table and raises no item. For each requirement
+  of a source of the class `regulation` or `governance`, the session MUST find who has the
+  duty before it gives the requirement to an item. A
+  requirement MUST NOT go to a decision of section 3.3. A requirement that is basic in its
+  view becomes an item, and the ladder places it. The check
+  MUST fail, outside
+  the check of phase 1, when the table is absent or empty; when a cell is empty; when an
+  identifier is used two times; when the cell "Goes to" has no such form or names a row that
+  does not exist or an item that is retired; when a stakeholder or a view is not in section
+  1; when the source is not in section 2; when an item that is not retired holds no
+  requirement and has no `own rule`; and when a stakeholder of section 1 has no
+  requirement. The report MUST give, for each view, the number of requirements and the number
+  for each exit, also in the JSON report. The check MUST list under "What remains" each view
+  with more than half of its requirements at a boundary. In the review, the owner MUST get
+  this part with the views.
+- **FR-049**: Each source of section 2 MUST name, in the cell `Views`, the views that it was
+  read for, or `all` for a body of knowledge. For each view, the skill MUST find and read the
+  references of the field of that view: the standards and references that the body of
+  knowledge names for the knowledge areas of the view, and the results of a search in the
+  words of the view. The check MUST fail when the cell names a view that section 1 does not
+  have, and when the cell is present and empty. A specification without the cell MUST NOT
+  fail for it. The check MUST list under "What remains" each view with fewer than two sources
+  that were read in full or in part for it and do not say `all`, and MUST give this number in
+  the part "Views".
+
+**An index of the converted documents**
+
+Decision of the owner, 2026-10-11: the factory does not use embeddings now. It uses a
+full-text search over the converted documents that it downloads and uses. The search uses
+synonyms. The references in a document and to other documents stay connected.
+
+- **FR-050**: A program MUST build an index of the converted files of a work folder, as one
+  database file in that folder. For each document, the index holds the pages with a full-text
+  search, the sections, the references and the acronyms. It holds also the other names of the
+  documents and the synonyms. A second build MUST read only a file that changed, and MUST
+  remove a document whose file is gone. The same files MUST give the same content of the
+  database, without a current time. The work folder MUST be outside each git repository. A
+  file that cannot be indexed MUST NOT stop the program. The program of FR-044 MUST build the
+  index at its end.
+- **FR-051**: A command that reads the index MUST NOT print the text of a document. It gives
+  pointers only: the document, the page, the title of a section, an identifier and a number.
+  The search takes words and phrases. It MUST give the pages that hold each term, sorted by
+  the rank of the full-text search, the document and the page, with the terms that matched and
+  the number of matches. When no page holds each term, it MUST say so and MUST give the pages
+  that hold one term or more, marked as partial.
+- **FR-052**: The search MUST add the synonyms of each term, MUST name the synonyms that it
+  used, and MUST have an option to switch them off. A group of synonyms is symmetric and
+  transitive, and its terms are compared without case. A synonym comes from an acronym of a
+  document, from a file of synonyms, or from the glossary of an aspect specification. An
+  acronym MUST be recorded only when each letter of the short form is the first letter of one
+  word of the long form, in the same sequence.
+- **FR-053**: The index MUST find the sections of a document with fixed patterns, and MUST
+  record the pattern of each section. A document without a found section MUST get one section
+  for all its pages. The index MUST record the internal references to a section, a chapter, a
+  page, a table, a figure and a chapter title, with the target pages when the target is in the
+  document. It MUST record the external references: the identifiers of standards from a table
+  of families, the addresses, and each numbered citation that the list of references of its
+  chapter resolves. An external reference that names a document of the index MUST point at
+  that document. One command MUST give the references of one page. One command MUST give each
+  place that cites one identifier or one document.
+- **FR-054**: A command MUST give the page ranges of one document for the readers, with a
+  largest number of pages. A section that fits is one range, a longer section is divided, and
+  short neighbours are joined. Each page of the document MUST be in exactly one range. A
+  command MUST measure the search with a table of queries, documents and pages. It counts a
+  row as found when one of its pages, or a page next to it, is in the first results. It MUST
+  print the number found, the total, the share and each row that was not found.
+- **FR-055**: The index MUST record each range of pages of a document that was given to a
+  reader, with the task of the reader. A range that is recorded two times MUST be one record.
+  A command MUST remove one record. A new build MUST keep the records of a document whose
+  converted file did not change, and MUST remove the records of each other document. A command
+  MUST give, for each document, the pages that are in no recorded range, as ranges for new
+  readers with the titles of their sections. Its result code MUST be 1 when a page is in no
+  recorded range. The same command MUST write or replace the table "Reading" in the vetting
+  record of an aspect specification: one row for each converted document that is a source of
+  section 2, with the number of pages, the ranges that were given and the ranges that were
+  not. A source with `all` in the cell `Views` and without a converted document MUST get a row
+  that says so. A program writes this table; a person or a session does not. The check MUST
+  fail for a source with `full` in the cell `Read` and with pages that no reader got, and for
+  a source with `all` in the cell `Views` and without a row in a table that exists. It MUST
+  list each source with pages that no reader got, and a specification without the table,
+  under what remains. `--scope` MUST NOT examine the table.
+- **FR-056**: The procedure of the research MUST use the index. A session builds the index
+  after the seeds are retrieved and after each conversion. It gives one range of a converted
+  document to one reader, records the range when the reader starts, and gives each range that
+  no reader got to a new reader. It finds the pages of one stakeholder, one concern or one
+  view with the search, and gives the pages to a reader; it does not read a page. It takes
+  the candidates for the sources of the own field of a view from the references that the body
+  of knowledge cites. It records two names of one thing in the file `synonyms.txt` of the work
+  folder, and the build MUST read this file when it is there. The second reader gets the pages
+  of the evidence row. The owner gets the table "Reading" in the review. The reader of a
+  converted file MUST report the first and the last page that it read, and each page of its
+  range that it did not read, with the reason.
+
+Decision of the owner, 2026-10-11, after the trial of the iteration I-3: only the owner
+decides a boundary that takes requirements away from an aspect. In that trial the session
+sent each requirement of one concern to a boundary that it wrote itself.
+
+- **FR-057**: Each boundary of section 1 MUST have a state in its line: `(proposed)`, or
+  `(decided by the owner on <YYYY-MM-DD>)`. A line without a state is proposed. The session
+  MUST write a boundary as proposed, and only the owner decides it. A requirement MUST NOT go
+  to a boundary that the owner did not decide. `vetting.md` MUST hold a table "Proposed
+  boundaries" with one row for each proposed boundary: the boundary, the requirements of the
+  register that it would take, the stakeholders that it would leave with no requirement, and
+  the reason. The check MUST fail, outside the check of phase 1, when a requirement goes to a
+  boundary that the owner did not decide; when a state has a different form; when a decided
+  state has no date; when a proposed boundary has no row; when a row names a boundary that
+  section 1 does not have or that the owner decided; and when a row names a requirement that
+  the register does not have. The check MUST list under "What remains" each proposed
+  boundary with the number of requirements that it would take, and each stakeholder that a
+  proposed boundary would leave with no requirement in the aspect. The report MUST give, for
+  each view, the number of requirements that a proposed boundary would take, also in the
+  JSON report. In the review, the owner MUST get the proposed boundaries directly after the
+  intent, the stakeholders and the views. After the decision of the owner, the session
+  writes the state with the date and changes the exit of the requirements that the boundary
+  takes; it removes a boundary that the owner declined. In a refresh, a decided boundary
+  stays and a new boundary starts as proposed.
+- **FR-058**: An aspect specification MAY have a charter of the owner in `charter.md`: the
+  target, the principles with their priority, and the constraints. The session MUST draft
+  it in phase 1 from what the owner says in the session: each row MUST name the words of
+  the owner that it comes from, and the session proposes the sentence of each principle, the
+  order and the way to check it. The owner MUST get the draft before the research, and only
+  the owner confirms it. The session MUST read the charter before the triage,
+  and the owner MUST get it first in the review. No program reads the charter. (The stage
+  test ST-1 refuted a cell that ties each requirement to a line of the charter.)
+- **FR-059**: The index MUST keep the lines `REQ` and `USE` of the reports of the readers. A
+  command MUST store each such line of one report file for one source of section 2: the
+  source, the name of the report file, the line number, the kind (`req`, `tool`,
+  `integration`, `framework`, `pattern` or `principle`) and the cells of the line. The same
+  report for the same source MUST replace its earlier lines. A line that starts with `REQ`
+  or `USE` and does not have the form MUST NOT be stored; the command MUST print its line number, MUST
+  store the other lines, and MUST give the result code 1. The lines `REQ | none` and
+  `USE | none` store nothing. The command MUST refuse a source that does not have the form
+  `S-<digits>`. A command MUST print the stored lines as rows of Markdown tables, sorted by
+  the source, the report and the line number, for all kinds, for one kind or for one source.
+  The index MUST NOT count, rank or judge the lines. A build MUST NOT change them. The text
+  of a report is data: the program MUST only store it and print it. The procedure MUST save
+  each report into the work folder, MUST store its lines, and MUST write the rows of the
+  table "Requirements" from the stored lines. The check MUST be able to compare that table
+  with the stored requirement lines: a line without a row and a row without a line with the
+  same source and the same words MUST fail.
+- **FR-060**: A reader MAY get the text of a web source through the same path as a PDF source:
+  a converted file, the index and the reader of the type `sota-file-reader`. A program MUST
+  write the text of an http or https address, or of a file of HTML, Markdown or plain text, as
+  a converted file with parts of a fixed number of lines as pages, under the rules of the
+  target of the PDF converter. The converted text MUST NOT be committed. The procedure asks
+  for the conversion when a page came back empty or in part, or when its words must be
+  examined. (The stage test ST-13 found no more requirement lines from the text than from
+  the web tool.) If the request for an address gives no text, the program MUST retrieve the
+  page with a headless browser that has a new, empty profile, and MUST write that into the
+  first line of the converted file. Without a browser, the program MUST give the reason and
+  the command that installs the browser, and MUST continue. The setup of a new environment
+  MUST name the missing browser as a step. A source of the class `regulation` or
+  `governance` that gives no text to a reader MUST NOT stay "not verified" before each
+  address of its issuer was converted and the owner was asked for the file.
+- **FR-061**: Removed in iteration I-22 with the answers of risk and reward.
+- **FR-062**: Removed in iteration I-22. FR-011 gives the value of an item.
+- **FR-063**: The research MUST search for the regulation, the governance and the public
+  recommendations of the aspect, in the words of each view and of each stakeholder, and MUST
+  give each one that it finds to a reader. The source is the text of the issuer.
+- **FR-064**: A source MAY have the class `regulation` or `governance`. The rendered checklist
+  MUST name, for each item, the sources of these two classes whose requirement rows go to the
+  item. The rendered skill MUST ask the owner of a project which regulation and which
+  governance bind the project: an item that names one of them is necessary for that project.
+  The rendered skill MUST ask also where the product is used. If the owner cannot know that,
+  as for an open project, the skill MUST NOT record "none": it shows each regulation and each
+  governance of the checklist with its items, and the owner decides for each of them if the
+  project prepares for it. The rendered checklist MUST name, for each item, the classes of
+  the sources that ask for it, and MUST give for each class who states it and what it means
+  for the item. `vetting.md` MUST hold a table "Binding sources" with one row for each source
+  of these two classes: the source, whom it binds and where the source says that. The cell
+  comes from the report of a reader. The check MUST list under "What remains" each such
+  source that raises an item and has no row. The rendered checklist MUST give this table,
+  and the rendered skill MUST mark, in the selection, each item that a binding source asks
+  for as `necessary`, and each item of a source that the owner prepares for as `prepared`.
+  In the review, the owner MUST get the table with the items that each source raises.
+- **FR-065**: A program MUST retrieve the catalogues of a manifest into the work folder and
+  MUST give the entries that hold all the terms of a query. The program MUST keep the entries
+  in a table of their own in the index of FR-051, and MUST search them with the full-text
+  search and the synonyms of the index. The search in the converted documents MUST NOT give
+  an entry of a catalogue. A catalogue is a list that its
+  issuer keeps, without a ranking. An entry is a candidate: a
+  reader reads its page before the session records a source. A catalogue that fails MUST NOT
+  stop the program. The setup of a new environment MUST retrieve the catalogues. The check
+  MUST list under "What remains" a list "Searches" without a query of the catalogues.
+- **FR-066**: For each kind of thing that the research searches for, and for each view, the
+  session MUST make one query at the minimum without the name of a document, a project, an
+  organization or a product. The research MUST search also for the public data services of
+  the aspect. A page of a vendor, a blog or a list of products is a pointer only: the source is
+  the page of the issuer. The text that a search tool writes about its results is not a
+  finding.
 
 ### Key Entities
 
@@ -301,10 +655,37 @@ specification whose check reports no failure other than "not accepted".
 - **Evidence record**: for each source, the summary of what it contributes, the location, the
   rows it supports and the date read.
 - **Vetting record**: for each independent source, the signals, the score, the version of the
-  rubric and the confirmation of the owner. For each item, the answers and the result of the
-  calculation of risk and reward.
+  rubric and the confirmation of the owner.
+- **Intent of the owner**: the answers of the owner to three questions before the research,
+  each as a quote with its date.
+- **Stakeholder**: one group of persons that has an interest in the result or carries a duty
+  for it, with its concerns for the aspect and its source.
+- **View**: one set of concerns that an aspect brings together, with its stakeholders and its
+  source. Each checklist item belongs to one view.
+- **Requirement**: one thing that a source says a project must or should do, with its
+  stakeholder, its view, its source and its one exit.
+- **Boundary**: what one neighbouring aspect owns and what the aspect keeps, with its state:
+  proposed by the research, or decided by the owner with the date.
+
+- **Index**: the database of the converted documents of a work folder, with their pages,
+  sections, references, acronyms, other names and synonyms, and with the page ranges that were
+  given to readers. It is not committed.
+- **Reading**: the table of the vetting record that names, for each converted document of a
+  source, the pages that the readers got and the pages that no reader got.
 - **Risk dimension**: one dimension on which the risk of a project differs for an aspect, with
   the question that finds it out.
+- **Target**: one measurable result that a project reaches when it applies the recipe, with
+  its scale, what measures it, and its source.
+- **Trial**: one application of a recipe that is not delivered to a copy of a project, up to
+  the plan.
+- **Trial finding**: one defect of a plan that a reviewer found, with its viewpoint, its route
+  and its status.
+- **Seed**: one document or standard that the factory starts from, with its issuer, version,
+  kind, address, digest and terms. The repository holds the row, not the document.
+- **Work folder**: a folder outside each git repository that holds the retrieved seeds, their
+  converted text and the record of their states.
+- **Kit**: a neutral copy of the tooling in a folder outside each git repository, with a
+  marker file that names the commit that it comes from.
 - **Recipe skill**: the rendered skill of one aspect, with its checklist as a reference file
   and its templates for agent files.
 - **Selection**: the checklist that a project commits: the answers of the risk assessment, the

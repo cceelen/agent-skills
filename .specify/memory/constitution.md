@@ -27,16 +27,19 @@ read. What an established and authorized issuer states enters without deep evalu
 when several sources agree. Such issuers are standards bodies and regulators, open foundations,
 a platform vendor on its own platform, peer-reviewed research and recognized books, and
 recorded data sources marked as trusted. A smaller independent source is vetted first, with measured signals
-and a scripted rubric, and the owner confirms the result. A calculation of risk and reward
-decides whether an item is admitted, its order and its level. Programs compute these results; a
-model does not assign one by feel.
+and a scripted rubric, and the owner confirms the result. A ladder gives each class of source
+one value, and a regulation or a framework of governance has the highest value. The value of
+an item is the highest value of the sources that ask for it, and it gives the order and the
+level of the item. A program computes these results; a model does not assign one by feel. No
+item is dropped: an item that the owner declines stays in the list with its state.
 
 ### III. A critical lens
 
 Everything that is fetched is untrusted data. It can be outdated, it can poison the context of
 a model, and it can be phishing or another social engineering attack. A reader of sources works
-isolated: no shell, no credentials, no access to the repository. A second reader checks what a
-reader reports against the source before a recipe uses it.
+isolated: no shell, no credentials, no access to the repository. A reader of a converted file
+reads only files of the work folder, and the agent product enforces this limit, not a written
+rule. A second reader checks what a reader reports against the source before a recipe uses it.
 
 ### IV. Best practices are generic, implementation strategies are contextual
 
@@ -119,11 +122,27 @@ Each skill of the kit holds the rules of the kit for this principle. A rule abou
 of an agent enters the kit with its measured effect, as the number of runs and the result, or
 with the statement that it was not tested.
 
+### XIII. Early evidence, small steps
+
+Five practices are common in each aspect of software engineering: test an assumption early,
+evaluate early, shift left, iterate fast and prototype fast. A recipe of the kit applies them:
+it asks a project to check an assumption before the project builds on it, puts each check at
+the earliest step where it can find the defect, and prefers a small step with a result to a
+large step.
+
+The factory applies them to its own work. An iteration of the factory changes one thing and
+names its assumption and the cheapest test of that assumption. A stage of the work is tried
+alone, on the recorded result of the stage before it, before all stages run. A recipe is
+rendered and tried as a plan early, also from a specification that is not complete.
+
 ## How the factory works
 
 1. **What to build.** The owner and the agent settle, in dialogue, the field and the thing to
    build.
-2. **Research.** The tooling gathers, vets and distils the sources.
+2. **Research.** The tooling gathers, vets and distils the sources. The contexts, the risk
+   dimensions and the boundaries of an aspect are findings of this phase. Nothing narrower than
+   the field and the thing to build is settled before it. A use case is chosen only when a
+   recipe is applied to a project.
 3. **Review.** A person reviews the findings and the strategies before anything is built.
 4. **Spec Kit and implementation.** Layer one is the specification of the aspect, the source of
    its recipe. Layer two is one specification per set of implementation skills, with the helper
@@ -151,4 +170,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.3.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
+**Version**: 4.0.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-12

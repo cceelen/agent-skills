@@ -1,0 +1,17 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/plain/evidence.md": "874a45c14e1cc173a76e0397c66bf854b5c915b36aaae49ef728a9974b98065c",
+    "inputs/plain/rubric-items.txt": "967c508b5381ba8e4925fed20f19e689f7ab606fdd5e5b0fc127e8716cbb90e7",
+    "inputs/plain/spec.md": "6c4e5039a4dda8134781bfe4dfe3ba875949ac7d40678a5dde8330be3102eb91",
+    "inputs/plain/vetting.md": "9eaff773b6abfd43b80140e87a7ab951bdc8035d351953fd110bc3fdf93960e3",
+    "inputs/templates/evidence.md": "7e87169ab016db11d02a7f13a8be233b9eadd64d28f6eee80114cf1099bf1949",
+    "inputs/templates/rubric-items.txt": "967c508b5381ba8e4925fed20f19e689f7ab606fdd5e5b0fc127e8716cbb90e7",
+    "inputs/templates/spec.md": "a2afcd4a5ea31434ca8408069e1f2bea22b0532639a075ec0f81b1e67ea44663",
+    "inputs/templates/vetting.md": "9eaff773b6abfd43b80140e87a7ab951bdc8035d351953fd110bc3fdf93960e3",
+    "prompts/answers.md": "cc81112f6352cd6bd77332bc65b73672091be1acb4e1991f5a89faf86232bb18",
+    "registration.md": "af337556bc3d65cb9fea9797490d4f71a567160d346c0b868a2dd75532ebfea1"
+  },
+  "seal": "8339db21049c667372ab4c1dc4aec9538e502774a3f53b3d5668ad378720f18b"
+}

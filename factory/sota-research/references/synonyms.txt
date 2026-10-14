@@ -1,0 +1,6 @@
+# Synonyms for the search in the index of the converted documents (scripts/index.py).
+# Write one group in each line. Separate the terms with " = ".
+# Write a term only when a source uses it. Do not write a term from your memory.
+# The program reads this file in each build. A line that starts with "#" is a comment.
+# Example of the format:
+# first term = second term = third term

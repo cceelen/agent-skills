@@ -1,0 +1,8 @@
+architecture
+operations
+quality
+development
+security
+integrity
+product owner
+views of the recipe

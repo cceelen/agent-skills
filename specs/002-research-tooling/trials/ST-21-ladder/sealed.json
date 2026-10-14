@@ -1,0 +1,18 @@
+{
+  "commit": null,
+  "date": "2026-10-12",
+  "files": {
+    "inputs/case/evidence.md": "ab6e08a0366b5d58a6298eb8bc179b2d287ee3cad82ab9e5e7c6a0389ec920e1",
+    "inputs/case/factory/sota-research/scripts/aspect.py": "9bcb654d2a5074f62d6f9380f7bcc85a4958068ccfe1561508ed67f69d11dbc5",
+    "inputs/case/factory/sota-research/scripts/check.py": "f12776888eaa3816d439a5a707454a0009557eedfd0a8ba8cb8c2e36a133ae7c",
+    "inputs/case/factory/sota-research/scripts/place.py": "f3c855feecdb083f58d6b2ef17b64bda120391b64d1ac3d6e97f4cdd0da3d9f4",
+    "inputs/case/factory/sota-research/scripts/rubric-items.txt": "ff96c14b4a79e4258516c0e99ec11bfafb15450ff5ca34e54b60109e0fef2dc1",
+    "inputs/case/factory/sota-research/scripts/sample.py": "ff49c09e61549053a1aae605530463a522edeaba281beb1f3429d350ca2a7cee",
+    "inputs/case/part.md": "f43006e8abbd159e86505c86a8697999b7b92df1e7076c5baa50d40ea3f82f15",
+    "inputs/case/spec.md": "7987aeaa36958b5fab73497894452fc82007ee91d5d2f90549df05caebc2011b",
+    "inputs/case/vetting.md": "878122f6841af79167dc2985e223b5d1eac8819167267c8f12f6a921842e0a0b",
+    "prompts/task.md": "eb7ea9dd903ba4edb679fc3274c6e639e9df8ce21a05ebaa814713325a230ace",
+    "registration.md": "52d90197ad9258b5198fb3270c65c52d021bb4e52bb05015768e9710e16506ee"
+  },
+  "seal": "b1065a7b528dd70218e9898f90570aa05f1b8c44fdf2203096ca231316bbc174"
+}

@@ -1,0 +1,10 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/case/lines.md": "cbe3e3bd0907df9360ee3497428731e065bc04becedc785275d4ef074f4ad399",
+    "prompts/compare.md": "6aabb3a058490f0875ebd0d56c0d4d8e037cc154f66a1c2d71d719ea26526941",
+    "registration.md": "c281b3e9e58255a0e384add190b1b1e605245a0246b9b9eea0c327f4b8d72181"
+  },
+  "seal": "18f580f9e7804fa6e01326fb8d82e04512be5125a624a3a2a2bbe85abe991b20"
+}

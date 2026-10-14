@@ -1,0 +1,11 @@
+{
+  "commit": null,
+  "date": "2026-10-11",
+  "files": {
+    "inputs/case/reader.md": "7f569dd1916545d3599ecb24418586281410e4eb879c3aa6ac4f0b3a4a49217a",
+    "inputs/case/source.md": "efdde74dfa10292185e2e92b7846418a6f77f36bb3ba52f1918900fa5e2d763b",
+    "prompts/read.md": "4f78814cb9be9be212eb749171e1b2cb0315d14661059111223840f74f19d280",
+    "registration.md": "1ccbecb528eb179c22e2db8d22244c897a48a6fbc35701ce61b84a4590db7dc8"
+  },
+  "seal": "833c2972c4271663037b0106c45bd4d522c0a42a9cdb523ca36f345060cdffa3"
+}

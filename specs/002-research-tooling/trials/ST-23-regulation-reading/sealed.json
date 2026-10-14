@@ -1,0 +1,14 @@
+{
+  "commit": null,
+  "date": "2026-10-13",
+  "files": {
+    "inputs/governance/converted/S-15.md": "fbe883138d95edf2509070de5786a83fca9ee16216b12a741ee48983111a1d49",
+    "inputs/governance/task.md": "7f569dd1916545d3599ecb24418586281410e4eb879c3aa6ac4f0b3a4a49217a",
+    "inputs/regulation/converted/S-13.md": "ec31259faa5cbeb95fd04900c4b067230c7e06d39ce2124f7e799ccd76dff207",
+    "inputs/regulation/task.md": "7f569dd1916545d3599ecb24418586281410e4eb879c3aa6ac4f0b3a4a49217a",
+    "prompts/governance.md": "9c0eb77c74da8c2b501deacd45f7bbbb446469cb3bfd74dac5b9d3a76f6bfaa3",
+    "prompts/regulation.md": "3d324298024e6b14cdc3803af4ecde121028e385ccc04b3cf3fee009c8b0b0e0",
+    "registration.md": "5b255c8613a990d9949d20cb264d52f81f712fd071cb724df79afb070ee05d20"
+  },
+  "seal": "c718053999af8c01ce6bda3dd5ec988d7e3e8c259db4b8d2c4c127a4ba3fb481"
+}

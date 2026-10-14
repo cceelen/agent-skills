@@ -1,0 +1,21 @@
+# Ladder for the value and the level of a checklist item.
+# Increase the version when a value or a limit changes.
+
+version: 5
+
+# The value of an item is the highest value of the sources that ask for it.
+# A source asks for an item when one of its requirements goes to the item.
+value regulation: 6
+value governance: 6
+value own-rule: 6
+value standard: 4
+value foundation: 3
+value vendor: 2
+value research: 2
+value trusted-data: 2
+value independent: 1
+
+# An item is on level 1 when its value is at or above this value.
+level 1: 4
+# An item below level 1 is on level 2 when its value is at or above this value. If not, it is on level 3.
+level 2: 2
