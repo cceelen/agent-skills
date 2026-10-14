@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Group normalized requirements by their fields. Standard library only.
+
+  group.py NORMAL OUT
+
+NORMAL is a Markdown table with the columns Id, Party, Strength, Practice, Object, Condition,
+Measure and Source. Two rows with the same practice and the same object are one demand: a
+duplicate. Two rows with the same practice are similar. The program writes the counts and the
+groups into OUT.
+"""
+
+import collections
+import re
+import sys
+
+COLUMNS = ("id", "party", "strength", "practice", "object", "condition", "measure", "source")
+
+
+def rows(text):
+    head, out = None, []
+    for line in text.splitlines():
+        if not line.startswith("|") or set(line) <= set("|-: "):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if head is None:
+            head = [c.lower() for c in cells]
+            continue
+        out.append(dict(zip(head, cells)))
+    return head or [], out
+
+
+def key(text):
+    return " ".join(re.findall(r"[a-z0-9]+", text.lower()))
+
+
+def source(cell):
+    found = re.match(r"\s*(S-\d+)", cell)
+    return found.group(1) if found else cell.strip()
+
+
+def main(argv):
+    if len(argv) != 2:
+        print(__doc__, file=sys.stderr)
+        return 2
+    head, table = rows(open(argv[0], encoding="utf-8").read())
+    missing = [c for c in COLUMNS if c not in head]
+    if missing:
+        open(argv[1], "w").write(f"Columns that are absent: {', '.join(missing)}\n")
+        return 1
+    same = collections.defaultdict(list)
+    similar = collections.defaultdict(list)
+    for row in table:
+        same[(key(row["practice"]), key(row["object"]))].append(row)
+        similar[key(row["practice"])].append(row)
+
+    def across(groups):
+        return [g for g in groups.values() if len({source(r["source"]) for r in g}) > 1]
+
+    lines = [
+        f"Rows: {len(table)}",
+        f"Groups with the same practice and the same object: {len(same)}",
+        f"Groups with the same practice and the same object, with rows of two or more sources: {len(across(same))}",
+        f"Groups with the same practice: {len(similar)}",
+        f"Groups with the same practice, with rows of two or more sources: {len(across(similar))}",
+        "",
+        "## Groups with the same practice and the same object, with two or more rows",
+        "",
+    ]
+    for (practice, obj), group in sorted(same.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        if len(group) > 1:
+            sources = sorted({source(r["source"]) for r in group})
+            ids = ", ".join(r["id"] for r in group)
+            lines.append(f"- {practice} / {obj}: {ids} ({', '.join(sources)})")
+    open(argv[1], "w", encoding="utf-8").write("\n".join(lines) + "\n")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

@@ -1,0 +1,11 @@
+{
+  "commit": null,
+  "date": "2026-10-14",
+  "files": {
+    "inputs/case/group.py": "cb5612472849a40043290d85a14136e7cd43b6e8fd6286f6637a73ea503c801d",
+    "inputs/case/rows.md": "e48d886312979929a949a9756f358d7fea875f0761780de171b11ef70a82f1a9",
+    "prompts/normalize.md": "9dbb694440d1c157917527df924ed801eeaf639381412153807c424c4d70e37d",
+    "registration.md": "cf8525385f3e07b67c2da6cdcf5b1cfc881aec598ee838f8e04551e0e996d493"
+  },
+  "seal": "5fbc2279421bf5795f50f21d33311abd7a7fca0478207244e1cc27dbf29b5499"
+}
