@@ -1,0 +1,42 @@
+# Rubric for the calculation of risk and reward of a checklist item.
+# Increase the version when a question, a scale, a threshold or a limit changes.
+# Do not change the identifier of a question. Records refer to it.
+
+version: 1
+
+# An item is admitted when its score is at or above this value.
+threshold admission: 20
+# An item is on level 1 when it applies in each context (breadth 3) and its score is at or above this value.
+threshold level-1: 40
+# An item above level 1 is on level 2 when its cost is at or below this value, and on level 3 when it is above.
+limit cost-level-2: 4
+
+question severity 1-3: How bad is the harm that the item prevents?
+  1: A nuisance. The work continues.
+  2: Lost work, or a fault that users see.
+  3: Harm to users, lost data, a legal consequence, or a stop of the project.
+
+question probability 1-3: How probable is that harm in a project that does not have the item?
+  1: Rare. Most projects never see it.
+  2: It occurs in the life of many projects.
+  3: It occurs in most projects, or more than one time.
+
+question breadth 1-3: In how many contexts does the item apply?
+  1: In one context, for example one industry or one type of delivery.
+  2: In many contexts, but not in all.
+  3: In each context, from a single maintainer to a company.
+
+question adopt 1-3: How much effort is necessary to adopt the item?
+  1: Less than one hour, with tools that the project has.
+  2: Some days, or a new tool.
+  3: Weeks, a change of the process, or a paid service.
+
+question keep 1-3: How much effort is necessary to keep the item?
+  1: None, or a program does it.
+  2: Some regular work.
+  3: Constant work, or a person with special knowledge.
+
+question own-risk 0-2: Which risk does the item itself bring, for example lock-in or false confidence?
+  0: None that is known.
+  1: A risk that the project can control.
+  2: A risk that can cause the harm that the item must prevent.

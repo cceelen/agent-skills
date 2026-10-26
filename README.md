@@ -1,5 +1,8 @@
 # Agent skills
 
+[![test](https://github.com/cceelen/agent-skills/actions/workflows/test.yml/badge.svg)](https://github.com/cceelen/agent-skills/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/cceelen/agent-skills/graph/badge.svg)](https://codecov.io/gh/cceelen/agent-skills)
+
 This repository contains agent skills in the open `SKILL.md` format. Each skill is one folder
 in `skills/`. You can use the skills with Claude, with OpenAI Codex, and with other agents
 that read `SKILL.md` files.
