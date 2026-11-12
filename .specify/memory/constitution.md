@@ -123,7 +123,10 @@ with the statement that it was not tested.
 
 1. **What to build.** The owner and the agent settle, in dialogue, the field and the thing to
    build.
-2. **Research.** The tooling gathers, vets and distils the sources.
+2. **Research.** The tooling gathers, vets and distils the sources. The contexts, the risk
+   dimensions and the boundaries of an aspect are findings of this phase. Nothing narrower than
+   the field and the thing to build is settled before it. A use case is chosen only when a
+   recipe is applied to a project.
 3. **Review.** A person reviews the findings and the strategies before anything is built.
 4. **Spec Kit and implementation.** Layer one is the specification of the aspect, the source of
    its recipe. Layer two is one specification per set of implementation skills, with the helper
@@ -151,4 +154,4 @@ request that changes this file and states the reason. The version follows semant
 MAJOR for a removed or redefined principle, MINOR for a new principle, PATCH for a
 clarification.
 
-**Version**: 3.3.0 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10
+**Version**: 3.3.1 | **Ratified**: 2026-10-08 | **Last Amended**: 2026-10-10

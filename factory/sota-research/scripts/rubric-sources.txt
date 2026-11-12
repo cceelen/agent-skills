@@ -1,0 +1,28 @@
+# Rubric for the vetting of an independent source.
+# Increase the version when a gate, a weight or the pass score changes.
+
+version: 1
+
+# Gates. A source that fails a gate is rejected without a question to the owner.
+#   no author or issuer   the page names no author, and section 2 names no issuer
+#   no date               the page gives no date, and section 2 gives no date
+#   too old               the age is above this number of days
+#   not reachable         the address answers "not found" or "gone"
+gate max-age-days: 1095
+
+# A source with a score at or above this value passes to the owner for confirmation.
+# A source below it is rejected.
+pass score: 5
+
+# Weights. The maximum is 10 points.
+# age-days: the age of the source on the day of the collection (measured).
+weight age-days: <=365:3 <=730:2 else:1
+# record: the author has a record in the field (an answer of the reader, with a URL).
+weight record: yes:3 no:0
+# links-out: a page links to other hosts, which shows that it cites its own sources (measured).
+weight links-out: >=5:2 >=1:1 else:0
+# commits-12m: a repository had commits in the last 12 months (measured by the collector).
+weight commits-12m: >=12:2 >=1:1 else:0
+# fast-lane-references: how many fast-lane sources of the specification refer to the source
+# (an answer of the reader, with the identifiers).
+weight fast-lane-references: >=2:2 >=1:1 else:0

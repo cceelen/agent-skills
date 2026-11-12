@@ -8,6 +8,10 @@ reports are not comparable with new reports.
 - The kit gives the agent five rules for evidence before action. The rules are in each skill.
   The plugin puts them into each session. `install.sh` adds them to the instruction file of the
   user. The section "The rules of the kit" in `README.md` tells you how to prevent this.
+- The repository gets the tooling of the factory in `factory/sota-research/`. It distils the
+  state of the art of one aspect of software engineering into a recipe skill. Users of the
+  kit do not install it.
+- The tooling uses the latest stable Python and runs with `uv`.
 
 ## 1.0.3
 

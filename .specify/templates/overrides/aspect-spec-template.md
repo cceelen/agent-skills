@@ -1,6 +1,6 @@
 # Aspect specification: [MAJOR ASPECT]
 
-**Branch**: `[###-name]` | **Research date**: [DATE] | **Supersedes**: [the research date of the earlier revision, or none]
+**Branch**: `[###-name]` | **Research date**: [DATE] | **Supersedes**: [the research date of the earlier revision, or none] | **Accepted**: [the person and the date, or pending]
 
 Layer one of the factory: the exploration of one major aspect of software engineering. This
 specification is the source of the recipe for the aspect, a strategy and a generic checklist
@@ -11,17 +11,26 @@ file high level. It holds nothing that an agent can learn from the project or fr
 
 ## 1. Aspect
 
+Settled with the owner before the research. Only the field and the thing to build: no use
+case, no first user, nothing narrower.
+
 - **Aspect**: [one major aspect, in one line]
 - **Field and disciplines**: [the field it belongs to; the disciplines it covers or cuts across]
-- **Contexts**: [the values of each dimension that change the strategy: use case; how the
-  software reaches its users; exposure (who depends on the project); team; industry and
-  regulation; data; forge; stack]
-- **Risk dimensions**: [the dimensions on which the risk of a project differs for this aspect,
-  one line each, with the question that finds it out and the opinion of the kit on the answer;
-  for example operative (can an operation be undone?), regulatory (is personal data
-  involved?), commercial (what is the data worth?)]
-- **Boundaries**: [what neighbouring aspects own, one line each]
-- **Agreed with the owner on**: [DATE; what to build and for whom]
+- **Agreed with the owner on**: [DATE; the field and the thing to build]
+
+Found by the research, and reviewed by the owner with the other findings. Each line names its
+source, or says `(judgement)`. A use case is chosen only when the recipe is applied to a project.
+
+- **Contexts**: the values of each dimension that change the strategy. One line each.
+  - `[use case]`: [values] ([S-01 section 2])
+  - `[how the software reaches its users]`: [values] ([source])
+- **Risk dimensions**: the dimensions on which the risk of a project differs for this aspect.
+  One line each: the name, the question that finds it out, the opinion of the kit on the
+  answer, and the source.
+  - `[operative]`: [Can an operation be undone? Opinion: ...] ([source])
+  - `[regulatory]`: [Is personal data involved? Opinion: ...] ([source])
+- **Boundaries**: what each neighbouring aspect owns, and what this aspect keeps. One line each.
+  - `[neighbour]`: [what it owns; what this aspect keeps] ([source])
 
 ## 2. Sources
 
@@ -95,10 +104,13 @@ a project is the list of adopted items whose check fails.
 
 What the recipe skill and its agent wrapper do, and which implementation skills layer two must
 work out. Each skill of the set holds the rules of the kit, `rules/evidence-before-action.md`,
-and reads a source in the turn in which it uses a value from it.
+and reads a source in the turn in which it uses a value from it. The renderer copies the fields
+of the recipe skill into the skill as they are. Thus write them for the reader of the skill,
+and do not refer to a section of this specification.
 
 ### Recipe skill and agent: [name]
 
+- **Target folder**: [the folder of the rendered skill; leave this line out for `skills/<name>/`]
 - **Goal**: [the state it brings a case to]
 - **Reads first**: [the contexts of section 1 it finds out; the risk analysis and the selection
   of the project]
